@@ -183,30 +183,6 @@
       position: relative;
     }
 
-    /* Preloader */
-    .preloader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: fadeOut 2s forwards 2s;
-    }
-    .preloader::before {
-      content: '';
-      width: 60px;
-      height: 60px;
-      border: 5px solid ${colors[1]};
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
     /* Header */
     header {
       position: relative;
@@ -354,7 +330,7 @@
       border-bottom: 1px solid ${colors[0]}40;
       transition: all 0.3s ease;
     }
-    section#tokenonomics ul li:hover {
+    section#tokenomics ul li:hover {
       color: ${colors[1]};
       transform: translateX(10px);
     }
@@ -429,14 +405,27 @@
       font-size: 1.5rem;
     }
 
-    /* Community Section */
+    /* Community Section (Revamped) */
     section#community {
       margin-bottom: 6rem;
       padding: 3rem;
-      background: rgba(20,20,20,0.9);
+      background: linear-gradient(to bottom, ${colors[0]}20, ${colors[1]}20);
       border-radius: 20px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.5);
       transition: transform 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    section#community::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      animation: sweep 4s infinite ease-in-out;
+      z-index: -1;
     }
     section#community:hover {
       transform: translateY(-10px);
@@ -448,33 +437,57 @@
       margin-bottom: 2rem;
       text-shadow: 0 0 15px ${colors[0]}80;
       position: relative;
+      text-align: center;
     }
-    section#community h3::before {
-      content: '👥';
+    section#community h3::after {
+      content: '🌐';
       position: absolute;
-      left: -40px;
+      right: -40px;
       font-size: 2rem;
+      animation: spin 6s linear infinite;
     }
-    section#community p {
-      font-size: 1.2rem;
-      color: #ddd;
-      margin-bottom: 1rem;
+    section#community .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
     }
     section#community a {
-      color: ${colors[1]};
+      color: #fff;
       font-weight: 600;
       text-decoration: none;
+      padding: 1rem 2rem;
+      background: ${colors[1]};
+      border-radius: 50px;
       transition: all 0.3s ease;
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.1);
+      box-shadow: 0 0 15px ${colors[1]}80;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+    }
+    section#community a::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.5s ease;
     }
     section#community a:hover {
       color: ${colors[0]};
-      text-shadow: 0 0 10px ${colors[0]}80;
-      background: rgba(255,255,255,0.2);
-      transform: translateY(-3px);
+      transform: scale(1.1);
+      box-shadow: 0 0 25px ${colors[1]};
+      background: ${colors[1]}cc;
+    }
+    section#community a:hover::before {
+      width: 200px;
+      height: 200px;
     }
 
     /* Logo */
@@ -527,7 +540,7 @@
       z-index: 0;
       overflow: hidden;
     }
-    .particles span.ConcurrentModificationException {
+    .particles span {
       position: absolute;
       background: ${colors[1]}80;
       border-radius: 50%;
@@ -544,14 +557,6 @@
     .particles span:nth-child(8) { width: 4px; height: 4px; top: 80%; left: 85%; animation-duration: 8s; }
 
     /* Animations */
-    @keyframes fadeOut {
-      0% { opacity: 1; }
-      100% { opacity: 0; visibility: hidden; }
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
     @keyframes glow {
       0% { text-shadow: 0 0 20px ${colors[1]}80; }
       100% { text-shadow: 0 0 40px ${colors[1]}; }
@@ -582,6 +587,15 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
     }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes sweep {
+      0% { transform: translateX(-100%); }
+      50% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -590,13 +604,11 @@
       section h3 { font-size: 2rem; }
       .content { padding: 2rem 1rem; }
       section { padding: 2rem; }
+      section#community .social-links { flex-direction: column; gap: 1rem; }
     }
   </style>
 </head>
 <body>
-  <!-- Preloader -->
-  <div class="preloader"></div>
-
   <!-- Header -->
   <header>
     ${bannerData ? `<img src="${bannerData}" class="banner" alt="Banner" />` : ''}
@@ -626,8 +638,10 @@
     </section>
     <section id="community">
       <h3>Community</h3>
-      ${telegram ? `<p><a href="${telegram}" target="_blank">Join Telegram</a></p>` : ''}
-      ${twitter ? `<p><a href="${twitter}" target="_blank">Follow on Twitter/X</a></p>` : ''}
+      <div class="social-links">
+        ${telegram ? `<a href="${telegram}" target="_blank">Telegram</a>` : ''}
+        ${twitter ? `<a href="${twitter}" target="_blank">Twitter/X</a>` : ''}
+      </div>
     </section>
   </div>
 
@@ -636,7 +650,7 @@
 
   <!-- Footer -->
   <footer>
-    <p>&copy; 2025 ${name}. All Rights Reserved.</p>
+    <p>© 2025 ${name}. All Rights Reserved.</p>
     ${telegram || twitter ? `
       <p>
         ${telegram ? `<a href="${telegram}" target="_blank">Telegram</a>` : ''}
