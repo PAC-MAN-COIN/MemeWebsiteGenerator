@@ -1,11 +1,10 @@
-<!-- FULLY UPGRADED: Styling, Image Upload, Functional Preview + Download -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Meme Coin Site Builder</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -17,7 +16,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: start;
       min-height: 100vh;
     }
     h1 {
@@ -26,8 +24,8 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       font-family: 'Orbitron', sans-serif;
-      margin-bottom: 2rem;
       text-align: center;
+      margin-bottom: 2rem;
     }
     .form {
       width: 100%;
@@ -36,6 +34,15 @@
       flex-direction: column;
       gap: 16px;
     }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      color: #aaa;
+    }
     input, textarea, select, button {
       padding: 14px;
       border-radius: 10px;
@@ -43,22 +50,17 @@
       font-size: 1rem;
       background: #1c1c1c;
       color: white;
-      transition: border-color 0.2s;
     }
     input:focus, textarea:focus, select:focus {
       border-color: #00ffe0;
       outline: none;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 100px;
     }
     button {
       background: linear-gradient(45deg, #00ffe0, #ff00ff);
       color: #000;
       font-weight: bold;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.2s ease;
     }
     button:hover {
       transform: scale(1.03);
@@ -72,50 +74,19 @@
       border-radius: 12px;
       display: none;
     }
-    label {
-      font-size: 0.95rem;
-      margin-bottom: 6px;
-      color: #aaa;
-    }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
   </style>
 </head>
 <body>
   <h1>Meme Coin Site Builder</h1>
   <div class="form">
-    <div class="form-group">
-      <label>Coin Name</label>
-      <input id="coinName" placeholder="$NUTPEPE" />
-    </div>
-    <div class="form-group">
-      <label>Tagline</label>
-      <input id="tagline" placeholder="The future is dairy-fueled" />
-    </div>
-    <div class="form-group">
-      <label>Description</label>
-      <textarea id="description" placeholder="What is your coin about?"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Tokenomics</label>
-      <textarea id="tokenomics" placeholder="List each item on a new line"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Roadmap</label>
-      <textarea id="roadmap" placeholder="Q1 Launch, Q2 Rug, Q3 Rebirth"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Telegram Link</label>
-      <input id="telegram" placeholder="https://t.me/yourcoin" />
-    </div>
-    <div class="form-group">
-      <label>Twitter/X Link</label>
-      <input id="twitter" placeholder="https://twitter.com/yourcoin" />
-    </div>
-    <div class="form-group">
-      <label>Color Theme</label>
+    <div class="form-group"><label>Coin Name</label><input id="coinName" placeholder="$NUTPEPE" /></div>
+    <div class="form-group"><label>Tagline</label><input id="tagline" placeholder="The future is dairy-fueled" /></div>
+    <div class="form-group"><label>Description</label><textarea id="description" placeholder="What is your coin about?"></textarea></div>
+    <div class="form-group"><label>Tokenomics</label><textarea id="tokenomics" placeholder="List each item on a new line"></textarea></div>
+    <div class="form-group"><label>Roadmap</label><textarea id="roadmap" placeholder="Q1 Launch, Q2 Rug, Q3 Rebirth"></textarea></div>
+    <div class="form-group"><label>Telegram Link</label><input id="telegram" placeholder="https://t.me/yourcoin" /></div>
+    <div class="form-group"><label>Twitter/X Link</label><input id="twitter" placeholder="https://twitter.com/yourcoin" /></div>
+    <div class="form-group"><label>Color Theme</label>
       <select id="colorTheme">
         <option value="#00ffe0,#ff00ff">Neon (Teal + Magenta)</option>
         <option value="#facc15,#ef4444">Gold + Red</option>
@@ -125,16 +96,11 @@
         <option value="#f97316,#e11d48">Orange + Rose</option>
       </select>
     </div>
-    <div class="form-group">
-      <label>Upload Banner Image</label>
-      <input type="file" id="bannerImage" accept="image/*" />
-    </div>
-    <div class="form-group">
-      <label>Upload Logo Image</label>
-      <input type="file" id="logoImage" accept="image/*" />
-    </div>
+    <div class="form-group"><label>Upload Banner Image</label><input type="file" id="bannerImage" accept="image/*" /></div>
+    <div class="form-group"><label>Upload Logo Image</label><input type="file" id="logoImage" accept="image/*" /></div>
     <button onclick="generatePreview()">Generate Preview</button>
     <button onclick="downloadSite()">Download Site Files (ZIP)</button>
+    <button onclick="githubLogin()">Host on GitHub</button>
   </div>
   <iframe id="previewFrame"></iframe>
 
@@ -217,11 +183,19 @@
       const name = document.getElementById('coinName').value.trim();
       const zip = new JSZip();
       zip.file("index.html", html);
-      if (bannerData) zip.file("images/banner.png", bannerData.split(",")[1], {base64: true});
-      if (logoData) zip.file("images/logo.png", logoData.split(",")[1], {base64: true});
+      if (bannerData) zip.file("images/banner.png", bannerData.split(",")[1], { base64: true });
+      if (logoData) zip.file("images/logo.png", logoData.split(",")[1], { base64: true });
       zip.generateAsync({ type: "blob" }).then(content => {
         saveAs(content, `${name.replace(/[^a-zA-Z0-9]/g, '') || 'memecoin'}-site.zip`);
       });
+    }
+
+    function githubLogin() {
+      const clientId = "YOUR_GITHUB_CLIENT_ID";
+      const redirectUri = window.location.origin + "/auth/callback";
+      const scope = "repo";
+      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+      window.open(githubAuthUrl, "_blank");
     }
   </script>
 </body>
