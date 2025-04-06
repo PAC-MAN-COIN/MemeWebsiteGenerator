@@ -288,3 +288,132 @@ main {
     white-space: nowrap;
     border-width: 0;
 }
+
+
+/* --- Profile Manager Nav Styles --- */
+.profile-manager-nav {
+    position: relative;
+    display: inline-block;
+    margin-left: 20px; /* Space from main links */
+}
+
+.profile-manager-button {
+    background-color: #333;
+    color: #eee;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    border: 1px solid #555;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 100px; /* Ensure minimum width */
+    justify-content: space-between;
+}
+
+.profile-manager-button:hover,
+.profile-manager-button:focus {
+    background-color: #444;
+    border-color: #777;
+}
+
+#currentProfileDisplay {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px; /* Limit width */
+    display: inline-block;
+    vertical-align: middle;
+}
+.dropdown-arrow {
+    font-size: 0.7em;
+    vertical-align: middle;
+    transition: transform 0.2s;
+}
+.profile-manager-button[aria-expanded="true"] .dropdown-arrow {
+     transform: rotate(180deg);
+}
+
+
+.profile-manager-dropdown {
+    display: none; /* Hidden by default */
+    position: absolute;
+    background-color: #2a2a2a;
+    min-width: 180px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.4);
+    z-index: 102; /* Above nav */
+    border-radius: 5px;
+    border: 1px solid #444;
+    right: 0; /* Align to the right */
+    margin-top: 5px;
+    overflow: hidden; /* Ensure rounded corners clip content */
+}
+
+.profile-manager-dropdown.show {
+    display: block;
+}
+
+.profile-manager-dropdown a,
+.profile-manager-dropdown span.no-profiles {
+    color: #ccc;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+.profile-manager-dropdown span.no-profiles {
+    font-style: italic;
+    color: #888;
+}
+
+.profile-manager-dropdown a:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+.profile-manager-dropdown hr {
+    border: none;
+    height: 1px;
+    background-color: #444;
+    margin: 5px 0;
+}
+
+/* --- Adjustments for Mobile --- */
+@media (max-width: 768px) {
+    /* Move profile manager inside the toggle menu */
+    #portal-nav-links {
+         /* Existing styles... */
+        padding-bottom: 50px; /* Add space at the bottom for profile manager */
+    }
+     .profile-manager-nav {
+         position: absolute; /* Position at bottom of expanded mobile nav */
+         bottom: 0;
+         left: 0;
+         width: 100%;
+         margin-left: 0;
+         background-color: #252525; /* Slightly different background */
+         border-top: 1px solid #444;
+         z-index: 103; /* Above links */
+     }
+     .profile-manager-button {
+         width: 100%;
+         border-radius: 0;
+         border: none;
+         padding: 12px 15px;
+         justify-content: center; /* Center text on mobile */
+         font-size: 1rem;
+     }
+     .profile-manager-dropdown {
+         position: fixed; /* Fixed position relative to viewport */
+         bottom: 50px; /* Position above the button */
+         left: 0;
+         right: 0;
+         width: 90%;
+         max-width: 300px; /* Limit width */
+         margin: 0 auto 10px auto; /* Center horizontally, margin at bottom */
+         border-radius: 8px;
+     }
+}

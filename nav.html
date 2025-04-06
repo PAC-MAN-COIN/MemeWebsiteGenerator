@@ -6,7 +6,21 @@
             <li><a href="resizer.html">Image Resizer</a></li>
             <li><a href="sticker-generator.html">Sticker Generator</a></li>
             <li><a href="shill-generator.html">Shill Generator</a></li>
-            <li><a href="raid-team.html">Raid Teams</a></li> </ul>
+            <li><a href="raid-team.html">Raid Teams</a></li>
+        </ul>
+
+        <div class="profile-manager-nav" id="profileManagerNav">
+            <button class="profile-manager-button" id="profileDropdownButton" aria-haspopup="true" aria-expanded="false">
+                <span id="currentProfileDisplay">No Profile</span> <span class="dropdown-arrow">▼</span>
+            </button>
+            <div class="profile-manager-dropdown" id="profileDropdownContent">
+                <div id="profileListContainer">
+                   </div>
+                <hr>
+                <a href="#" id="createNewProfileBtn">Create New Profile</a>
+                <a href="#" id="manageProfilesBtn">Manage Profiles</a>
+            </div>
+        </div>
         <button class="portal-nav-toggle" id="portal-nav-toggle-btn" aria-label="Toggle navigation" aria-expanded="false">☰</button>
     </div>
 </nav>
