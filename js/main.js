@@ -17,36 +17,52 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(html => {
                 navbarPlaceholder.innerHTML = html;
 
-                // --- Create Mobile Nav Content Wrapper ONLY if mobile toggle exists in HTML ---
+                // --- Create Mobile Nav Content Wrapper ONLY if mobile toggle is VISIBLE ---
                 // This prevents restructuring the HTML on desktop views.
-                const toggleBtnExists = document.getElementById('portal-nav-toggle-btn');
+                const toggleBtn = document.getElementById('portal-nav-toggle-btn');
                 let mobileNavContent = document.getElementById('mobile-nav-content'); // Check if it exists in nav.html first
+                let shouldSetupMobileWrapper = false;
 
-                if (toggleBtnExists && !mobileNavContent) { // Only create if toggle is present AND wrapper not already in HTML
+                if (toggleBtn) {
+                    // Check the computed style AFTER HTML is potentially rendered
+                    const toggleBtnStyle = window.getComputedStyle(toggleBtn);
+                    if (toggleBtnStyle.display !== 'none') {
+                        shouldSetupMobileWrapper = true;
+                        console.log("Toggle button is VISIBLE (display != none), setting up mobile wrapper."); // Debug log
+                    } else {
+                        console.log("Toggle button exists but is HIDDEN (display: none), assuming desktop. Skipping wrapper."); // Debug log
+                    }
+                } else {
+                     console.log("Toggle button not found, assuming desktop. Skipping wrapper."); // Debug log
+                }
+
+
+                if (shouldSetupMobileWrapper && !mobileNavContent) { // Only create if needed AND wrapper not already in HTML
                     const portalNav = document.getElementById('portal-nav');
                     if(portalNav) {
-                        console.log("Creating #mobile-nav-content wrapper via JS for mobile view."); // Debug log
+                        console.log("Creating #mobile-nav-content wrapper via JS.");
                         mobileNavContent = document.createElement('div');
                         mobileNavContent.id = 'mobile-nav-content';
                         // Move existing links and profile manager into the wrapper
                         const links = document.getElementById('portal-nav-links');
                         const profileMgr = document.getElementById('profileManagerNav');
+                        // Check if elements exist before appending
                         if(links) mobileNavContent.appendChild(links);
                         if(profileMgr) mobileNavContent.appendChild(profileMgr);
                         portalNav.appendChild(mobileNavContent); // Append wrapper to #portal-nav
                     } else {
                          console.error("#portal-nav not found, cannot create #mobile-nav-content wrapper.");
                     }
-                } else if (toggleBtnExists && mobileNavContent) {
-                     console.log("#mobile-nav-content wrapper already exists in nav.html."); // Debug log
-                } else {
-                    console.log("Toggle button not found, assuming desktop view, skipping mobile wrapper creation/check."); // Debug log
+                } else if (shouldSetupMobileWrapper && mobileNavContent) {
+                     console.log("#mobile-nav-content wrapper already exists in nav.html.");
                 }
+                // --- End Mobile Wrapper Logic ---
+
 
                 // --- Initialize and Setup ---
                 initProfileManager();     // Initialize profile system (from profile-manager.js)
                 setActiveNavLink();       // Highlight correct nav link
-                attachNavToggle();        // Make mobile hamburger work
+                attachNavToggle();        // Make mobile hamburger work (will do nothing if toggleBtn not found)
                 setupProfileDropdown();   // Setup the profile dropdown UI & functionality
             })
             .catch(error => {
@@ -95,17 +111,16 @@ function attachNavToggle() {
     // Mobile content wrapper might or might not exist depending on view/HTML structure
     const mobileNavContent = document.getElementById('mobile-nav-content');
 
-    // Only proceed if the toggle button exists (implies mobile context potentially)
-    if (!toggleBtn || !navMenu) {
-        // No error needed if button doesn't exist (desktop view)
-        // if (!navMenu) console.error("Nav menu element (#portal-nav) not found.");
+    // Only proceed if the toggle button exists AND is visible
+    if (!toggleBtn || !navMenu || window.getComputedStyle(toggleBtn).display === 'none') {
+        // No error needed, just don't attach listeners if not relevant
         return;
     }
 
     console.log("Attaching mobile nav toggle listener."); // Debug log
 
     toggleBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
+        event.stopPropagation(); // Prevent document click handler from closing immediately
         const isOpen = navMenu.classList.toggle('portal-nav-open');
         toggleBtn.setAttribute('aria-expanded', isOpen);
 
@@ -120,15 +135,17 @@ function attachNavToggle() {
         }
     });
 
-    // Use navMenu to find links, as mobileNavContent might not exist if built into nav.html
+    // Use navMenu to find links container, as mobileNavContent might not exist if built into nav.html
     const linksContainer = navMenu.querySelector('#portal-nav-links');
     if (linksContainer) {
         // Close mobile menu if a main navigation link is clicked
         linksContainer.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
+                // Check if we are actually in the open mobile state before closing
                 if (navMenu.classList.contains('portal-nav-open')) {
                     navMenu.classList.remove('portal-nav-open');
-                    toggleBtn.setAttribute('aria-expanded', 'false');
+                    // Ensure the button state is also updated
+                    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
                 }
             });
         });
@@ -137,15 +154,16 @@ function attachNavToggle() {
 
     // Close mobile menu or profile dropdown if clicking outside
     document.addEventListener('click', (event) => {
-        // Don't run outside-click logic if the mobile nav isn't even potentially open
-        if (!toggleBtn) return;
+        // Check if the toggle button exists and is visible before running outside click logic
+        if (!toggleBtn || window.getComputedStyle(toggleBtn).display === 'none') return;
 
         const profileManagerNav = document.getElementById('profileManagerNav');
         const profileDropdownContent = document.getElementById('profileDropdownContent');
         const profileDropdownButton = document.getElementById('profileDropdownButton');
 
         // Close mobile nav if open and click is outside the main nav element
-        if (navMenu.classList.contains('portal-nav-open') && !navMenu.contains(event.target)) {
+        // Make sure the click wasn't on the toggle button itself
+        if (navMenu.classList.contains('portal-nav-open') && !navMenu.contains(event.target) && event.target !== toggleBtn) {
              navMenu.classList.remove('portal-nav-open');
              toggleBtn.setAttribute('aria-expanded', 'false');
         }
@@ -271,21 +289,13 @@ function setupProfileDropdown() {
     dropdownButton.addEventListener('click', (event) => {
         event.stopPropagation(); // Prevent document click handler
         // console.log("Profile dropdown button clicked"); // DEBUG LOG
-        // Check if click target is inside the mobile open menu context if needed
-        const isMobileOpen = document.getElementById('portal-nav')?.classList.contains('portal-nav-open');
 
-        populateNavDropdownList(); // Always repopulate before showing/toggling
+        populateNavDropdownList(); // Repopulate before showing/toggling
         const isCurrentlyShown = dropdownContent.classList.contains('show');
         const isExpanded = dropdownContent.classList.toggle('show');
         dropdownButton.setAttribute('aria-expanded', isExpanded);
-        // console.log(`Dropdown toggled. Was shown: ${isCurrentlyShown}, Is now shown: ${isExpanded}, Mobile Open: ${isMobileOpen}`); // DEBUG LOG
+        // console.log(`Dropdown toggled. Was shown: ${isCurrentlyShown}, Is now shown: ${isExpanded}`); // DEBUG LOG
 
-        // // Debug mobile issue: check parent visibility
-        // if (isMobileOpen && isExpanded) {
-        //     setTimeout(() => { // Allow styles to apply
-        //         console.log("Mobile nav open, checking dropdown visibility:", dropdownContent.offsetParent !== null, getComputedStyle(dropdownContent).display);
-        //     }, 0);
-        // }
     });
 
     // Initial population of the button text
