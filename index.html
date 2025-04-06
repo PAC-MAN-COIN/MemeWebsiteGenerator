@@ -150,7 +150,7 @@
         <h2 class="form-section-title">Website Structure & Elements</h2>
         <fieldset class="checkbox-group">
             <legend>Toggle Website Elements:</legend>
-            {/* IDs here are used by isChecked */}
+
             <div><input type="checkbox" id="includeNavbar" checked><span>Top Navigation Bar</span></div>
             <div><input type="checkbox" id="showTagline" checked><span>Show Tagline in Header</span></div>
             <div><input type="checkbox" id="showLogo" checked><span>Show Logo Below Content</span></div>
@@ -161,10 +161,10 @@
         <fieldset class="checkbox-group">
             <legend>Include & Reorder Content Sections (Drag & Drop):</legend>
             <div id="section-list">
-                 {/* Checkbox IDs here are only used for initial state, check happens dynamically */}
+
                 <div class="section-item" draggable="true" data-section-id="about">
                     <span class="drag-handle">↕️</span>
-                    <input type="checkbox" id="includeAboutCheck" checked> {/* Changed ID slightly to avoid conflict */}
+                    <input type="checkbox" id="includeAboutCheck" checked>
                     <span>About Section</span>
                 </div>
                 <div class="section-item" draggable="true" data-section-id="how-to-buy">
@@ -207,7 +207,6 @@
 
         <hr/>
         <h2 class="form-section-title">Section Content Details</h2>
-        {/* ... other content textareas ... */}
         <div class="form-group">
           <label for="howToBuyContent">How to Buy Steps (1 step per line)</label>
           <textarea id="howToBuyContent" placeholder="1. Get a Wallet (e.g., MetaMask)\n2. Buy Base Coin (e.g., ETH/SOL)\n3. Swap on DEX (e.g., Uniswap/Raydium)\nContract: 0x123..."></textarea>
@@ -242,7 +241,6 @@
 
         <hr/>
         <h2 class="form-section-title">Branding & Socials</h2>
-        {/* ... image uploads and social links ... */}
          <div class="form-group">
           <label for="bannerImage">Upload Banner Image (Header Background)</label>
           <input type="file" id="bannerImage" accept="image/*" />
