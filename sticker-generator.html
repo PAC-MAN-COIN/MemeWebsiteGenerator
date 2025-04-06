@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Portal - Sticker Generator</title>
+    <link rel="icon" href="images/logo.png">
+    <link rel="stylesheet" href="style.css"> <style>
+        main#sticker-main { padding-top: 2rem; }
+        .sticker-container {
+            background-color: #1a1a1a;
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid #333;
+            width: 100%;
+            max-width: 1100px; /* Wider for more controls */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* --- Controls Layout --- */
+        .sticker-controls {
+            display: grid;
+            /* Define 3 columns: Upload/Preview | Text Selection | Style Options */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem 2rem; /* Row gap, Column gap */
+            align-items: flex-start;
+            border-bottom: 1px solid #333;
+            padding-bottom: 2rem;
+        }
+         .control-col { display: flex; flex-direction: column; gap: 1.5rem; } /* Space within columns */
+
+        .control-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .control-group label, .control-col > label, fieldset legend { font-size: 0.95rem; color: #aaa; font-weight: bold; margin-bottom: 0.25rem; }
+
+        /* File Input & Preview */
+        #baseImagePreview { max-width: 100%; max-height: 180px; height: auto; display: none; border: 1px solid #444; border-radius: 5px; margin-top: 10px; background-color: #222; object-fit: contain;}
+        #baseImagePlaceholder { color: #555; font-style: italic; text-align: center; margin-top: 10px; }
+        input[type="file"] { padding: 10px; background-color: #2a2a2a; border: 1px solid #444; border-radius: 5px; cursor: pointer; color: #ccc; }
+        input[type="file"]::-webkit-file-upload-button { background: #444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin-right: 10px; transition: background-color 0.2s; }
+        input[type="file"]:hover::-webkit-file-upload-button { background: #555; }
+
+        /* Text Options */
+        fieldset { border: 1px solid #333; padding: 1rem; border-radius: 8px; margin: 0; height: 100%; display: flex; flex-direction: column;}
+        fieldset legend { padding: 0 5px; margin-left: 10px; color: #ccc; font-size: 1rem; }
+        .preset-phrases { max-height: 180px; overflow-y: auto; padding-right: 5px; /* For scrollbar */ margin-bottom: 1rem;}
+        .preset-phrases label { display: block; margin-bottom: 8px; font-weight: normal; color: #ddd; cursor: pointer;}
+        .preset-phrases input[type="checkbox"] { margin-right: 8px; accent-color: #00ffe0; vertical-align: middle; width: 16px; height: 16px;}
+
+        textarea#customPhrases { padding: 10px; border-radius: 5px; border: 1px solid #333; font-size: 0.95rem; background: #1c1c1c; color: white; width: 100%; box-sizing: border-box; min-height: 90px; resize: vertical; font-family: inherit; flex-grow: 1; } /* Allow textarea to grow */
+
+        /* Font/Style Options */
+        .style-options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; }
+        .style-options-grid .control-group { gap: 0.3rem;} /* Smaller gap in style grid */
+         input[type="color"] {
+             -webkit-appearance: none; -moz-appearance: none; appearance: none;
+             width: 100%; height: 35px; background-color: transparent; border: 1px solid #555; border-radius: 5px; cursor: pointer; padding: 0 3px;
+         }
+         input[type="color"]::-webkit-color-swatch { border-radius: 3px; border: 1px solid #666; }
+         input[type="color"]::-moz-color-swatch { border-radius: 3px; border: 1px solid #666; }
+
+         select, input[type="number"] {
+             padding: 8px 10px; background: #1c1c1c; color: white; border: 1px solid #333; border-radius: 5px; font-size: 0.9rem; width: 100%; box-sizing: border-box;
+         }
+         input[type="number"] { width: 70px;} /* Fixed width for number inputs */
+
+        /* Generate Button Area */
+        .generate-area {
+            grid-column: 1 / -1; /* Span all columns */
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        #generateButton { padding: 12px 30px; font-size: 1.1rem; background: linear-gradient(45deg, #00ffe0, #ff00ff); color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+        #generateButton:hover { transform: scale(1.03); }
+        #generateButton:disabled { background: #444; cursor: not-allowed; transform: none; opacity: 0.7;}
+
+        /* Results Area */
+        #statusMessage { text-align: center; color: #aaa; font-style: italic; margin: 1rem 0; min-height: 1.2em; }
+        #stickerResults { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 1rem; margin-top: 1rem; border-top: 1px solid #333; padding-top: 2rem; }
+        .sticker-preview-item { background-color: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 8px; padding: 10px; text-align: center; position: relative; }
+        .sticker-preview-item img { max-width: 100%; height: 100px; width: auto; object-fit: contain; display: block; margin: 0 auto 10px auto; cursor: pointer; /* For individual download later */ }
+        .sticker-download-btn { display: block; width: 100%; background-color: #38bdf8; color: #000; text-decoration: none; padding: 5px 0; font-size: 0.8rem; border-radius: 4px; border: none; cursor: pointer; transition: background-color 0.2s; margin-top: 5px; }
+        .sticker-download-btn:hover { background-color: #7dd3fc; }
+
+        #downloadAllButton { display: none; margin: 2rem auto 0 auto; padding: 12px 30px; font-size: 1.1rem; background: #4ade80; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+        #downloadAllButton:hover { transform: scale(1.03); }
+        #downloadAllButton:disabled { background: #999; cursor: wait;}
+
+    </style>
+</head>
+<body>
+    <div id="navbar-placeholder"></div>
+
+    <main id="sticker-main">
+        <h1 class="page-title">Telegram Sticker Generator</h1>
+        <p class="page-subtitle">Add text to your image to create stickers ready for Telegram!</p>
+
+        <div class="sticker-container">
+            <div class="sticker-controls">
+                <div class="control-col">
+                    <div class="control-group">
+                        <label for="stickerBaseImage">1. Upload Base Image</label>
+                        <input type="file" id="stickerBaseImage" accept="image/png, image/jpeg, image/webp">
+                        <img id="baseImagePreview" src="#" alt="Image Preview">
+                        <p id="baseImagePlaceholder">No image selected</p>
+                    </div>
+                </div>
+
+                <div class="control-col">
+                    <fieldset>
+                        <legend>2. Select/Add Text Phrases</legend>
+                        <div class="preset-phrases" id="presetPhrasesContainer">
+                            </div>
+                        <div class="control-group" style="margin-top: 1rem;">
+                           <label for="customPhrases" style="margin-bottom: 0.5rem;">Or Add Custom (one per line):</label>
+                           <textarea id="customPhrases" rows="4" placeholder="TO THE MOON! etc..."></textarea>
+                       </div>
+                    </fieldset>
+                </div>
+
+                 <div class="control-col">
+                     <fieldset>
+                         <legend>3. Text Style Options</legend>
+                         <div class="style-options-grid">
+                             <div class="control-group">
+                                 <label for="textFontFamily">Font:</label>
+                                 <select id="textFontFamily">
+                                     <option value="Impact, Arial Black, sans-serif">Impact</option>
+                                     <option value="'Comic Sans MS', cursive, sans-serif">Comic Sans</option>
+                                     <option value="Arial Black, Gadget, sans-serif">Arial Black</option>
+                                     <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
+                                      <option value="Verdana, Geneva, sans-serif">Verdana</option>
+                                 </select>
+                             </div>
+                             <div class="control-group">
+                                 <label for="textPosition">Position:</label>
+                                 <select id="textPosition">
+                                     <option value="bottom">Bottom Center</option>
+                                     <option value="top">Top Center</option>
+                                     <option value="middle">Middle Center</option>
+                                 </select>
+                             </div>
+                              <div class="control-group">
+                                 <label for="textCase">Case:</label>
+                                 <select id="textCase">
+                                     <option value="upper">UPPERCASE</option>
+                                     <option value="lower">lowercase</option>
+                                      <option value="normal">Normal</option>
+                                 </select>
+                             </div>
+                             <div class="control-group">
+                                 <label for="strokeWidth">Outline:</label>
+                                 <input type="number" id="strokeWidth" value="5" min="0" max="20">
+                             </div>
+                             <div class="control-group">
+                                 <label for="textColor">Text Color:</label>
+                                 <input type="color" id="textColor" value="#FFFFFF">
+                             </div>
+                             <div class="control-group">
+                                 <label for="strokeColor">Outline Color:</label>
+                                 <input type="color" id="strokeColor" value="#000000">
+                             </div>
+                         </div>
+                     </fieldset>
+                 </div>
+
+                 <div class="generate-area">
+                      <button id="generateButton" disabled>4. Generate Stickers</button>
+                 </div>
+
+            </div>
+
+            <div class="sticker-results-area">
+                 <p id="statusMessage"></p>
+                 <div id="stickerResults"></div>
+                 <button id="downloadAllButton">Download All (.zip)</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        // --- DOM Elements ---
+        const imageInput = document.getElementById('stickerBaseImage');
+        const baseImagePreview = document.getElementById('baseImagePreview');
+        const baseImagePlaceholder = document.getElementById('baseImagePlaceholder');
+        const presetPhrasesContainer = document.getElementById('presetPhrasesContainer');
+        const customPhrasesTextarea = document.getElementById('customPhrases');
+        const strokeWidthInput = document.getElementById('strokeWidth');
+        const textFontFamilySelect = document.getElementById('textFontFamily');
+        const textColorInput = document.getElementById('textColor');
+        const strokeColorInput = document.getElementById('strokeColor');
+        const textPositionSelect = document.getElementById('textPosition');
+        const textCaseSelect = document.getElementById('textCase');
+        const generateButton = document.getElementById('generateButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const stickerResultsDiv = document.getElementById('stickerResults');
+        const downloadAllButton = document.getElementById('downloadAllButton');
+
+        // --- State ---
+        let baseImage = null;
+        let generatedStickers = []; // Holds { name: '...', blob: Blob }
+
+        // --- Preset Phrases ---
+        const presetPhrases = [ "BUY THE DIP", "HODL", "TO THE MOON", "GM", "GN", "WEN LAMBO?", "DIAMOND HANDS", "PAPER HANDS?", "RUG PULL?", "SEND IT", "LOOKS RARE", "NGMI", "WAGMI", "COPE", "SEETHE", "FOMO", "THIS IS THE WAY", "IT'S PUMPING", "IT'S DUMPING", "ATH INCOMING", "BUY NOW", "SELL NOW?", "AIRDROP?", "BASED", "CRYPTO" ];
+
+        // --- Populate Preset Phrases ---
+        function populatePresets() { presetPhrasesContainer.innerHTML = ''; presetPhrases.forEach((phrase, index) => { const label = document.createElement('label'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = phrase; checkbox.id = `preset_${index}`; label.htmlFor = checkbox.id; label.appendChild(checkbox); label.appendChild(document.createTextNode(` ${phrase}`)); presetPhrasesContainer.appendChild(label); }); }
+
+        // --- Image Handling ---
+        imageInput.addEventListener('change', (event) => { const file = event.target.files[0]; if (!file || !file.type.startsWith('image/')) { alert('Please select a valid image file.'); baseImage = null; baseImagePreview.style.display = 'none'; baseImagePlaceholder.style.display = 'block'; generateButton.disabled = true; return; } const reader = new FileReader(); reader.onload = (e) => { baseImage = new Image(); baseImage.onload = () => { baseImagePreview.src = e.target.result; baseImagePreview.style.display = 'block'; baseImagePlaceholder.style.display = 'none'; generateButton.disabled = false; console.log(`Image loaded: ${baseImage.naturalWidth}x${baseImage.naturalHeight}`); }; baseImage.onerror = () => { alert('Failed to load image.'); baseImage = null; generateButton.disabled = true; }; baseImage.src = e.target.result; }; reader.onerror = () => { alert('Failed to read file.'); baseImage = null; generateButton.disabled = true; }; reader.readAsDataURL(file); });
+
+        // --- Sticker Generation ---
+        generateButton.addEventListener('click', async () => { /* (Keep existing listener, but update options) */
+             if (!baseImage) { alert('Please upload a base image first.'); return; }
+             const selectedPresets = Array.from(presetPhrasesContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+             const customPhrases = customPhrasesTextarea.value.split('\n').map(p => p.trim()).filter(p => p.length > 0);
+             const allPhrases = [...new Set([...selectedPresets, ...customPhrases])];
+             if (allPhrases.length === 0) { alert('Please select at least one preset phrase or add custom text.'); return; }
+
+             stickerResultsDiv.innerHTML = '';
+             statusMessage.textContent = `Generating ${allPhrases.length} sticker(s)... Please wait.`;
+             statusMessage.style.display = 'block';
+             downloadAllButton.style.display = 'none';
+             generateButton.disabled = true;
+             generatedStickers = [];
+
+             // --- Get Style Options ---
+             const options = {
+                 fontFamily: textFontFamilySelect.value,
+                 textColor: textColorInput.value,
+                 strokeColor: strokeColorInput.value,
+                 strokeWidth: parseInt(strokeWidthInput.value, 10) || 0,
+                 textPosition: textPositionSelect.value, // 'top', 'middle', 'bottom'
+                 textCase: textCaseSelect.value // 'upper', 'lower', 'normal'
+             };
+
+             for (const phrase of allPhrases) {
+                  try {
+                     // Pass options to canvas function
+                     const stickerDataUrl = await createStickerCanvas(baseImage, phrase, options);
+                     const blob = await dataURLtoBlob(stickerDataUrl); // Convert for zipping
+                     const safeFilename = `sticker_${phrase.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
+                     generatedStickers.push({ name: safeFilename, blob: blob });
+                     displayStickerPreview(stickerDataUrl, phrase, safeFilename); // Pass dataURL for preview/single download
+                  } catch (error) { console.error(`Failed to generate sticker for "${phrase}":`, error); }
+             }
+
+             statusMessage.textContent = `Generated ${generatedStickers.length} sticker(s).`;
+             generateButton.disabled = false;
+             if (generatedStickers.length > 0) { downloadAllButton.style.display = 'block'; }
+        });
+
+        // --- Canvas Creation Function (UPDATED) ---
+        async function createStickerCanvas(img, text, options) {
+            return new Promise((resolve, reject) => {
+                 try {
+                     const FONT_SIZE_RATIO = 0.14; // Base font size relative to image width
+                     const PADDING_RATIO = 0.05; // Padding relative to font size
+                     const MAX_WIDTH = 512;
+                     const MAX_HEIGHT = 512;
+
+                     const canvas = document.createElement('canvas');
+                     const ctx = canvas.getContext('2d');
+
+                     const baseWidth = img.naturalWidth;
+                     const baseHeight = img.naturalHeight;
+                     canvas.width = baseWidth;
+                     canvas.height = baseHeight;
+
+                     // Draw image
+                     ctx.drawImage(img, 0, 0);
+
+                     // Apply Text Case
+                     let processedText = text;
+                     if (options.textCase === 'upper') processedText = text.toUpperCase();
+                     else if (options.textCase === 'lower') processedText = text.toLowerCase();
+
+                     // Text Styling
+                     let fontSize = Math.max(30, Math.round(baseWidth * FONT_SIZE_RATIO)); // Base font size
+                     ctx.font = `bold ${fontSize}px ${options.fontFamily}`;
+                     ctx.textAlign = 'center'; // Using center alignment for simplicity
+                     ctx.fillStyle = options.textColor;
+                     ctx.strokeStyle = options.strokeColor;
+                     ctx.lineWidth = Math.max(1, options.strokeWidth); // Ensure at least 1px stroke if > 0
+
+                     // Adjust font size if text too wide
+                     let textFits = false;
+                     while (fontSize >= 20 && !textFits) { // Min font size 20px
+                         ctx.font = `bold ${fontSize}px ${options.fontFamily}`;
+                         const metrics = ctx.measureText(processedText);
+                         if (metrics.width < baseWidth * 0.9) { // Check if fits within 90% width
+                              textFits = true;
+                         } else {
+                              fontSize -= 2; // Reduce font size and try again
+                         }
+                     }
+                     ctx.lineWidth = Math.max(1, Math.round(fontSize * 0.1)); // Recalculate stroke based on final font size
+
+                     // Text Placement
+                     const padding = fontSize * PADDING_RATIO;
+                     const textX = baseWidth / 2;
+                     let textY;
+
+                     if (options.textPosition === 'top') {
+                         ctx.textBaseline = 'top';
+                         textY = padding;
+                     } else if (options.textPosition === 'middle') {
+                         ctx.textBaseline = 'middle';
+                         textY = baseHeight / 2;
+                     } else { // Default to bottom
+                         ctx.textBaseline = 'bottom';
+                         textY = baseHeight - padding;
+                     }
+
+                     // Draw stroke and then fill
+                     if (options.strokeWidth > 0) {
+                          ctx.strokeText(processedText, textX, textY);
+                     }
+                     ctx.fillText(processedText, textX, textY);
+
+                     // --- Resize to Telegram specs ---
+                     let targetWidth = baseWidth; let targetHeight = baseHeight;
+                     const aspectRatio = baseWidth / baseHeight;
+                     if (targetWidth > MAX_WIDTH || targetHeight > MAX_HEIGHT) {
+                         if (aspectRatio >= 1) { targetWidth = MAX_WIDTH; targetHeight = Math.round(MAX_WIDTH / aspectRatio); }
+                         else { targetHeight = MAX_HEIGHT; targetWidth = Math.round(MAX_HEIGHT * aspectRatio); }
+                     }
+                     targetWidth = Math.max(1, targetWidth); targetHeight = Math.max(1, targetHeight);
+
+                     const finalCanvas = document.createElement('canvas'); finalCanvas.width = targetWidth; finalCanvas.height = targetHeight;
+                     const finalCtx = finalCanvas.getContext('2d');
+                     finalCtx.drawImage(canvas, 0, 0, targetWidth, targetHeight);
+
+                     resolve(finalCanvas.toDataURL('image/png'));
+                 } catch (err) {
+                      reject(err);
+                 }
+            });
+        }
+
+        // --- Display Sticker Preview (Accepts filename now) ---
+        function displayStickerPreview(dataUrl, phrase, filename) {
+            const itemDiv = document.createElement('div'); itemDiv.className = 'sticker-preview-item';
+            const img = document.createElement('img'); img.src = dataUrl; img.alt = `Sticker: ${phrase}`;
+            const downloadBtn = document.createElement('a'); downloadBtn.href = dataUrl; downloadBtn.textContent = 'Download'; downloadBtn.className = 'sticker-download-btn'; downloadBtn.download = filename; // Use generated filename
+            itemDiv.appendChild(img); itemDiv.appendChild(downloadBtn);
+            stickerResultsDiv.appendChild(itemDiv);
+        }
+
+        // --- Download All Button ---
+        downloadAllButton.addEventListener('click', async () => { /* (Keep existing listener using generatedStickers with blobs) */
+             if (generatedStickers.length === 0) return;
+             statusMessage.textContent = 'Preparing zip file...';
+             downloadAllButton.disabled = true;
+             const zip = new JSZip();
+             generatedStickers.forEach(sticker => { zip.file(sticker.name, sticker.blob); }); // Add blobs directly
+             try {
+                 const zipBlob = await zip.generateAsync({ type: "blob" });
+                 saveAs(zipBlob, "meme_portal_stickers.zip");
+                 statusMessage.textContent = `Generated ${generatedStickers.length} stickers. Zip downloaded!`;
+             } catch (error) { console.error("Error creating zip file:", error); statusMessage.textContent = 'Error creating zip file.'; }
+             finally { downloadAllButton.disabled = false; }
+         });
+
+        // Helper: Convert data URL to Blob (needed for JSZip)
+        async function dataURLtoBlob(dataurl) {
+            const res = await fetch(dataurl);
+            return await res.blob();
+        }
+
+        // --- Initial Setup ---
+        populatePresets();
+
+    </script>
+
+</body>
+</html>
