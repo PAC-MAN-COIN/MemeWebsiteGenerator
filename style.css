@@ -28,7 +28,7 @@ body {
 #portal-nav {
     position: sticky;
     top: 0;
-    z-index: 101; /* Base z-index */
+    z-index: 105; /* Keep high z-index */
     background-color: rgba(26, 26, 26, 0.9);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -39,16 +39,18 @@ body {
     left: 0;
     right: 0;
 }
+
+/* --- Desktop Flex Layout Fix --- */
 .portal-nav-container {
     max-width: 1920px;
     margin: 0 auto;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: nowrap;
+    /* Removed justify-content, rely on gap and auto margins */
+    align-items: center; /* Vertically align items */
+    flex-wrap: nowrap; /* Prevent wrapping on desktop */
     min-height: 35px;
+    gap: 20px; /* Add consistent gap between direct children */
 }
-/* Brand is a link */
 .portal-brand {
     font-family: 'Orbitron', sans-serif;
     font-size: 1.4rem;
@@ -56,24 +58,31 @@ body {
     background: linear-gradient(90deg, #ff00ff, #00ffe0);
      -webkit-background-clip: text;
      -webkit-text-fill-color: transparent;
-     text-decoration: none; /* Ensure brand isn't underlined */
+     text-decoration: none;
      vertical-align: middle;
-     flex-shrink: 0; /* Prevent logo from shrinking */
-     margin-right: auto; /* Pushes other items to the right */
+     flex-shrink: 0; /* Prevent logo shrinking */
+     /* Removed margin-right: auto; */
 }
-
-/* Desktop Nav Links */
 #portal-nav-links {
     list-style: none;
     display: flex;
-    gap: 25px;
-    margin: 0 20px; /* Add horizontal margin */
+    gap: 25px; /* Gap between links */
+    margin: 0; /* Remove horizontal margins */
     padding: 0;
     align-items: center;
-    flex-wrap: wrap;
-    flex-grow: 1; /* Allow the link container to grow */
-    justify-content: center; /* Center the links within the available space */
+    flex-wrap: wrap; /* Allow link wrapping if space is extremely tight */
+    flex-grow: 1; /* Allow links section to take available space */
+    justify-content: center; /* Center links within their allocated space */
 }
+.profile-manager-nav {
+    position: relative; /* For dropdown positioning */
+    display: inline-block; /* Keep as inline-block or inline-flex */
+    flex-shrink: 0; /* Prevent profile button shrinking */
+    margin-left: auto; /* PUSH profile button to the far right */
+}
+/* --- End Desktop Fix --- */
+
+
 #portal-nav-links li a {
     color: #ccc; text-decoration: none; font-size: 0.9rem;
     font-family: 'Poppins', sans-serif; transition: color 0.2s;
@@ -84,12 +93,6 @@ body {
 #portal-nav-links li a.coming-soon { color: #666; cursor: default; font-style: italic; }
 #portal-nav-links li a.coming-soon:hover { color: #666; }
 
-/* Profile Manager Nav Styles (Desktop) */
-.profile-manager-nav {
-    position: relative; /* Crucial for absolute dropdown */
-    display: inline-block;
-    flex-shrink: 0;
-}
 .profile-manager-button {
     background-color: #333; color: #eee; padding: 6px 12px; font-size: 0.9rem;
     font-family: 'Poppins', sans-serif; border: 1px solid #555; border-radius: 6px;
@@ -103,14 +106,14 @@ body {
 .profile-manager-button[aria-expanded="true"] .dropdown-arrow { transform: rotate(180deg); }
 .profile-manager-dropdown {
     display: none;
-    position: absolute; /* Position relative to .profile-manager-nav */
+    position: absolute;
     background-color: #2a2a2a;
-    min-width: 180px; /* Or width: 100% if preferred */
+    min-width: 180px;
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.4);
-    z-index: 110; /* High z-index */
+    z-index: 110;
     border-radius: 5px;
     border: 1px solid #444;
-    right: 0; /* Align to the right of the button */
+    right: 0;
     margin-top: 5px;
     overflow: hidden;
     box-sizing: border-box;
@@ -128,7 +131,7 @@ body {
 
 /* Mobile Nav Toggle Button */
 .portal-nav-toggle {
-    display: none; /* Hidden by default, shown in media query */
+    display: none;
     background: none; border: 1px solid #555; color: #ccc; font-size: 1.5rem;
     padding: 0px 8px; line-height: 1; border-radius: 4px; cursor: pointer;
     flex-shrink: 0;
@@ -183,40 +186,46 @@ main { padding: 2rem; flex-grow: 1; display: flex; flex-direction: column; align
 .no-profiles-message { text-align: center; color: #888; padding: 1rem 0; font-style: italic; }
 .modal-error-message { color: #ff4d4d; font-size: 0.9rem; margin-top: 10px; text-align: center; min-height: 1.2em; }
 
+
 /* === Mobile Responsiveness === */
 @media (max-width: 768px) {
     /* --- Styles for Collapsed Mobile Header --- */
     #portal-nav {
         padding: 8px 0.75rem;
-        position: sticky; /* Keep sticky */
-        z-index: 105; /* Ensure header is above open menu content */
+        position: sticky;
+        z-index: 105;
     }
     .portal-nav-container {
         gap: 10px;
         flex-wrap: nowrap;
         align-items: center;
+        /* Reset desktop gap if needed, handled by specific elements */
+        /* gap: 0; */
     }
     .portal-brand {
         font-size: 1.15rem;
-        margin-right: auto;
-    }
-    .portal-nav-toggle {
-        display: inline-block;
-        order: 2;
-        padding: 2px 8px;
-        font-size: 1.4rem;
+        margin-right: auto; /* Keep pushing other items right */
     }
     /* Hide desktop links container */
     #portal-nav-links {
-        display: none;
+        display: none; /* Ensure hidden */
+        order: 1; /* Ensure default order doesn't interfere */
+    }
+    /* Show mobile toggle */
+    .portal-nav-toggle {
+        display: inline-block;
+        order: 3; /* After profile */
+        padding: 2px 8px;
+        font-size: 1.4rem;
+        margin-left: 5px; /* Add small gap */
     }
     /* Style profile button in header */
     .profile-manager-nav {
-        display: flex; /* Use flex for button contents */
+        display: flex;
         align-items: center;
-        margin-left: 0;
-        order: 1;
-        position: static; /* Reset position */
+        margin-left: 0; /* Reset desktop margin */
+        order: 2; /* Before toggle */
+        position: static;
     }
     .profile-manager-button {
         padding: 4px 8px;
@@ -226,8 +235,8 @@ main { padding: 2rem; flex-grow: 1; display: flex; flex-direction: column; align
         border: none;
         gap: 4px;
         color: #eee;
-        position: static; /* Reset position */
-        border-radius: 4px; /* Add slight radius */
+        position: static;
+        border-radius: 4px;
     }
     #currentProfileDisplay {
         max-width: 70px;
@@ -236,20 +245,19 @@ main { padding: 2rem; flex-grow: 1; display: flex; flex-direction: column; align
     .profile-manager-button .dropdown-arrow {
         display: inline-block;
         font-size: 0.6em;
-        transform: rotate(0deg); /* Ensure reset */
+        transform: rotate(0deg);
     }
     /* Hide desktop dropdown absolutely */
     .profile-manager-dropdown {
         display: none !important;
-        position: absolute !important; /* Ensure it doesn't affect layout */
+        position: absolute !important;
     }
 
 
     /* --- Styles for when mobile menu is OPEN (.portal-nav-open) --- */
     #portal-nav.portal-nav-open {
        /* Make nav container relative for positioning children */
-       position: sticky; /* Keep sticky */
-       /* Add overflow hidden potentially? Might clip dropdown */
+       position: sticky;
     }
     #portal-nav.portal-nav-open .portal-nav-container {
         align-items: flex-start;
@@ -258,34 +266,36 @@ main { padding: 2rem; flex-grow: 1; display: flex; flex-direction: column; align
     /* Container for the dropdown content (links + profile) */
     #mobile-nav-content {
         position: absolute;
-        top: 100%; /* Start below header */
+        top: 100%;
         left: 0;
         width: 100%;
         background-color: rgba(30, 30, 30, 0.98);
         border-top: 1px solid #333;
         box-shadow: 0 5px 10px rgba(0,0,0,0.4);
-        z-index: 100; /* Below header */
-        display: none; /* Hidden initially */
-        overflow-x: hidden; /* Prevent horizontal overflow */
+        z-index: 100;
+        display: none;
+        overflow-x: hidden;
         box-sizing: border-box;
+        max-height: calc(100vh - 60px); /* Example max height, adjust header height (e.g. 60px) */
+        overflow-y: auto; /* Allow scrolling if content exceeds height */
     }
     #portal-nav.portal-nav-open #mobile-nav-content {
-        display: block; /* Show when menu is open */
+        display: block;
     }
 
     /* Style main links within the open menu */
     #portal-nav.portal-nav-open #portal-nav-links {
-        display: flex; /* Display as flex column */
+        display: flex;
         flex-direction: column;
-        position: static; /* Position naturally inside #mobile-nav-content */
+        position: static;
         width: 100%;
-        background-color: transparent; /* Inherit background */
+        background-color: transparent;
         padding: 0;
-        border-top: none; /* Remove border */
-        box-shadow: none; /* Remove shadow */
+        border-top: none;
+        box-shadow: none;
         gap: 0;
         align-items: stretch;
-        order: 1; /* Links first */
+        order: 1;
         box-sizing: border-box;
     }
     #portal-nav.portal-nav-open #portal-nav-links li {
@@ -315,14 +325,14 @@ main { padding: 2rem; flex-grow: 1; display: flex; flex-direction: column; align
 
     /* Style profile section within the open menu */
     #portal-nav.portal-nav-open .profile-manager-nav {
-        display: block; /* Display as block */
-        order: 10; /* After links */
+        display: block;
+        order: 10;
         width: 100%;
         margin-left: 0;
         margin-top: 0;
-        position: static; /* Position naturally inside #mobile-nav-content */
-        background-color: #252525; /* Background for this section */
-        border-top: 1px solid #555; /* Separator */
+        position: static;
+        background-color: #252525;
+        border-top: 1px solid #555;
         box-sizing: border-box;
     }
     /* Style profile button within the open menu */
@@ -330,13 +340,12 @@ main { padding: 2rem; flex-grow: 1; display: flex; flex-direction: column; align
         width: 100%;
         border-radius: 0;
         border: none;
-        border-top: none; /* Removed top border here */
         padding: 12px 15px;
         justify-content: center;
         font-size: 1rem;
-        background-color: transparent; /* Inherit */
+        background-color: transparent;
         display: flex;
-        position: relative; /* Context for dropdown arrow */
+        position: relative;
         z-index: 103;
         color: #eee;
         box-sizing: border-box;
@@ -353,8 +362,8 @@ main { padding: 2rem; flex-grow: 1; display: flex; flex-direction: column; align
 
     /* Style profile dropdown within the open menu */
     #portal-nav.portal-nav-open .profile-manager-dropdown {
-        position: static; /* In flow below button */
-        display: none; /* Hidden until .show */
+        position: static;
+        display: none;
         box-shadow: none;
         border: none;
         border-radius: 0;
@@ -363,15 +372,15 @@ main { padding: 2rem; flex-grow: 1; display: flex; flex-direction: column; align
         margin-top: 0;
         background-color: #1e1e1e;
         z-index: 102;
-        border-top: 1px solid #444; /* Separator */
+        border-top: 1px solid #444;
         box-sizing: border-box;
         /* Reset absolute positioning */
         right: auto;
-        margin-top: 0;
+        /* display: block !important; */ /* REMOVE THIS FOR DEBUGGING */
     }
     /* Show profile dropdown using .show class */
     #portal-nav.portal-nav-open .profile-manager-dropdown.show {
-        display: block !important; /* Use important to ensure visibility override */
+        display: block !important; /* Ensure visibility */
     }
     #portal-nav.portal-nav-open .profile-manager-dropdown a,
     #portal-nav.portal-nav-open .profile-manager-dropdown span.no-profiles {
@@ -402,6 +411,7 @@ main { padding: 2rem; flex-grow: 1; display: flex; flex-direction: column; align
     .page-subtitle { font-size: 1.1rem; margin-bottom: 2rem;}
     .tool-grid { grid-template-columns: 1fr; gap: 1.5rem;}
 }
+
 
 /* Utility class for screen reader only elements */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
