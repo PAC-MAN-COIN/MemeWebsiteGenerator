@@ -1,10 +1,9 @@
-<!-- FULLY UPGRADED: Styling, Image Upload, Functional Preview + Download -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meme Coin Site Builder</title>
+  <title>Meme Coin Site Builder - Advanced</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
@@ -31,10 +30,10 @@
     }
     .form {
       width: 100%;
-      max-width: 600px;
+      max-width: 700px; /* Increased width */
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px; /* Increased gap */
     }
     input, textarea, select, button {
       padding: 14px;
@@ -44,6 +43,7 @@
       background: #1c1c1c;
       color: white;
       transition: border-color 0.2s;
+      font-family: inherit; /* Ensure consistent font */
     }
     input:focus, textarea:focus, select:focus {
       border-color: #00ffe0;
@@ -59,6 +59,7 @@
       font-weight: bold;
       cursor: pointer;
       transition: transform 0.2s;
+      border: none; /* Ensure button border is removed */
     }
     button:hover {
       transform: scale(1.03);
@@ -70,52 +71,150 @@
       height: 600px;
       border: 2px solid #333;
       border-radius: 12px;
-      display: none;
+      display: none; /* Hidden initially */
     }
     label {
       font-size: 0.95rem;
       margin-bottom: 6px;
       color: #aaa;
+      display: block; /* Ensure label takes full width */
     }
     .form-group {
       display: flex;
       flex-direction: column;
     }
+    .checkbox-group {
+        background: #1c1c1c;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #333;
+    }
+    .checkbox-group label {
+        color: #eee;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    .checkbox-group div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+    .checkbox-group input[type="checkbox"] {
+        width: 18px; /* Style checkboxes */
+        height: 18px;
+        accent-color: #00ffe0; /* Color the check */
+        cursor: pointer;
+    }
+    .checkbox-group span {
+        font-size: 0.9rem;
+        color: #ccc;
+    }
+    input[type="file"] {
+        padding: 10px; /* Adjust file input padding */
+        cursor: pointer;
+    }
+    input[type="file"]::-webkit-file-upload-button { /* Style file button */
+        background: #333;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+    input[type="file"]:hover::-webkit-file-upload-button {
+        background: #444;
+    }
+    hr {
+        border: none;
+        border-top: 1px solid #333;
+        margin: 20px 0;
+    }
+    h2.form-section-title {
+        font-size: 1.2rem;
+        color: #00ffe0;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        font-family: 'Orbitron', sans-serif;
+        border-bottom: 1px solid #333;
+        padding-bottom: 5px;
+    }
   </style>
 </head>
 <body>
-  <h1>Meme Coin Site Builder</h1>
+  <h1>Meme Coin Site Builder 🚀</h1>
+
   <div class="form">
+
+    <h2 class="form-section-title">Core Details</h2>
     <div class="form-group">
-      <label>Coin Name</label>
+      <label for="coinName">Coin Name</label>
       <input id="coinName" placeholder="$NUTPEPE" />
     </div>
     <div class="form-group">
-      <label>Tagline</label>
+      <label for="tagline">Tagline</label>
       <input id="tagline" placeholder="The future is dairy-fueled" />
     </div>
     <div class="form-group">
-      <label>Description</label>
-      <textarea id="description" placeholder="What is your coin about?"></textarea>
+      <label for="description">Description (Appears in 'About' section if included)</label>
+      <textarea id="description" placeholder="What is your coin about? Explain its vision, meme origin, or goals."></textarea>
+    </div>
+
+    <hr/>
+    <h2 class="form-section-title">Content Sections</h2>
+     <div class="checkbox-group">
+        <label>Include Website Sections:</label>
+        <div>
+            <input type="checkbox" id="includeAbout" value="true" checked>
+            <span>About Section (Uses Description above)</span>
+        </div>
+        <div>
+            <input type="checkbox" id="includeTokenomics" value="true" checked>
+            <span>Tokenomics Section</span>
+        </div>
+        <div>
+            <input type="checkbox" id="includeRoadmap" value="true" checked>
+            <span>Roadmap Section</span>
+        </div>
+         <div>
+            <input type="checkbox" id="includeCommunity" value="true" checked>
+            <span>Community / Social Links Section</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+      <label for="tokenomics">Tokenomics Details (1 item per line)</label>
+      <textarea id="tokenomics" placeholder="e.g., Total Supply: 1 Quadrillion\n5% Buy Tax\n5% Sell Tax\nLiquidity Locked"></textarea>
     </div>
     <div class="form-group">
-      <label>Tokenomics</label>
-      <textarea id="tokenomics" placeholder="List each item on a new line"></textarea>
+      <label for="roadmap">Roadmap Phases (1 item per line)</label>
+      <textarea id="roadmap" placeholder="e.g., Phase 1: Launch & Stealth Fair Launch\nPhase 2: CMC & CG Listing\nPhase 3: Utility Development\nPhase 4: World Domination"></textarea>
+    </div>
+
+    <hr/>
+    <h2 class="form-section-title">Links & CTA</h2>
+    <div class="form-group">
+      <label for="telegram">Telegram Link</label>
+      <input id="telegram" type="url" placeholder="https://t.me/yourcoin" />
     </div>
     <div class="form-group">
-      <label>Roadmap</label>
-      <textarea id="roadmap" placeholder="Q1 Launch, Q2 Rug, Q3 Rebirth"></textarea>
+      <label for="twitter">Twitter/X Link</label>
+      <input id="twitter" type="url" placeholder="https://twitter.com/yourcoin" />
     </div>
-    <div class="form-group">
-      <label>Telegram Link</label>
-      <input id="telegram" placeholder="https://t.me/yourcoin" />
+     <div class="form-group">
+      <label for="ctaText">Header CTA Button Text (Optional)</label>
+      <input id="ctaText" placeholder="e.g., Buy $NUTPEPE Now!" />
     </div>
-    <div class="form-group">
-      <label>Twitter/X Link</label>
-      <input id="twitter" placeholder="https://twitter.com/yourcoin" />
+     <div class="form-group">
+      <label for="ctaLink">Header CTA Button Link (Optional)</label>
+      <input id="ctaLink" type="url" placeholder="Link to PancakeSwap, Uniswap, etc." />
     </div>
+
+    <hr/>
+    <h2 class="form-section-title">Appearance & Branding</h2>
     <div class="form-group">
-      <label>Color Theme</label>
+      <label for="colorTheme">Color Theme</label>
       <select id="colorTheme">
         <option value="#00ffe0,#ff00ff">Neon (Teal + Magenta)</option>
         <option value="#facc15,#ef4444">Gold + Red</option>
@@ -123,62 +222,210 @@
         <option value="#9333ea,#f472b6">Purple + Pink</option>
         <option value="#38bdf8,#22c55e">Sky + Lime</option>
         <option value="#f97316,#e11d48">Orange + Rose</option>
+        <option value="#ffffff,#aaaaaa">Monochrome (White + Gray)</option>
+        <option value="#ff5733,#c70039">Fiery (Orange + Dark Red)</option>
       </select>
     </div>
+     <div class="form-group">
+        <label for="fontPair">Font Pairing (Heading / Body)</label>
+        <select id="fontPair">
+            <option value="Orbitron,Poppins">Orbitron / Poppins (Sci-Fi/Modern)</option>
+            <option value="Press Start 2P,VT323">Press Start 2P / VT323 (Retro Pixel)</option>
+            <option value="Montserrat,Lato">Montserrat / Lato (Clean Sans-Serif)</option>
+            <option value="Roboto Slab,Roboto">Roboto Slab / Roboto (Modern Serif/Sans)</option>
+            <option value="Bangers,Permanent Marker">Bangers / Permanent Marker (Comic/Handwritten)</option>
+        </select>
+     </div>
     <div class="form-group">
-      <label>Upload Banner Image</label>
+      <label for="bannerImage">Upload Banner Image (Recommended: 1920x1080)</label>
       <input type="file" id="bannerImage" accept="image/*" />
     </div>
     <div class="form-group">
-      <label>Upload Logo Image</label>
+      <label for="logoImage">Upload Logo Image (Recommended: Square, 512x512)</label>
       <input type="file" id="logoImage" accept="image/*" />
     </div>
-    <button onclick="generatePreview()">Generate Preview</button>
-    <button onclick="downloadSite()">Download Site Files (ZIP)</button>
+    <div class="form-group">
+      <label for="faviconImage">Upload Favicon (Recommended: .ico or .png, 32x32)</label>
+      <input type="file" id="faviconImage" accept="image/x-icon,image/png" />
+    </div>
+     <div class="form-group">
+      <label for="footerText">Custom Footer Text (Optional, short)</label>
+      <input id="footerText" placeholder="e.g., Not financial advice. DYOR." />
+    </div>
+
+    <hr/>
+    <button type="button" onclick="generatePreview()">Generate Preview</button>
+    <button type="button" onclick="downloadSite()">Download Site Files (ZIP)</button>
   </div>
-  <iframe id="previewFrame"></iframe>
+
+  <iframe id="previewFrame" title="Website Preview"></iframe>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script>
-    let bannerData = '', logoData = '';
-    document.getElementById('bannerImage').addEventListener('change', e => toBase64(e.target.files[0], d => bannerData = d));
-    document.getElementById('logoImage').addEventListener('change', e => toBase64(e.target.files[0], d => logoData = d));
+    let bannerData = '', logoData = '', faviconData = '';
+
+    // Helper to safely get element value or default
+    const getValue = (id, defaultValue = '') => {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : defaultValue;
+    };
+     // Helper to safely get checkbox state
+    const isChecked = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.checked : false;
+    };
+
+    // Image to Base64 Conversion
+    function setupImageUpload(inputId, callback) {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('change', e => {
+                if (e.target.files && e.target.files[0]) {
+                    toBase64(e.target.files[0], callback);
+                } else {
+                    callback(''); // Clear data if no file selected
+                }
+            });
+        }
+    }
+
+    setupImageUpload('bannerImage', d => bannerData = d);
+    setupImageUpload('logoImage', d => logoData = d);
+    setupImageUpload('faviconImage', d => faviconData = d);
 
     function toBase64(file, callback) {
       const reader = new FileReader();
       reader.onload = () => callback(reader.result);
+      reader.onerror = () => callback(''); // Handle error
       reader.readAsDataURL(file);
     }
 
-    function buildHTML() {
-      const name = document.getElementById('coinName').value.trim();
-      const tagline = document.getElementById('tagline').value.trim();
-      const description = document.getElementById('description').value.trim();
-      const tokenomics = document.getElementById('tokenomics').value.trim().split("\n").map(t => `<li>${t}</li>`).join('');
-      const roadmap = document.getElementById('roadmap').value.trim().split("\n").map(r => `<li>${r}</li>`).join('');
-      const telegram = document.getElementById('telegram').value.trim();
-      const twitter = document.getElementById('twitter').value.trim();
-      const colors = document.getElementById('colorTheme').value.split(',');
+    // Map Google Font names to URL-friendly names if needed (usually lowercase with + for spaces)
+    const fontUrlMap = {
+        'Orbitron': 'Orbitron:wght@600;900',
+        'Poppins': 'Poppins:wght@300;400;600;800',
+        'Press Start 2P': 'Press+Start+2P',
+        'VT323': 'VT323',
+        'Montserrat': 'Montserrat:wght@400;700;900',
+        'Lato': 'Lato:wght@300;400;700',
+        'Roboto Slab': 'Roboto+Slab:wght@400;700',
+        'Roboto': 'Roboto:wght@300;400;700',
+        'Bangers': 'Bangers',
+        'Permanent Marker': 'Permanent+Marker'
+    };
 
+    function buildHTML() {
+        // --- Get Data ---
+        const name = getValue('coinName', 'Meme Coin');
+        const tagline = getValue('tagline', 'To the Moon!');
+        const description = getValue('description');
+        const tokenomicsRaw = getValue('tokenomics');
+        const roadmapRaw = getValue('roadmap');
+        const telegram = getValue('telegram');
+        const twitter = getValue('twitter');
+        const ctaText = getValue('ctaText');
+        const ctaLink = getValue('ctaLink');
+        const colors = getValue('colorTheme', '#00ffe0,#ff00ff').split(',');
+        const fontPair = getValue('fontPair', 'Orbitron,Poppins').split(',');
+        const footerText = getValue('footerText');
+
+        // Section visibility
+        const showAbout = isChecked('includeAbout');
+        const showTokenomics = isChecked('includeTokenomics');
+        const showRoadmap = isChecked('includeRoadmap');
+        const showCommunity = isChecked('includeCommunity');
+
+        // Process lists
+        const tokenomicsList = tokenomicsRaw ? tokenomicsRaw.split("\n").map(t => `<li>${t.trim()}</li>`).join('') : '';
+        const roadmapList = roadmapRaw ? roadmapRaw.split("\n").map(r => `<li>${r.trim()}</li>`).join('') : '';
+
+        // Determine fonts
+        const headingFont = fontPair[0].trim();
+        const bodyFont = fontPair[1].trim();
+        const googleFontParams = [fontUrlMap[headingFont], fontUrlMap[bodyFont]].filter(Boolean).join('&family=');
+        const googleFontLink = googleFontParams ? `<link href="https://fonts.googleapis.com/css2?family=${googleFontParams}&display=swap" rel="stylesheet">` : '';
+
+        // Determine Favicon link
+        const faviconHref = faviconData || logoData || 'favicon.ico'; // Use uploaded favicon, fallback to logo, then default
+
+        // --- Build HTML Sections ---
+        const headerSection = `
+          <header>
+            ${bannerData ? `<img src="${bannerData}" class="banner" alt="Banner" loading="lazy" />` : ''}
+            <h1>${name}</h1>
+            <h2>${tagline}</h2>
+            ${ctaText && ctaLink ? `<a href="${ctaLink}" target="_blank" class="cta-button">${ctaText}</a>` : ''}
+          </header>`;
+
+        const aboutSection = showAbout && description ? `
+          <section id="about">
+            <h3>About ${name}</h3>
+            <p>${description.replace(/\n/g, '<br>')}</p> {/* Handle newlines in desc */}
+          </section>` : '';
+
+        const tokenomicsSection = showTokenomics && tokenomicsList ? `
+          <section id="tokenomics">
+            <h3>Tokenomics</h3>
+            <ul>${tokenomicsList}</ul>
+          </section>` : '';
+
+        const roadmapSection = showRoadmap && roadmapList ? `
+          <section id="roadmap">
+            <h3>Roadmap</h3>
+            <ul>${roadmapList}</ul>
+          </section>` : '';
+
+        const communitySection = showCommunity && (telegram || twitter) ? `
+          <section id="community">
+            <h3>Join Our Community</h3>
+            <div class="social-links">
+              ${telegram ? `<a href="${telegram}" target="_blank">Telegram</a>` : ''}
+              ${twitter ? `<a href="${twitter}" target="_blank">Twitter/X</a>` : ''}
+            </div>
+          </section>` : '';
+
+        const footerSection = `
+          <footer>
+            <p>© ${new Date().getFullYear()} ${name}. All Rights Reserved.</p>
+            ${footerText ? `<p class="footer-disclaimer">${footerText}</p>` : ''}
+            ${(telegram || twitter) && showCommunity ? /* Avoid duplicating links if community section exists */ '' :
+              `<p class="footer-links">
+                ${telegram ? `<a href="${telegram}" target="_blank">Telegram</a>` : ''}
+                ${telegram && twitter ? ' | ' : ''}
+                ${twitter ? `<a href="${twitter}" target="_blank">Twitter/X</a>` : ''}
+              </p>`
+            }
+          </footer>`;
+
+      // --- Return Full HTML Document ---
       return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="${name} - The ultimate meme coin revolution. Join the hype, own the meme, and ride the wave!">
-  <meta name="keywords" content="${name}, meme coin, crypto, blockchain, token">
-  <meta name="author" content="Grok 3, xAI">
-  <title>${name} - Meme Coin Revolution</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <link rel="icon" href="${logoData || 'favicon.ico'}">
+  <meta name="description" content="${tagline} - Join the ${name} meme coin revolution!">
+  <meta name="keywords" content="${name}, meme coin, crypto, cryptocurrency, token, ${tagline.split(' ').join(', ')}">
+  <title>${name} - ${tagline}</title>
+  ${googleFontLink}
+  <link rel="icon" href="${faviconHref}">
   <style>
+    :root {
+      --font-heading: '${headingFont}', sans-serif;
+      --font-body: '${bodyFont}', sans-serif;
+      --color-primary: ${colors[0]};
+      --color-secondary: ${colors[1]};
+      --color-primary-transparent: ${colors[0]}20;
+      --color-secondary-transparent: ${colors[1]}20;
+      --color-primary-shadow: ${colors[0]}80;
+      --color-secondary-shadow: ${colors[1]}80;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: var(--font-body);
       background: #0a0a0a;
       color: #fff;
-      line-height: 1.6;
+      line-height: 1.7; /* Slightly increased line-height */
       overflow-x: hidden;
       position: relative;
     }
@@ -186,503 +433,369 @@
     /* Header */
     header {
       position: relative;
-      min-height: 80vh;
+      min-height: 70vh; /* Adjusted height */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 4rem 2rem;
+      padding: 5rem 2rem; /* Increased padding */
       overflow: hidden;
+      background: linear-gradient(rgba(10, 10, 10, 0.7), rgba(10, 10, 10, 0.9)); /* Dark overlay */
     }
     header img.banner {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       object-fit: cover;
-      z-index: 0;
-      filter: brightness(0.7);
+      z-index: -1; /* Behind overlay */
+      filter: brightness(0.6); /* Further dim */
+      opacity: 0.8;
     }
-    header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, ${colors[0]}20, ${colors[1]}20);
-      z-index: 1;
-    }
+    /* Removed header::before pseudo-element for cleaner overlay */
     header h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 5rem;
-      font-weight: 900;
-      color: ${colors[1]};
-      text-shadow: 0 0 30px ${colors[1]}80;
+      font-family: var(--font-heading);
+      font-size: clamp(2.5rem, 10vw, 5.5rem); /* Responsive font size */
+      font-weight: 900; /* Make heading bolder if font supports */
+      color: var(--color-primary);
+      text-shadow: 0 0 20px var(--color-primary-shadow), 0 0 35px var(--color-secondary-shadow);
       margin: 1rem 0;
       z-index: 2;
       position: relative;
-      animation: glow 2s ease-in-out infinite alternate;
+      animation: glow 2.5s ease-in-out infinite alternate;
     }
     header h2 {
-      font-size: 2rem;
+      font-size: clamp(1.2rem, 5vw, 2rem); /* Responsive font size */
       font-weight: 400;
-      color: #fff;
-      text-shadow: 0 0 15px rgba(255,255,255,0.5);
+      color: #eee; /* Slightly off-white */
+      text-shadow: 1px 1px 10px rgba(0,0,0,0.7);
       z-index: 2;
       position: relative;
+      margin-bottom: 2rem; /* Space before CTA */
+      max-width: 800px; /* Limit width */
       animation: fadeInUp 1s ease-out forwards;
+    }
+    .cta-button {
+        font-family: var(--font-heading);
+        background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+        color: #000;
+        padding: 15px 35px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-size: clamp(1rem, 4vw, 1.3rem);
+        font-weight: 600; /* Bolder CTA */
+        z-index: 2;
+        position: relative;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 5px 25px var(--color-primary-shadow);
+        display: inline-block; /* Allow margin */
+        margin-top: 1rem;
+    }
+    .cta-button:hover {
+        transform: scale(1.08);
+        box-shadow: 0 8px 35px var(--color-secondary-shadow);
     }
 
     /* Content */
     .content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 4rem 2rem;
+      max-width: 1100px; /* Slightly narrower */
+      margin: -50px auto 0 auto; /* Pull content slightly over header bottom */
+      padding: 3rem 1.5rem; /* Adjusted padding */
       position: relative;
-      z-index: 2;
+      z-index: 3; /* Above header elements */
+      display: flex;
+      flex-direction: column;
+      gap: 4rem; /* Spacing between sections */
     }
 
-    /* About Section */
-    section#about {
-      margin-bottom: 6rem;
-      padding: 3rem;
-      background: rgba(20,20,20,0.9);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      transition: transform 0.5s ease;
-      position: relative;
-      overflow: hidden;
+    /* General Section Styling */
+    section {
+        padding: 3rem clamp(1rem, 5vw, 3rem); /* Responsive padding */
+        background: rgba(18, 18, 18, 0.85); /* Slightly lighter bg */
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        border: 1px solid #222; /* Subtle border */
+        backdrop-filter: blur(5px); /* Frosted glass effect if supported */
+        position: relative;
+        overflow: hidden; /* Contain pseudo-elements */
     }
-    section#about:hover {
-      transform: translateY(-10px);
+    section h3 {
+        font-family: var(--font-heading);
+        font-size: clamp(1.8rem, 6vw, 2.8rem); /* Responsive */
+        color: var(--color-primary);
+        margin-bottom: 2rem;
+        text-shadow: 0 0 15px var(--color-primary-shadow);
+        position: relative;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--color-primary-transparent);
+        display: inline-block; /* Fit border to text */
     }
-    section#about::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, ${colors[0]}20, transparent 70%);
-      animation: rotate 20s linear infinite;
-      z-index: -1;
+    section ul {
+        font-size: clamp(1rem, 3vw, 1.1rem); /* Responsive */
+        color: #ccc;
+        list-style: none;
+        padding-left: 0; /* Remove default padding */
     }
-    section#about h3 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 2.5rem;
-      color: ${colors[0]};
-      margin-bottom: 2rem;
-      text-shadow: 0 0 15px ${colors[0]}80;
-      position: relative;
+     section ul li {
+        position: relative;
+        padding: 0.8rem 0 0.8rem 35px; /* Adjusted padding */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 0.5rem; /* Spacing between list items */
     }
-    section#about h3::before {
-      content: 'ℹ️';
-      position: absolute;
-      left: -40px;
-      font-size: 2rem;
+    section ul li:last-child {
+        border-bottom: none;
     }
-    section#about p {
-      font-size: 1.2rem;
-      color: #ddd;
+    section ul li:hover {
+        color: var(--color-secondary);
+        transform: translateX(5px);
+        background-color: rgba(255, 255, 255, 0.03);
     }
-
-    /* Tokenomics Section */
-    section#tokenomics {
-      margin-bottom: 6rem;
-      padding: 3rem;
-      background: linear-gradient(45deg, ${colors[1]}20, ${colors[0]}20);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      transition: transform 0.5s ease;
-      position: relative;
-      border: 2px dashed ${colors[1]};
-    }
-    section#tokenomics:hover {
-      transform: scale(1.02);
-    }
-    section#tokenomics h3 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 2.5rem;
-      color: ${colors[1]};
-      margin-bottom: 2rem;
-      text-shadow: 0 0 15px ${colors[1]}80;
-      position: relative;
-      text-align: center;
-    }
-    section#tokenomics h3::after {
-      content: '💸';
-      position: absolute;
-      right: -40px;
-      font-size: 2rem;
-      animation: bounce 1s infinite;
-    }
-    section#tokenomics ul {
-      font-size: 1.2rem;
-      color: #ddd;
-      list-style: none;
-    }
-    section#tokenomics ul li {
-      position: relative;
-      padding: 1rem 0 1rem 40px;
-      border-bottom: 1px solid ${colors[0]}40;
-      transition: all 0.3s ease;
-    }
-    section#tokenomics ul li:hover {
-      color: ${colors[1]};
-      transform: translateX(10px);
-    }
-    section#tokenomics ul li::before {
-      content: '📊';
-      position: absolute;
-      left: 0;
-      font-size: 1.5rem;
+    section ul li::before { /* General list item icon */
+        content: '⚡'; /* Default icon */
+        position: absolute;
+        left: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.4rem;
+        color: var(--color-primary);
     }
 
-    /* Roadmap Section */
-    section#roadmap {
-      margin-bottom: 6rem;
-      padding: 3rem;
-      background: rgba(20,20,20,0.9);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      transition: transform 0.5s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    section#roadmap::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to right, transparent, ${colors[1]}20, transparent);
-      animation: slide 5s infinite linear;
-      z-index: -1;
-    }
-    section#roadmap:hover {
-      transform: translateY(-10px);
-    }
-    section#roadmap h3 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 2.5rem;
-      color: ${colors[0]};
-      margin-bottom: 2rem;
-      text-shadow: 0 0 15px ${colors[0]}80;
-      position: relative;
-    }
-    section#roadmap h3::before {
-      content: '🗺️';
-      position: absolute;
-      left: -40px;
-      font-size: 2rem;
-    }
-    section#roadmap ul {
-      font-size: 1.2rem;
-      color: #ddd;
-      list-style: none;
-    }
-    section#roadmap ul li {
-      position: relative;
-      padding: 1rem 0 1rem 40px;
-      transition: all 0.3s ease;
-      background: rgba(255,255,255,0.05);
-      margin-bottom: 1rem;
-      border-radius: 10px;
-    }
-    section#roadmap ul li:hover {
-      color: ${colors[1]};
-      transform: translateX(10px);
-      background: rgba(255,255,255,0.1);
-    }
-    section#roadmap ul li::before {
-      content: '🚀';
-      position: absolute;
-      left: 10px;
-      font-size: 1.5rem;
-    }
 
-    /* Community Section (Revamped) */
-    section#community {
-      margin-bottom: 6rem;
-      padding: 3rem;
-      background: linear-gradient(to bottom, ${colors[0]}20, ${colors[1]}20);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      transition: transform 0.5s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    section#community::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-      animation: sweep 4s infinite ease-in-out;
-      z-index: -1;
-    }
-    section#community:hover {
-      transform: translateY(-10px);
-    }
-    section#community h3 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 2.5rem;
-      color: ${colors[0]};
-      margin-bottom: 2rem;
-      text-shadow: 0 0 15px ${colors[0]}80;
-      position: relative;
-      text-align: center;
-    }
-    section#community h3::after {
-      content: '🌐';
-      position: absolute;
-      right: -40px;
-      font-size: 2rem;
-      animation: spin 6s linear infinite;
-    }
+    /* Section Specific Styles & Icons */
+    section#about { background: rgba(25, 25, 25, 0.9); }
+    section#about h3::before { content: 'ℹ️'; margin-right: 15px; }
+    section#about p { font-size: clamp(1rem, 3vw, 1.15rem); color: #ddd; }
+
+    section#tokenomics { border-left: 5px solid var(--color-secondary); }
+    section#tokenomics h3::before { content: '📊'; margin-right: 15px; }
+    section#tokenomics ul li::before { content: '💰'; }
+
+    section#roadmap { border-left: 5px solid var(--color-primary); }
+    section#roadmap h3::before { content: '🗺️'; margin-right: 15px; }
+    section#roadmap ul li::before { content: '🚀'; }
+
+    section#community { text-align: center; background: linear-gradient(135deg, var(--color-primary-transparent), var(--color-secondary-transparent)); }
+    section#community h3 { display: block; border-bottom: none; } /* Center heading */
+    section#community h3::before { content: '🌐'; margin-right: 15px; }
     section#community .social-links {
       display: flex;
       justify-content: center;
-      gap: 2rem;
+      gap: 1.5rem;
       flex-wrap: wrap;
+      margin-top: 1.5rem;
     }
     section#community a {
-      color: #fff;
+      color: #0a0a0a; /* Dark text on bright button */
       font-weight: 600;
       text-decoration: none;
-      padding: 1rem 2rem;
-      background: ${colors[1]};
+      padding: 0.8rem 1.8rem; /* Adjusted padding */
+      background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
       border-radius: 50px;
       transition: all 0.3s ease;
-      box-shadow: 0 0 15px ${colors[1]}80;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.2rem;
+      box-shadow: 0 0 15px var(--color-primary-shadow);
+      font-family: var(--font-heading);
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
       text-transform: uppercase;
-      position: relative;
-      overflow: hidden;
-    }
-    section#community a::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255,255,255,0.3);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: all 0.5s ease;
+      border: 2px solid transparent;
     }
     section#community a:hover {
-      color: ${colors[0]};
-      transform: scale(1.1);
-      box-shadow: 0 0 25px ${colors[1]};
-      background: ${colors[1]}cc;
-    }
-    section#community a:hover::before {
-      width: 200px;
-      height: 200px;
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 5px 25px var(--color-secondary-shadow);
+      background: linear-gradient(45deg, var(--color-secondary), var(--color-primary)); /* Flip gradient */
+      color: #000;
     }
 
     /* Logo */
+    .logo-container { /* Add container for centering */
+       text-align: center;
+       padding: 2rem 0;
+       margin-top: 2rem;
+    }
     .logo {
-      width: 150px;
+      width: clamp(100px, 20vw, 150px); /* Responsive */
       border-radius: 50%;
-      border: 4px solid ${colors[1]};
-      box-shadow: 0 0 30px ${colors[1]}80;
-      margin: 3rem auto;
-      display: block;
+      border: 4px solid var(--color-primary);
+      box-shadow: 0 0 25px var(--color-primary-shadow);
       transition: all 0.5s ease;
-      animation: spinGlow 6s linear infinite;
+      animation: spinGlow 8s linear infinite alternate; /* Slower spin */
+      display: inline-block; /* Needed for text-align center */
     }
     .logo:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 50px ${colors[1]};
+      box-shadow: 0 0 40px var(--color-secondary-shadow); /* Glow with secondary on hover */
     }
 
     /* Footer */
     footer {
-      background: linear-gradient(to top, ${colors[1]}20, #0a0a0a);
-      padding: 3rem 2rem;
+      background: #050505; /* Darker footer */
+      padding: 2.5rem 1rem;
       text-align: center;
-      border-top: 2px solid ${colors[0]}40;
+      border-top: 3px solid var(--color-primary); /* Thicker border */
+      margin-top: 4rem; /* More space before footer */
     }
     footer p {
-      font-size: 1.1rem;
-      color: #ddd;
-      margin-bottom: 1rem;
+      font-size: clamp(0.9rem, 2.5vw, 1rem);
+      color: #aaa;
+      margin-bottom: 0.8rem;
+    }
+    footer p.footer-disclaimer {
+        font-size: 0.85rem;
+        color: #777;
+        font-style: italic;
     }
     footer a {
-      color: ${colors[1]};
-      font-weight: 600;
+      color: var(--color-secondary);
+      font-weight: 500; /* Slightly less bold */
       text-decoration: none;
       transition: all 0.3s ease;
+      margin: 0 8px; /* Spacing for inline links */
     }
     footer a:hover {
-      color: ${colors[0]};
-      text-shadow: 0 0 10px ${colors[0]}80;
+      color: var(--color-primary);
+      text-shadow: 0 0 8px var(--color-primary-shadow);
     }
 
-    /* Particle-like Background */
-    .particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .particles span {
-      position: absolute;
-      background: ${colors[1]}80;
-      border-radius: 50%;
-      animation: particleFloat 10s infinite linear;
-      opacity: 0.7;
-    }
-    .particles span:nth-child(1) { width: 5px; height: 5px; top: 10%; left: 15%; animation-duration: 8s; }
-    .particles span:nth-child(2) { width: 3px; height: 3px; top: 20%; left: 25%; animation-duration: 12s; }
-    .particles span:nth-child(3) { width: 4px; height: 4px; top: 30%; left: 35%; animation-duration: 9s; }
-    .particles span:nth-child(4) { width: 6px; height: 6px; top: 40%; left: 45%; animation-duration: 11s; }
-    .particles span:nth-child(5) { width: 2px; height: 2px; top: 50%; left: 55%; animation-duration: 7s; }
-    .particles span:nth-child(6) { width: 5px; height: 5px; top: 60%; left: 65%; animation-duration: 10s; }
-    .particles span:nth-child(7) { width: 3px; height: 3px; top: 70%; left: 75%; animation-duration: 13s; }
-    .particles span:nth-child(8) { width: 4px; height: 4px; top: 80%; left: 85%; animation-duration: 8s; }
 
     /* Animations */
     @keyframes glow {
-      0% { text-shadow: 0 0 20px ${colors[1]}80; }
-      100% { text-shadow: 0 0 40px ${colors[1]}; }
+      from { text-shadow: 0 0 15px var(--color-primary-shadow), 0 0 25px var(--color-secondary-shadow); }
+      to { text-shadow: 0 0 25px var(--color-primary-shadow), 0 0 40px var(--color-secondary-shadow); }
     }
     @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     @keyframes spinGlow {
-      0% { transform: rotate(0deg); box-shadow: 0 0 30px ${colors[1]}80; }
-      50% { transform: rotate(180deg); box-shadow: 0 0 50px ${colors[1]}; }
-      100% { transform: rotate(360deg); box-shadow: 0 0 30px ${colors[1]}80; }
-    }
-    @keyframes particleFloat {
-      0% { transform: translateY(0) translateX(0); opacity: 0.7; }
-      50% { transform: translateY(-50vh) translateX(20px); opacity: 0.3; }
-      100% { transform: translateY(-100vh) translateX(-20px); opacity: 0; }
-    }
-    @keyframes rotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    @keyframes slide {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    @keyframes sweep {
-      0% { transform: translateX(-100%); }
-      50% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
+      0% { transform: rotate(0deg); box-shadow: 0 0 25px var(--color-primary-shadow); border-color: var(--color-primary); }
+      50% { transform: rotate(180deg); box-shadow: 0 0 35px var(--color-secondary-shadow); border-color: var(--color-secondary); }
+      100% { transform: rotate(360deg); box-shadow: 0 0 25px var(--color-primary-shadow); border-color: var(--color-primary); }
     }
 
     /* Responsive */
     @media (max-width: 768px) {
-      header h1 { font-size: 3rem; }
-      header h2 { font-size: 1.5rem; }
-      section h3 { font-size: 2rem; }
-      .content { padding: 2rem 1rem; }
+      header { min-height: 60vh; padding: 4rem 1rem; }
+      .content { margin-top: -30px; padding: 2rem 1rem; gap: 2.5rem; }
       section { padding: 2rem; }
-      section#community .social-links { flex-direction: column; gap: 1rem; }
+      section h3 { font-size: 1.8rem; }
+      section ul { font-size: 0.95rem; }
+      section ul li { padding-left: 30px; }
+      section ul li::before { font-size: 1.2rem; left: 0; }
+      section#community a { padding: 0.7rem 1.5rem; font-size: 0.9rem;}
+      .cta-button { padding: 12px 30px; font-size: 1.1rem; }
     }
+     @media (max-width: 480px) {
+         header h1 { font-size: 2.2rem; }
+         header h2 { font-size: 1.1rem; }
+         section h3 { font-size: 1.6rem; }
+         .cta-button { padding: 10px 25px; font-size: 1rem; }
+         section#community .social-links { gap: 1rem; }
+         section#community a { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
+     }
+
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    ${bannerData ? `<img src="${bannerData}" class="banner" alt="Banner" />` : ''}
-    <h1>${name}</h1>
-    <h2>${tagline}</h2>
-  </header>
 
-  <!-- Particle-like Background -->
-  <div class="particles">
-    <span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span>
-  </div>
+  ${headerSection}
 
-  <!-- Content -->
   <div class="content">
-    <section id="about">
-      <h3>About</h3>
-      <p>${description}</p>
-    </section>
-    <section id="tokenomics">
-      <h3>Tokenomics</h3>
-      <ul>${tokenomics}</ul>
-    </section>
-    <section id="roadmap">
-      <h3>Roadmap</h3>
-      <ul>${roadmap}</ul>
-    </section>
-    <section id="community">
-      <h3>Community</h3>
-      <div class="social-links">
-        ${telegram ? `<a href="${telegram}" target="_blank">Telegram</a>` : ''}
-        ${twitter ? `<a href="${twitter}" target="_blank">Twitter/X</a>` : ''}
-      </div>
-    </section>
+    ${aboutSection}
+    ${tokenomicsSection}
+    ${roadmapSection}
+    ${communitySection}
   </div>
 
-  <!-- Logo -->
-  ${logoData ? `<img src="${logoData}" class="logo" alt="Logo" />` : ''}
+  ${logoData ? `<div class="logo-container"><img src="${logoData}" class="logo" alt="${name} Logo" loading="lazy" /></div>` : ''}
 
-  <!-- Footer -->
-  <footer>
-    <p>© 2025 ${name}. All Rights Reserved.</p>
-    ${telegram || twitter ? `
-      <p>
-        ${telegram ? `<a href="${telegram}" target="_blank">Telegram</a>` : ''}
-        ${telegram && twitter ? ' | ' : ''}
-        ${twitter ? `<a href="${twitter}" target="_blank">Twitter/X</a>` : ''}
-      </p>
-    ` : ''}
-  </footer>
+  ${footerSection}
+
 </body>
 </html>`;
-    }
+    } // End of buildHTML function
 
     function generatePreview() {
       const preview = document.getElementById("previewFrame");
-      const html = buildHTML();
-      const blob = new Blob([html], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      preview.style.display = "block";
-      preview.src = url;
+      try {
+          const html = buildHTML();
+          const blob = new Blob([html], { type: "text/html" });
+          const url = URL.createObjectURL(blob);
+          preview.src = url; // Set the source
+          preview.style.display = "block"; // Make it visible
+          // Optional: Scroll to the preview
+          preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Revoke previous URL if exists to free memory
+          if (preview.dataset.previousUrl) {
+              URL.revokeObjectURL(preview.dataset.previousUrl);
+          }
+          preview.dataset.previousUrl = url; // Store current URL
+      } catch (error) {
+          console.error("Error generating preview:", error);
+          alert("An error occurred while generating the preview. Check the console for details.");
+          preview.style.display = "none"; // Hide iframe on error
+      }
     }
 
     function downloadSite() {
-      const html = buildHTML();
-      const name = document.getElementById('coinName').value.trim();
-      const zip = new JSZip();
-      zip.file("index.html", html);
-      if (bannerData) zip.file("images/banner.png", bannerData.split(",")[1], {base64: true});
-      if (logoData) zip.file("images/logo.png", logoData.split(",")[1], {base64: true});
-      zip.generateAsync({ type: "blob" }).then(content => {
-        saveAs(content, `${name.replace(/[^a-zA-Z0-9]/g, '') || 'memecoin'}-site.zip`);
-      });
+      try {
+          const html = buildHTML();
+          const name = getValue('coinName').replace(/[^a-zA-Z0-9]/g, '') || 'memecoin';
+          const zip = new JSZip();
+
+          // Add HTML file
+          zip.file("index.html", html);
+
+          // Create an images folder in the zip
+          const imgFolder = zip.folder("images");
+
+          // Add images if they exist, extracting base64 data
+          if (bannerData) {
+              imgFolder.file("banner." + bannerData.substring(bannerData.indexOf('/') + 1, bannerData.indexOf(';')), bannerData.split(",")[1], {base64: true});
+          }
+          if (logoData) {
+              imgFolder.file("logo." + logoData.substring(logoData.indexOf('/') + 1, logoData.indexOf(';')), logoData.split(",")[1], {base64: true});
+          }
+           if (faviconData) {
+               // Determine extension for favicon
+               let faviconExt = 'png'; // default
+               if (faviconData.startsWith('data:image/x-icon')) {
+                   faviconExt = 'ico';
+               } else if (faviconData.startsWith('data:image/png')) {
+                   faviconExt = 'png';
+               } // Add more types if needed (gif, jpg etc)
+              // Favicon usually goes in the root, but can also be in images
+              // Let's put it in root for convention, but adjust buildHTML to link correctly if needed.
+              // buildHTML currently links directly to base64 favicon or logo, which is fine for single page.
+              // If linking externally: zip.file("favicon." + faviconExt, faviconData.split(",")[1], {base64: true});
+              // For simplicity with base64 embedding, no separate file needed in zip unless specifically linking relatively.
+              // Let's adjust buildHTML to prefer linking relatively if files are downloaded.
+              // --- Re-evaluating: Simpler to keep embedding for single HTML download ---
+              // However, if user wants separate files:
+              zip.file("favicon." + faviconExt, faviconData.split(",")[1], { base64: true });
+              // Then, buildHTML would need modification to link relatively: <link rel="icon" href="favicon.ico">
+              // For now, stick with embedded base64 for simplicity in both preview and download.
+          }
+
+
+          // Generate and download the zip file
+          zip.generateAsync({ type: "blob" }).then(content => {
+              saveAs(content, `${name}-website.zip`);
+          }).catch(err => {
+             console.error("Error generating ZIP:", err);
+             alert("Could not generate the ZIP file.");
+          });
+
+      } catch (error) {
+           console.error("Error preparing download:", error);
+           alert("An error occurred while preparing the download. Check the console for details.");
+      }
     }
+
+    // Add event listener to generate preview on initial load if needed (optional)
+    // window.addEventListener('DOMContentLoaded', () => {
+    //     // You could pre-fill some defaults and generate an initial preview
+    //     // generatePreview();
+    // });
+
   </script>
 </body>
 </html>
