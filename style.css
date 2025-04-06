@@ -41,7 +41,7 @@ body { background: #0e0e0e; color: #fff; font-family: 'Poppins', sans-serif; mar
     position: static; width: auto; background-color: transparent; box-shadow: none; border: none; flex-direction: row; order: 0;
 }
 .profile-manager-nav {
-    position: relative; display: inline-block; flex-shrink: 0;
+    display: inline-block; flex-shrink: 0;
     /* --- Key Change: No auto margin, rely on space-between and order --- */
     margin-left: 0;
     /* Reset mobile styles */
