@@ -28,7 +28,7 @@ body {
 #portal-nav {
     position: sticky;
     top: 0;
-    z-index: 101;
+    z-index: 101; /* Base z-index */
     background-color: rgba(26, 26, 26, 0.9);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -86,10 +86,9 @@ body {
 
 /* Profile Manager Nav Styles (Desktop) */
 .profile-manager-nav {
-    position: relative;
-    display: inline-block; /* Will be flex on mobile header */
-    /* margin-left: 20px; */ /* Removed, handled by brand margin-right */
-    flex-shrink: 0; /* Prevent profile button shrinking */
+    position: relative; /* Crucial for absolute dropdown */
+    display: inline-block;
+    flex-shrink: 0;
 }
 .profile-manager-button {
     background-color: #333; color: #eee; padding: 6px 12px; font-size: 0.9rem;
@@ -103,14 +102,26 @@ body {
 .dropdown-arrow { font-size: 0.7em; vertical-align: middle; transition: transform 0.2s; }
 .profile-manager-button[aria-expanded="true"] .dropdown-arrow { transform: rotate(180deg); }
 .profile-manager-dropdown {
-    display: none; position: absolute; background-color: #2a2a2a;
-    min-width: 180px; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.4);
-    z-index: 102; border-radius: 5px; border: 1px solid #444;
-    right: 0; margin-top: 5px; overflow: hidden;
+    display: none;
+    position: absolute; /* Position relative to .profile-manager-nav */
+    background-color: #2a2a2a;
+    min-width: 180px; /* Or width: 100% if preferred */
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.4);
+    z-index: 110; /* High z-index */
+    border-radius: 5px;
+    border: 1px solid #444;
+    right: 0; /* Align to the right of the button */
+    margin-top: 5px;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 .profile-manager-dropdown.show { display: block; }
 .profile-manager-dropdown a,
-.profile-manager-dropdown span.no-profiles { color: #ccc; padding: 10px 15px; text-decoration: none; display: block; font-size: 0.9rem; white-space: nowrap; }
+.profile-manager-dropdown span.no-profiles {
+    color: #ccc; padding: 10px 15px; text-decoration: none;
+    display: block; font-size: 0.9rem; white-space: nowrap;
+    box-sizing: border-box;
+}
 .profile-manager-dropdown span.no-profiles { font-style: italic; color: #888; cursor: default;}
 .profile-manager-dropdown a:hover { background-color: #444; color: #fff; }
 .profile-manager-dropdown hr { border: none; height: 1px; background-color: #444; margin: 5px 0; }
@@ -120,7 +131,6 @@ body {
     display: none; /* Hidden by default, shown in media query */
     background: none; border: 1px solid #555; color: #ccc; font-size: 1.5rem;
     padding: 0px 8px; line-height: 1; border-radius: 4px; cursor: pointer;
-    /* margin-left: 15px; */ /* Removed, handled by container gap */
     flex-shrink: 0;
 }
 .portal-nav-toggle:hover { color: #fff; border-color: #888; }
@@ -174,207 +184,224 @@ main { padding: 2rem; flex-grow: 1; display: flex; flex-direction: column; align
 .modal-error-message { color: #ff4d4d; font-size: 0.9rem; margin-top: 10px; text-align: center; min-height: 1.2em; }
 
 /* === Mobile Responsiveness === */
- @media (max-width: 768px) {
-     /* --- Styles for Collapsed Mobile Header --- */
-     #portal-nav {
-         padding: 8px 0.75rem;
-     }
-     .portal-nav-container {
-         gap: 10px;
-         flex-wrap: nowrap;
-         align-items: center; /* Vertically center items in collapsed header */
-     }
-     .portal-brand {
-         font-size: 1.15rem;
-         margin-right: auto;
-     }
-     .portal-nav-toggle {
-         display: inline-block;
-         order: 2;
-         padding: 2px 8px;
-         font-size: 1.4rem;
-     }
-     .profile-manager-nav {
-         display: flex;
-         align-items: center;
-         margin-left: 0;
-         order: 1;
-     }
-     .profile-manager-button {
-         padding: 4px 8px;
-         font-size: 0.8rem;
-         min-width: auto;
-         background-color: transparent;
-         border: none;
-         gap: 4px;
-         color: #eee; /* Ensure text is visible */
-     }
-     #currentProfileDisplay {
-         max-width: 70px;
-         font-weight: normal;
-     }
-     .profile-manager-button .dropdown-arrow {
-         font-size: 0.6em;
-         display: inline-block; /* Ensure visible */
-     }
-     /* Hide desktop dropdown in the collapsed header */
-     .profile-manager-dropdown {
-         display: none !important;
-     }
-     /* Hide desktop nav links */
-     #portal-nav-links {
-         display: none;
-     }
+@media (max-width: 768px) {
+    /* --- Styles for Collapsed Mobile Header --- */
+    #portal-nav {
+        padding: 8px 0.75rem;
+        position: sticky; /* Keep sticky */
+        z-index: 105; /* Ensure header is above open menu content */
+    }
+    .portal-nav-container {
+        gap: 10px;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+    .portal-brand {
+        font-size: 1.15rem;
+        margin-right: auto;
+    }
+    .portal-nav-toggle {
+        display: inline-block;
+        order: 2;
+        padding: 2px 8px;
+        font-size: 1.4rem;
+    }
+    /* Hide desktop links container */
+    #portal-nav-links {
+        display: none;
+    }
+    /* Style profile button in header */
+    .profile-manager-nav {
+        display: flex; /* Use flex for button contents */
+        align-items: center;
+        margin-left: 0;
+        order: 1;
+        position: static; /* Reset position */
+    }
+    .profile-manager-button {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        min-width: auto;
+        background-color: transparent;
+        border: none;
+        gap: 4px;
+        color: #eee;
+        position: static; /* Reset position */
+        border-radius: 4px; /* Add slight radius */
+    }
+    #currentProfileDisplay {
+        max-width: 70px;
+        font-weight: normal;
+    }
+    .profile-manager-button .dropdown-arrow {
+        display: inline-block;
+        font-size: 0.6em;
+        transform: rotate(0deg); /* Ensure reset */
+    }
+    /* Hide desktop dropdown absolutely */
+    .profile-manager-dropdown {
+        display: none !important;
+        position: absolute !important; /* Ensure it doesn't affect layout */
+    }
 
 
-     /* --- Styles for when mobile menu is OPEN --- */
-     #portal-nav.portal-nav-open {
-        /* Container for absolutely positioned children */
-        position: relative;
-     }
+    /* --- Styles for when mobile menu is OPEN (.portal-nav-open) --- */
+    #portal-nav.portal-nav-open {
+       /* Make nav container relative for positioning children */
+       position: sticky; /* Keep sticky */
+       /* Add overflow hidden potentially? Might clip dropdown */
+    }
+    #portal-nav.portal-nav-open .portal-nav-container {
+        align-items: flex-start;
+    }
 
-     #portal-nav.portal-nav-open .portal-nav-container {
-         align-items: flex-start; /* Align header items to top when menu open */
-     }
+    /* Container for the dropdown content (links + profile) */
+    #mobile-nav-content {
+        position: absolute;
+        top: 100%; /* Start below header */
+        left: 0;
+        width: 100%;
+        background-color: rgba(30, 30, 30, 0.98);
+        border-top: 1px solid #333;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.4);
+        z-index: 100; /* Below header */
+        display: none; /* Hidden initially */
+        overflow-x: hidden; /* Prevent horizontal overflow */
+        box-sizing: border-box;
+    }
+    #portal-nav.portal-nav-open #mobile-nav-content {
+        display: block; /* Show when menu is open */
+    }
 
-     /* Show nav links when menu is open */
-     #portal-nav.portal-nav-open #portal-nav-links {
-         display: flex;
-         flex-direction: column;
-         position: absolute;
-         top: 100%; /* Position below nav bar */
-         left: 0;
-         width: 100%;
-         background-color: rgba(30, 30, 30, 0.98); /* Semi-transparent background */
-         padding: 0;
-         border-top: 1px solid #333;
-         box-shadow: 0 5px 10px rgba(0,0,0,0.4);
-         gap: 0;
-         align-items: stretch;
-         order: 1; /* Links visually first */
-         z-index: 101; /* Stacking context */
-     }
-     #portal-nav.portal-nav-open #portal-nav-links li {
-         width: 100%;
-         text-align: center;
-         border-bottom: 1px solid #333;
-     }
-     #portal-nav.portal-nav-open #portal-nav-links li:last-child {
-         border-bottom: none; /* No border on last link item */
-     }
-     #portal-nav.portal-nav-open #portal-nav-links li a {
-         padding: 12px 1rem;
-         width: 100%;
-         display: block;
-         box-sizing: border-box;
-         color: #ccc;
-         text-decoration: none;
-         font-size: 0.9rem;
-     }
-      #portal-nav.portal-nav-open #portal-nav-links li a:hover {
-          color: #fff;
-          background-color: #333; /* Add hover effect */
-      }
-       #portal-nav.portal-nav-open #portal-nav-links li a.active {
-           color: #00ffe0; font-weight: bold;
-       }
+    /* Style main links within the open menu */
+    #portal-nav.portal-nav-open #portal-nav-links {
+        display: flex; /* Display as flex column */
+        flex-direction: column;
+        position: static; /* Position naturally inside #mobile-nav-content */
+        width: 100%;
+        background-color: transparent; /* Inherit background */
+        padding: 0;
+        border-top: none; /* Remove border */
+        box-shadow: none; /* Remove shadow */
+        gap: 0;
+        align-items: stretch;
+        order: 1; /* Links first */
+        box-sizing: border-box;
+    }
+    #portal-nav.portal-nav-open #portal-nav-links li {
+        width: 100%;
+        text-align: center;
+        border-bottom: 1px solid #333;
+        box-sizing: border-box;
+    }
+    #portal-nav.portal-nav-open #portal-nav-links li:last-child {
+        border-bottom: none;
+    }
+    #portal-nav.portal-nav-open #portal-nav-links li a {
+        padding: 12px 1rem;
+        width: 100%;
+        display: block;
+        box-sizing: border-box;
+        color: #ccc;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    #portal-nav.portal-nav-open #portal-nav-links li a:hover {
+        color: #fff; background-color: #333;
+    }
+    #portal-nav.portal-nav-open #portal-nav-links li a.active {
+        color: #00ffe0; font-weight: bold;
+    }
 
+    /* Style profile section within the open menu */
+    #portal-nav.portal-nav-open .profile-manager-nav {
+        display: block; /* Display as block */
+        order: 10; /* After links */
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0;
+        position: static; /* Position naturally inside #mobile-nav-content */
+        background-color: #252525; /* Background for this section */
+        border-top: 1px solid #555; /* Separator */
+        box-sizing: border-box;
+    }
+    /* Style profile button within the open menu */
+    #portal-nav.portal-nav-open .profile-manager-button {
+        width: 100%;
+        border-radius: 0;
+        border: none;
+        border-top: none; /* Removed top border here */
+        padding: 12px 15px;
+        justify-content: center;
+        font-size: 1rem;
+        background-color: transparent; /* Inherit */
+        display: flex;
+        position: relative; /* Context for dropdown arrow */
+        z-index: 103;
+        color: #eee;
+        box-sizing: border-box;
+    }
+    #portal-nav.portal-nav-open .profile-manager-button:hover {
+        background-color: #333;
+    }
+    #portal-nav.portal-nav-open .profile-manager-button .dropdown-arrow {
+        display: inline-block; font-size: 0.7em;
+    }
+    #portal-nav.portal-nav-open .profile-manager-button[aria-expanded="true"] .dropdown-arrow {
+        transform: rotate(180deg);
+    }
 
-     /* --- Profile section inside the OPEN mobile menu --- */
-     #portal-nav.portal-nav-open .profile-manager-nav {
-         /* Appears below the absolutely positioned links */
-         display: block;
-         order: 10; /* Keep order high for DOM, but positions below */
-         width: 100%;
-         margin-left: 0;
-         margin-top: 0; /* Remove any top margin */
-         position: absolute; /* Position below the main nav links */
-         top: calc(100% + var(--nav-links-height, 0px)); /* Calculate top based on links height */
-         left: 0;
-         z-index: 102; /* Above default content */
-         background-color: #252525; /* Consistent background */
-         /* Removed border-top here, it's added via dropdown/button */
-     }
-     /* Reset profile button style for open menu */
-     #portal-nav.portal-nav-open .profile-manager-button {
-         width: 100%;
-         border-radius: 0;
-         border: none; /* Remove borders */
-         border-top: 1px solid #555; /* Separator line moved here */
-         padding: 12px 15px;
-         justify-content: center;
-         font-size: 1rem;
-         background-color: transparent; /* Inherit from parent */
-         display: flex;
-         position: relative; /* For z-index */
-         z-index: 103; /* Above dropdown */
-         color: #eee; /* Ensure text color */
-     }
-     #portal-nav.portal-nav-open .profile-manager-button:hover {
-         background-color: #333; /* Add hover */
-     }
-     /* Restore arrow if needed */
-     #portal-nav.portal-nav-open .profile-manager-button .dropdown-arrow {
-          display: inline-block; font-size: 0.7em;
-          /* Reset transform if needed */
-          /* transform: rotate(0deg); */
-     }
-     /* Rotate arrow when profile dropdown open */
-      #portal-nav.portal-nav-open .profile-manager-button[aria-expanded="true"] .dropdown-arrow {
-          transform: rotate(180deg);
-      }
+    /* Style profile dropdown within the open menu */
+    #portal-nav.portal-nav-open .profile-manager-dropdown {
+        position: static; /* In flow below button */
+        display: none; /* Hidden until .show */
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        max-width: none;
+        width: 100%;
+        margin-top: 0;
+        background-color: #1e1e1e;
+        z-index: 102;
+        border-top: 1px solid #444; /* Separator */
+        box-sizing: border-box;
+        /* Reset absolute positioning */
+        right: auto;
+        margin-top: 0;
+    }
+    /* Show profile dropdown using .show class */
+    #portal-nav.portal-nav-open .profile-manager-dropdown.show {
+        display: block !important; /* Use important to ensure visibility override */
+    }
+    #portal-nav.portal-nav-open .profile-manager-dropdown a,
+    #portal-nav.portal-nav-open .profile-manager-dropdown span.no-profiles {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #333;
+        display: block;
+        color: #ccc;
+        text-decoration: none;
+        font-size: 0.9rem;
+        white-space: normal;
+        box-sizing: border-box;
+    }
+    #portal-nav.portal-nav-open .profile-manager-dropdown span.no-profiles {
+        font-style: italic; color: #888; cursor: default;
+    }
+    #portal-nav.portal-nav-open .profile-manager-dropdown a:hover {
+        background-color: #444; color: #fff;
+    }
+    #portal-nav.portal-nav-open .profile-manager-dropdown hr { display: none; }
+    #portal-nav.portal-nav-open .profile-manager-dropdown > *:last-child {
+        border-bottom: none;
+    }
 
-
-     /* Dropdown style within the open menu */
-     #portal-nav.portal-nav-open .profile-manager-dropdown {
-         position: static; /* Renders in flow below the button */
-         display: none; /* Start hidden */
-         box-shadow: none;
-         border: none;
-         border-radius: 0;
-         max-width: none;
-         width: 100%;
-         margin-top: 0;
-         background-color: #1e1e1e; /* Darker background */
-         z-index: 102; /* Below button */
-         border-top: 1px solid #444; /* Separator from button */
-     }
-     /* Show dropdown using the .show class from JS */
-     #portal-nav.portal-nav-open .profile-manager-dropdown.show {
-         display: block;
-     }
-     #portal-nav.portal-nav-open .profile-manager-dropdown a,
-     #portal-nav.portal-nav-open .profile-manager-dropdown span.no-profiles {
-         padding: 12px 15px;
-         text-align: center;
-         border-bottom: 1px solid #333;
-         display: block;
-         color: #ccc;
-         text-decoration: none;
-         font-size: 0.9rem;
-         white-space: normal; /* Allow wrapping if needed */
-     }
-      #portal-nav.portal-nav-open .profile-manager-dropdown span.no-profiles {
-         font-style: italic; color: #888; cursor: default;
-     }
-     #portal-nav.portal-nav-open .profile-manager-dropdown a:hover {
-         background-color: #444; color: #fff;
-     }
-     #portal-nav.portal-nav-open .profile-manager-dropdown hr {
-         display: none;
-     }
-     /* No border on the very last item */
-     #portal-nav.portal-nav-open .profile-manager-dropdown > *:last-child {
-         border-bottom: none;
-     }
-
-     /* --- Other Mobile Styles --- */
-     main { padding: 1.5rem; }
-     .page-title { font-size: 2.2rem; }
-     .page-subtitle { font-size: 1.1rem; margin-bottom: 2rem;}
-     .tool-grid { grid-template-columns: 1fr; gap: 1.5rem;}
- }
-
+    /* --- Other Mobile Styles --- */
+    main { padding: 1.5rem; }
+    .page-title { font-size: 2.2rem; }
+    .page-subtitle { font-size: 1.1rem; margin-bottom: 2rem;}
+    .tool-grid { grid-template-columns: 1fr; gap: 1.5rem;}
+}
 
 /* Utility class for screen reader only elements */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }

@@ -17,6 +17,26 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(html => {
                 navbarPlaceholder.innerHTML = html;
 
+                // --- Create Mobile Nav Content Wrapper (if it doesn't exist in nav.html) ---
+                let mobileNavContent = document.getElementById('mobile-nav-content');
+                if (!mobileNavContent) {
+                    const portalNav = document.getElementById('portal-nav');
+                    if(portalNav) {
+                        mobileNavContent = document.createElement('div');
+                        mobileNavContent.id = 'mobile-nav-content';
+                        // Move existing links and profile manager into the wrapper
+                        const links = document.getElementById('portal-nav-links');
+                        const profileMgr = document.getElementById('profileManagerNav');
+                        if(links) mobileNavContent.appendChild(links);
+                        if(profileMgr) mobileNavContent.appendChild(profileMgr);
+                        // Insert wrapper into the main nav element
+                        portalNav.appendChild(mobileNavContent);
+                    } else {
+                         console.error("#portal-nav not found, cannot create #mobile-nav-content wrapper.");
+                    }
+                }
+
+
                 // --- Initialize and Setup ---
                 initProfileManager();     // Initialize profile system (from profile-manager.js)
                 setActiveNavLink();       // Highlight correct nav link
@@ -42,21 +62,14 @@ document.addEventListener('DOMContentLoaded', () => {
 function setActiveNavLink() {
     const navLinks = document.querySelectorAll('#portal-nav-links li a');
     if (!navLinks || navLinks.length === 0) return;
-
-    // Get the filename of the current page (e.g., "index.html", "tool.html")
     const currentPath = window.location.pathname;
-    const currentPageFile = currentPath.substring(currentPath.lastIndexOf('/') + 1).split('?')[0].split('#')[0] || 'index.html'; // Default to index.html if path ends in /
+    const currentPageFile = currentPath.substring(currentPath.lastIndexOf('/') + 1).split('?')[0].split('#')[0] || 'index.html';
 
     navLinks.forEach(link => {
         const linkHref = link.getAttribute('href');
-        if (!linkHref) return; // Skip if no href
-
-        // Get the filename from the link's href
+        if (!linkHref) return;
         const linkFile = linkHref.split('/').pop().split('?')[0].split('#')[0];
-
         link.classList.remove('active');
-
-        // Check for match: direct filename match OR (current is index and link is index or empty)
         if (linkFile === currentPageFile || (currentPageFile === 'index.html' && (linkFile === '' || linkHref === 'index.html'))) {
             link.classList.add('active');
         }
@@ -65,32 +78,23 @@ function setActiveNavLink() {
 
 function attachNavToggle() {
     const toggleBtn = document.getElementById('portal-nav-toggle-btn');
-    const navMenu = document.getElementById('portal-nav'); // The main nav container
-    const navLinksContainer = document.getElementById('portal-nav-links'); // The UL for main links
+    const navMenu = document.getElementById('portal-nav'); // The main nav element
+    const mobileNavContent = document.getElementById('mobile-nav-content'); // The wrapper for mobile content
 
-    if (!toggleBtn || !navMenu || !navLinksContainer) {
+    if (!toggleBtn || !navMenu || !mobileNavContent) {
         if (!toggleBtn) console.error("Nav toggle button (#portal-nav-toggle-btn) not found.");
         if (!navMenu) console.error("Nav menu element (#portal-nav) not found.");
-        if (!navLinksContainer) console.error("Nav links container (#portal-nav-links) not found.");
+        if (!mobileNavContent) console.error("Mobile nav content wrapper (#mobile-nav-content) not found.");
         return;
     }
 
     toggleBtn.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent document click handler from closing immediately
+        event.stopPropagation();
         const isOpen = navMenu.classList.toggle('portal-nav-open');
         toggleBtn.setAttribute('aria-expanded', isOpen);
 
-        // Calculate and set height for positioning profile section below links
-        if (isOpen) {
-            // Use requestAnimationFrame to ensure styles are applied before measuring
-            requestAnimationFrame(() => {
-                 const linksHeight = navLinksContainer.offsetHeight;
-                 navMenu.style.setProperty('--nav-links-height', `${linksHeight}px`);
-                 // console.log('Set --nav-links-height:', linksHeight); // For debugging
-            });
-        } else {
-             navMenu.style.removeProperty('--nav-links-height'); // Clean up CSS variable
-             // Also close profile dropdown if open
+        if (!isOpen) {
+             // If closing main menu, also close profile dropdown if it's open
              const profileDropdownContent = document.getElementById('profileDropdownContent');
              const profileDropdownButton = document.getElementById('profileDropdownButton');
              if (profileDropdownContent && profileDropdownContent.classList.contains('show')) {
@@ -101,30 +105,28 @@ function attachNavToggle() {
     });
 
     // Close mobile menu if a main navigation link is clicked
-    navMenu.querySelectorAll('#portal-nav-links a').forEach(link => {
+    mobileNavContent.querySelectorAll('#portal-nav-links a').forEach(link => {
         link.addEventListener('click', () => {
             if (navMenu.classList.contains('portal-nav-open')) {
                 navMenu.classList.remove('portal-nav-open');
                 toggleBtn.setAttribute('aria-expanded', 'false');
-                navMenu.style.removeProperty('--nav-links-height'); // Clean up
             }
         });
     });
 
     // Close mobile menu or profile dropdown if clicking outside
     document.addEventListener('click', (event) => {
-        const profileManagerNav = document.getElementById('profileManagerNav'); // The container for profile button/dropdown
+        const profileManagerNav = document.getElementById('profileManagerNav'); // Profile section container
         const profileDropdownContent = document.getElementById('profileDropdownContent');
         const profileDropdownButton = document.getElementById('profileDropdownButton');
 
-        // Close mobile nav if open and click is outside the entire nav bar
+        // Close mobile nav if open and click is outside the main nav element
         if (navMenu.classList.contains('portal-nav-open') && !navMenu.contains(event.target)) {
              navMenu.classList.remove('portal-nav-open');
              toggleBtn.setAttribute('aria-expanded', 'false');
-             navMenu.style.removeProperty('--nav-links-height'); // Clean up
         }
 
-        // Close profile dropdown if open and click is outside the profile manager container
+        // Close profile dropdown (desktop or mobile) if open and click is outside its container
         if (profileDropdownContent && profileDropdownContent.classList.contains('show')) {
             if (!profileManagerNav || !profileManagerNav.contains(event.target)) {
                 profileDropdownContent.classList.remove('show');
@@ -139,22 +141,20 @@ function attachNavToggle() {
 function setupProfileDropdown() {
     const profileManagerNav = document.getElementById('profileManagerNav'); // Container
     const dropdownButton = document.getElementById('profileDropdownButton');
-    const dropdownContent = document.getElementById('profileDropdownContent');
+    const dropdownContent = document.getElementById('profileDropdownContent'); // The UL/Div holding the items
     const currentProfileDisplay = document.getElementById('currentProfileDisplay'); // Span in the button
-    const profileListContainer = document.getElementById('profileListContainer'); // UL in dropdown
-    const createNewProfileBtn = document.getElementById('createNewProfileBtn'); // Link in dropdown
-    const manageProfilesBtn = document.getElementById('manageProfilesBtn');     // Link in dropdown
 
-    if (!dropdownButton || !dropdownContent || !currentProfileDisplay || !profileListContainer || !createNewProfileBtn || !manageProfilesBtn) {
-        console.error("One or more profile dropdown elements not found! Check IDs: profileDropdownButton, profileDropdownContent, currentProfileDisplay, profileListContainer, createNewProfileBtn, manageProfilesBtn");
-        // Optionally hide the whole profile section if elements are missing
-        if(profileManagerNav) profileManagerNav.style.display = 'none';
-        return;
+    // Check essential elements
+    if (!profileManagerNav || !dropdownButton || !dropdownContent || !currentProfileDisplay) {
+         console.error("Profile dropdown core elements missing (profileManagerNav, profileDropdownButton, profileDropdownContent, or currentProfileDisplay). Aborting setup.");
+         if(profileManagerNav) profileManagerNav.style.display = 'none'; // Hide section if broken
+         return;
     }
 
     // Function to update the list of profiles in the dropdown
     function populateNavDropdownList() {
-        profileListContainer.innerHTML = ''; // Clear existing list
+        // Use dropdownContent directly as the container
+        dropdownContent.innerHTML = ''; // Clear existing dynamic items only
         const profiles = getProfileNames();
         const currentProfile = getCurrentProfile();
 
@@ -162,55 +162,63 @@ function setupProfileDropdown() {
         currentProfileDisplay.textContent = currentProfile ? currentProfile : "No Profile";
         currentProfileDisplay.title = currentProfile ? `Current Profile: ${currentProfile}` : "No profile selected";
 
-        // Populate the dropdown list
-        if (profiles.length === 0) {
-            profileListContainer.innerHTML = '<span class="no-profiles">No profiles yet.</span>';
-        } else {
-            let hasOtherProfiles = false;
-            profiles.forEach(name => {
-                if (name !== currentProfile) {
-                    hasOtherProfiles = true;
-                    const link = document.createElement('a');
-                    link.href = "#"; // Prevent page jump
-                    link.textContent = `${name}`; // Simpler text
-                    link.title = `Switch to profile: ${name}`;
-                    link.dataset.profileName = name;
-                    link.addEventListener('click', handleProfileSwitch);
-                    profileListContainer.appendChild(link);
-                }
-            });
-            // Message if only the current profile exists or no profile is selected
-            if (!hasOtherProfiles && currentProfile) {
-                 // Check if list is empty before adding message
-                if (profileListContainer.children.length === 0) {
-                    profileListContainer.innerHTML = '<span class="no-profiles" style="cursor:default;">Only current profile exists.</span>';
-                }
-            } else if (profiles.length > 0 && !currentProfile){
-                 // List will have profiles, add prompt if needed
-                 // profileListContainer.insertAdjacentHTML('afterbegin', '<span class="no-profiles" style="cursor:default;">Select a profile</span><hr>'); // Example prompt
+        // Add "Switch to" links
+        let hasOtherProfiles = false;
+        profiles.forEach(name => {
+            if (name !== currentProfile) {
+                hasOtherProfiles = true;
+                const link = document.createElement('a');
+                link.href = "#";
+                link.textContent = name; // Just the name for switching
+                link.title = `Switch to profile: ${name}`;
+                link.dataset.profileName = name; // Identify action
+                link.addEventListener('click', handleProfileSwitch);
+                dropdownContent.appendChild(link);
             }
+        });
+
+        // Add messages if needed
+        if (profiles.length === 0) {
+             dropdownContent.insertAdjacentHTML('beforeend', '<span class="no-profiles">No profiles yet.</span>');
+        } else if (!hasOtherProfiles && currentProfile) {
+             // Only show this message if the list is truly empty (no switch links added)
+             if(dropdownContent.children.length === 0) {
+                 dropdownContent.insertAdjacentHTML('beforeend', '<span class="no-profiles" style="cursor:default;">Only current profile exists.</span>');
+             }
         }
-         // Always add Create New and Manage Profiles links if they haven't been added by mistake above
-         if (!profileListContainer.querySelector('[data-action="create"]')) {
+
+        // Add Separator
+        if(dropdownContent.children.length > 0) { // Add HR only if there were items before it
              const hr = document.createElement('hr');
-             profileListContainer.appendChild(hr);
+             dropdownContent.appendChild(hr);
+        }
 
-             const createLink = document.createElement('a');
-             createLink.href="#";
-             createLink.textContent = "Create New Profile";
-             createLink.dataset.action = "create";
-             createLink.id = 'createNewProfileBtn_dyn'; // Use different ID if needed
-             createLink.addEventListener('click', (event) => { event.preventDefault(); openCreateProfileModal(); closeDropdown(); });
-             profileListContainer.appendChild(createLink);
 
-             const manageLink = document.createElement('a');
-             manageLink.href="#";
-             manageLink.textContent = "Manage Profiles";
-             manageLink.dataset.action = "manage";
-             manageLink.id = 'manageProfilesBtn_dyn'; // Use different ID if needed
-             manageLink.addEventListener('click', (event) => { event.preventDefault(); openManageProfilesModal(); closeDropdown(); });
-             profileListContainer.appendChild(manageLink);
-         }
+        // Add "Create New Profile" Link
+        const createLink = document.createElement('a');
+        createLink.href="#";
+        createLink.id = 'createProfileDropdownLink'; // Specific ID
+        createLink.textContent = "Create New Profile";
+        createLink.addEventListener('click', (event) => {
+             event.preventDefault();
+             event.stopPropagation(); // Prevent closing immediately
+             openCreateProfileModal();
+             closeDropdown();
+        });
+        dropdownContent.appendChild(createLink);
+
+        // Add "Manage Profiles" Link
+        const manageLink = document.createElement('a');
+        manageLink.href="#";
+        manageLink.id = 'manageProfilesDropdownLink'; // Specific ID
+        manageLink.textContent = "Manage Profiles";
+        manageLink.addEventListener('click', (event) => {
+             event.preventDefault();
+             event.stopPropagation(); // Prevent closing immediately
+             openManageProfilesModal();
+             closeDropdown();
+        });
+        dropdownContent.appendChild(manageLink);
     }
 
     // Close dropdown function
@@ -224,282 +232,105 @@ function setupProfileDropdown() {
     // Switch profile action
     function handleProfileSwitch(event) {
         event.preventDefault();
-        event.stopPropagation(); // Prevent closing menu immediately
+        event.stopPropagation();
         const profileName = event.target.dataset.profileName;
         if (profileName && profileName !== getCurrentProfile()) {
             setCurrentProfile(profileName);
-            populateNavDropdownList(); // Update display
+            // No need to populate here, page reload handles it
             closeDropdown();
-            window.location.reload(); // Reload page to apply profile changes
+            window.location.reload();
         } else {
-            closeDropdown(); // Close if clicking current or invalid
+            closeDropdown();
         }
     }
-
-    // Add event listeners to static "Create New" and "Manage" buttons (if they exist in HTML)
-    // Note: The populate function now dynamically adds these, so these might not be needed if HTML is clean
-    createNewProfileBtn.addEventListener('click', (event) => { event.preventDefault(); openCreateProfileModal(); closeDropdown(); });
-    manageProfilesBtn.addEventListener('click', (event) => { event.preventDefault(); openManageProfilesModal(); closeDropdown(); });
 
     // Toggle dropdown visibility
     dropdownButton.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent document click handler
-        populateNavDropdownList(); // Repopulate before showing
+        event.stopPropagation();
+        console.log("Profile dropdown button clicked"); // DEBUG LOG
+        populateNavDropdownList(); // Always repopulate before showing/toggling
+        const isCurrentlyShown = dropdownContent.classList.contains('show');
         const isExpanded = dropdownContent.classList.toggle('show');
         dropdownButton.setAttribute('aria-expanded', isExpanded);
+        console.log("Dropdown 'show' class toggled. Is now shown:", isExpanded); // DEBUG LOG
+
+        // Debug mobile issue: check parent visibility
+        if (window.innerWidth <= 768 && document.getElementById('portal-nav').classList.contains('portal-nav-open')) {
+            console.log("Mobile nav open, checking parent visibility:", dropdownContent.offsetParent !== null);
+        }
     });
 
-    // Initial population of the button text
-    populateNavDropdownList();
+    // Initial population of the button text (doesn't populate dropdown list yet)
+     const initialProfile = getCurrentProfile();
+     currentProfileDisplay.textContent = initialProfile ? initialProfile : "No Profile";
+     currentProfileDisplay.title = initialProfile ? `Current Profile: ${initialProfile}` : "No profile selected";
 }
 
 
-// --- Modal Creation & Handling Functions ---
+// --- Modal Creation & Handling Functions --- (Unchanged from previous version)
 function createModal(id, titleHtml, contentHtml, buttonsHtml) {
-    closeAllModals(); // Close any existing modals first
+    closeAllModals();
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
     overlay.id = id;
-    // Close on overlay click
-    overlay.addEventListener('click', (event) => {
-        if (event.target === overlay) {
-            closeAllModals();
-        }
-    });
-
+    overlay.addEventListener('click', (event) => { if (event.target === overlay) closeAllModals(); });
     const modalBox = document.createElement('div');
     modalBox.className = 'modal-box';
-    // Prevent closing when clicking inside the box
     modalBox.addEventListener('click', event => event.stopPropagation());
-
-    // Title
     const title = document.createElement('h2');
-    title.innerHTML = titleHtml;
-    modalBox.appendChild(title);
-
-    // Close Button (Top Right)
+    title.innerHTML = titleHtml; modalBox.appendChild(title);
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'modal-close-btn';
-    closeBtn.innerHTML = '&times;'; // '×' symbol
-    closeBtn.setAttribute('aria-label', 'Close modal');
-    closeBtn.title = 'Close';
-    closeBtn.onclick = closeAllModals;
-    modalBox.appendChild(closeBtn);
-
-    // Content Area
+    closeBtn.className = 'modal-close-btn'; closeBtn.innerHTML = '&times;';
+    closeBtn.setAttribute('aria-label', 'Close modal'); closeBtn.title = 'Close';
+    closeBtn.onclick = closeAllModals; modalBox.appendChild(closeBtn);
     const contentDiv = document.createElement('div');
-    contentDiv.className = 'modal-content';
-    contentDiv.innerHTML = contentHtml;
+    contentDiv.className = 'modal-content'; contentDiv.innerHTML = contentHtml;
     modalBox.appendChild(contentDiv);
-
-    // Buttons Area (Optional)
     let buttonsDiv = null;
-    if(buttonsHtml){
-        buttonsDiv = document.createElement('div');
-        buttonsDiv.className = 'modal-buttons';
-        buttonsDiv.innerHTML = buttonsHtml;
-        modalBox.appendChild(buttonsDiv);
-    }
-
-    overlay.appendChild(modalBox);
-    document.body.appendChild(overlay);
-
-    // Trigger transition
-    setTimeout(() => overlay.classList.add('show'), 10); // Small delay for transition
-
+    if(buttonsHtml){ buttonsDiv = document.createElement('div'); buttonsDiv.className = 'modal-buttons'; buttonsDiv.innerHTML = buttonsHtml; modalBox.appendChild(buttonsDiv); }
+    overlay.appendChild(modalBox); document.body.appendChild(overlay);
+    setTimeout(() => overlay.classList.add('show'), 10);
     return { overlay, modalBox, contentDiv, buttonsDiv };
 }
-
 function closeAllModals() {
     document.querySelectorAll('.modal-overlay.show').forEach(modal => {
         modal.classList.remove('show');
-        // Remove from DOM after transition
-        modal.addEventListener('transitionend', () => {
-             if (!modal.classList.contains('show')) { // Ensure it wasn't reopened quickly
-                 modal.remove();
-             }
-        }, { once: true });
-         // Fallback removal if transition doesn't fire (e.g., display: none)
-         setTimeout(() => {
-             if (!modal.classList.contains('show')) modal.remove();
-         }, 500); // Adjust timeout based on transition duration
+        modal.addEventListener('transitionend', () => { if (!modal.classList.contains('show')) modal.remove(); }, { once: true });
+        setTimeout(() => { if (!modal.classList.contains('show')) modal.remove(); }, 500);
     });
 }
-
-
-// --- Create Profile Modal ---
+// --- Create Profile Modal --- (Unchanged from previous version)
 function openCreateProfileModal() {
-    const modalContent = `
-        <div class="control-group">
-            <label for="newProfileNameInput">New Profile Name:</label>
-            <input type="text" id="newProfileNameInput" placeholder="e.g., $MyAwesomeCoin" required>
-            <p id="createProfileError" class="modal-error-message" aria-live="assertive"></p>
-        </div>`;
-    const modalButtons = `
-        <button type="button" class="modal-button-cancel" id="createCancelBtn">Cancel</button>
-        <button type="button" class="modal-button-confirm" id="createSaveBtn">Create & Switch</button>`;
-
+    const modalContent = `<div class="control-group"><label for="newProfileNameInput">New Profile Name:</label><input type="text" id="newProfileNameInput" placeholder="e.g., $MyAwesomeCoin" required><p id="createProfileError" class="modal-error-message" aria-live="assertive"></p></div>`;
+    const modalButtons = `<button type="button" class="modal-button-cancel" id="createCancelBtn">Cancel</button><button type="button" class="modal-button-confirm" id="createSaveBtn">Create & Switch</button>`;
     const { contentDiv, buttonsDiv } = createModal('createProfileModalOverlay', 'Create New Profile', modalContent, modalButtons);
-
-    const inputField = contentDiv.querySelector('#newProfileNameInput');
-    const errorMsg = contentDiv.querySelector('#createProfileError');
-    const saveBtn = buttonsDiv.querySelector('#createSaveBtn');
-    const cancelBtn = buttonsDiv.querySelector('#createCancelBtn');
-
-    errorMsg.style.display = 'none'; // Ensure hidden initially
-    inputField.focus();
-
-    // Save action
-    saveBtn.onclick = () => {
-        errorMsg.textContent = ''; // Clear previous error
-        errorMsg.style.display = 'none';
-        const newName = inputField.value.trim();
-
-        if (!newName) {
-            errorMsg.textContent = 'Profile name cannot be empty.';
-            errorMsg.style.display = 'block';
-            inputField.focus();
-            return;
-        }
-
-        // Attempt to create profile (assuming createProfile handles uniqueness check & alerts)
-        if (createProfile(newName)) {
-            setCurrentProfile(newName);
-            closeAllModals();
-            window.location.reload(); // Reload to apply changes globally
-        } else {
-            // createProfile should ideally alert or return error message
-            // If not, provide a generic error here.
-            // errorMsg.textContent = `Failed to create profile "${newName}". It might already exist or be invalid.`;
-            // errorMsg.style.display = 'block';
-             inputField.focus(); // Keep focus on input if creation fails
-        }
-    };
-
-    // Allow Enter key to submit
-    inputField.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            saveBtn.click();
-        }
-    });
-
-    // Cancel action
+    const inputField = contentDiv.querySelector('#newProfileNameInput'); const errorMsg = contentDiv.querySelector('#createProfileError'); const saveBtn = buttonsDiv.querySelector('#createSaveBtn'); const cancelBtn = buttonsDiv.querySelector('#createCancelBtn');
+    errorMsg.style.display = 'none'; inputField.focus();
+    saveBtn.onclick = () => { errorMsg.textContent = ''; errorMsg.style.display = 'none'; const newName = inputField.value.trim(); if (!newName) { errorMsg.textContent = 'Profile name cannot be empty.'; errorMsg.style.display = 'block'; inputField.focus(); return; } if (createProfile(newName)) { setCurrentProfile(newName); closeAllModals(); window.location.reload(); } else { inputField.focus(); } };
+    inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') saveBtn.click(); });
     cancelBtn.onclick = closeAllModals;
 }
-
-
-// --- Manage Profiles Modal ---
+// --- Manage Profiles Modal --- (Unchanged from previous version)
 function openManageProfilesModal() {
-    const modalContent = `
-        <p>Select a profile to delete it permanently.</p>
-        <ul class="modal-profile-list" id="modalProfileList">
-            </ul>`;
-    const modalButtons = `
-        <button type="button" class="modal-button-cancel" id="manageCloseBtn">Close</button>`;
-
+    const modalContent = `<p>Select a profile to delete it permanently.</p><ul class="modal-profile-list" id="modalProfileList"></ul>`;
+    const modalButtons = `<button type="button" class="modal-button-cancel" id="manageCloseBtn">Close</button>`;
     const { contentDiv, buttonsDiv } = createModal('manageProfilesModalOverlay', 'Manage Profiles', modalContent, modalButtons);
-
-    const listElement = contentDiv.querySelector('#modalProfileList');
-    const closeBtn = buttonsDiv.querySelector('#manageCloseBtn');
-
-    populateModalProfileList(listElement); // Populate the list on open
-
-    closeBtn.onclick = closeAllModals;
+    const listElement = contentDiv.querySelector('#modalProfileList'); const closeBtn = buttonsDiv.querySelector('#manageCloseBtn');
+    populateModalProfileList(listElement); closeBtn.onclick = closeAllModals;
 }
-
-// Populate list inside Manage modal
+// --- Populate list inside Manage modal --- (Unchanged from previous version)
 function populateModalProfileList(listElement) {
-    listElement.innerHTML = ''; // Clear existing items
-    const profiles = getProfileNames();
-    const currentProfile = getCurrentProfile();
-
-    if (profiles.length === 0) {
-        listElement.innerHTML = '<li class="no-profiles-message">No profiles to manage.</li>';
-        return;
-    }
-
-    profiles.forEach(name => {
-        const item = document.createElement('li');
-        item.className = 'modal-profile-item';
-
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = name;
-        if (name === currentProfile) {
-            nameSpan.innerHTML += ' <small>(Active)</small>'; // Indicate active profile
-            nameSpan.style.fontWeight = 'bold';
-        }
-        item.appendChild(nameSpan);
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.title = `Delete profile: ${name}`;
-        deleteBtn.className = 'modal-delete-btn';
-        deleteBtn.dataset.profileName = name;
-
-        deleteBtn.addEventListener('click', () => {
-            // Close Manage modal before opening confirm modal might be smoother
-            // closeAllModals(); // Optional: close manage modal first
-            openConfirmDeleteModal(name, listElement); // Pass listElement to refresh later
-        });
-        item.appendChild(deleteBtn);
-
-        listElement.appendChild(item);
-    });
+    listElement.innerHTML = ''; const profiles = getProfileNames(); const currentProfile = getCurrentProfile();
+    if (profiles.length === 0) { listElement.innerHTML = '<li class="no-profiles-message">No profiles to manage.</li>'; return; }
+    profiles.forEach(name => { const item = document.createElement('li'); item.className = 'modal-profile-item'; const nameSpan = document.createElement('span'); nameSpan.textContent = name; if (name === currentProfile) { nameSpan.innerHTML += ' <small>(Active)</small>'; nameSpan.style.fontWeight = 'bold'; } item.appendChild(nameSpan); const deleteBtn = document.createElement('button'); deleteBtn.textContent = 'Delete'; deleteBtn.title = `Delete profile: ${name}`; deleteBtn.className = 'modal-delete-btn'; deleteBtn.dataset.profileName = name; deleteBtn.addEventListener('click', () => { openConfirmDeleteModal(name, listElement); }); item.appendChild(deleteBtn); listElement.appendChild(item); });
 }
-
-// --- Confirm Delete Profile Modal ---
-// Added listElementToRefresh parameter
+// --- Confirm Delete Profile Modal --- (Unchanged from previous version)
 function openConfirmDeleteModal(profileNameToDelete, listElementToRefresh) {
-    const currentActiveProfile = getCurrentProfile();
-    let message = `Permanently delete profile "<strong>${profileNameToDelete}</strong>"?<br><br>All associated data will be lost. This cannot be undone.`;
-    if (profileNameToDelete === currentActiveProfile) {
-        message += "<br><br><strong>Warning: This is your currently active profile!</strong> Deleting it will clear the active profile setting.";
-    }
-
-    const modalContent = `
-        <p>${message}</p>
-        <p id="deleteErrorMsg" class="modal-error-message" aria-live="assertive" style="display:none;"></p>`;
-    const modalButtons = `
-        <button type="button" class="modal-button-cancel" id="deleteCancelBtn">Cancel</button>
-        <button type="button" class="modal-button-delete" id="deleteConfirmBtn">Delete Profile</button>`;
-
+    const currentActiveProfile = getCurrentProfile(); let message = `Permanently delete profile "<strong>${profileNameToDelete}</strong>"?<br><br>All associated data will be lost. This cannot be undone.`; if (profileNameToDelete === currentActiveProfile) { message += "<br><br><strong>Warning: This is your currently active profile!</strong> Deleting it will clear the active profile setting."; }
+    const modalContent = `<p>${message}</p><p id="deleteErrorMsg" class="modal-error-message" aria-live="assertive" style="display:none;"></p>`;
+    const modalButtons = `<button type="button" class="modal-button-cancel" id="deleteCancelBtn">Cancel</button><button type="button" class="modal-button-delete" id="deleteConfirmBtn">Delete Profile</button>`;
     const { contentDiv, buttonsDiv } = createModal('confirmDeleteModalOverlay', 'Confirm Deletion', modalContent, modalButtons);
-
-    const confirmBtn = buttonsDiv.querySelector('#deleteConfirmBtn');
-    const cancelBtn = buttonsDiv.querySelector('#deleteCancelBtn');
-    const errorMsg = contentDiv.querySelector('#deleteErrorMsg');
-
-    confirmBtn.onclick = () => {
-        errorMsg.style.display = 'none';
-        if (deleteProfile(profileNameToDelete)) { // deleteProfile handles logic and localStorage update
-            console.log(`Profile "${profileNameToDelete}" deleted via modal confirmation.`);
-
-            closeAllModals(); // Close confirmation modal
-
-            // Refresh the Manage modal list IF it's still somehow open
-             const manageModalList = document.getElementById('modalProfileList');
-             if (manageModalList) {
-                 populateModalProfileList(manageModalList);
-             }
-
-            // Refresh the main nav dropdown display
-             const dropdownButton = document.getElementById('profileDropdownButton');
-             if (dropdownButton) { // Check if nav fully loaded
-                 setupProfileDropdown(); // Re-run setup to update button text & list generator
-             }
-
-
-            // Reload the page ONLY if the ACTIVE profile was deleted
-            if (profileNameToDelete === currentActiveProfile) {
-                // Give a small delay for user to see modal close
-                 setTimeout(() => window.location.reload(), 100);
-            }
-
-        } else {
-            errorMsg.textContent = `Failed to delete profile "${profileNameToDelete}".`;
-            errorMsg.style.display = 'block';
-        }
-    };
-
+    const confirmBtn = buttonsDiv.querySelector('#deleteConfirmBtn'); const cancelBtn = buttonsDiv.querySelector('#deleteCancelBtn'); const errorMsg = contentDiv.querySelector('#deleteErrorMsg');
+    confirmBtn.onclick = () => { errorMsg.style.display = 'none'; if (deleteProfile(profileNameToDelete)) { console.log(`Profile "${profileNameToDelete}" deleted via modal confirmation.`); closeAllModals(); const manageModalList = document.getElementById('modalProfileList'); if (manageModalList) { populateModalProfileList(manageModalList); } const dropdownButton = document.getElementById('profileDropdownButton'); if (dropdownButton) { setupProfileDropdown(); } if (profileNameToDelete === currentActiveProfile) { setTimeout(() => window.location.reload(), 100); } } else { errorMsg.textContent = `Failed to delete profile "${profileNameToDelete}".`; errorMsg.style.display = 'block'; } };
     cancelBtn.onclick = closeAllModals;
 }
