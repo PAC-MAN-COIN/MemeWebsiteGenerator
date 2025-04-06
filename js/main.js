@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navbarPlaceholder = document.getElementById('navbar-placeholder');
     // UPDATED PATH: Use relative path to go up one directory from js/
-    const navPath = '../_nav.html';
+    const navPath = '../nav.html';
 
     if (navbarPlaceholder) {
         fetch(navPath) // Fetch the navigation HTML file using the corrected path
