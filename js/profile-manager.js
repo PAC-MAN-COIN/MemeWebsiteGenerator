@@ -201,7 +201,15 @@ function saveDataForProfile(profileName, dataKey, dataValue) {
     return saveAllProfilesData(profiles);
 }
 
-
+/**
+ * Gets the data object for the currently active profile.
+ * @returns {object|null} The current profile's data object, or null if none active.
+ */
+function getCurrentProfileData() {
+    const currentProfile = getCurrentProfile();
+    if (!currentProfile) return null;
+    return getProfileData(currentProfile); // Uses existing function
+}
 // Example of how a tool would load its data:
 // const currentProfile = getCurrentProfile();
 // if (currentProfile) {
