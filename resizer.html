@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Portal - Image Resizer</title>
+    <link rel="icon" href="images/logo.png">
+    <link rel="stylesheet" href="style.css"> <style>
+        main#resizer-main {
+             padding-top: 2rem;
+        }
+        .resizer-container {
+            background-color: #1a1a1a;
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid #333;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* --- Input/Controls Section --- */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 1.5rem;
+            align-items: flex-end;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1 1 180px;
+            min-width: 150px;
+        }
+        .control-group label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        .dimension-inputs {
+            display: flex;
+            gap: 1rem;
+            flex: 2 1 200px;
+            min-width: 180px;
+        }
+        .dimension-inputs .control-group {
+             flex: 1;
+             min-width: 80px;
+        }
+        .action-controls {
+             display: flex;
+             flex-wrap: wrap;
+             gap: 1rem;
+             align-items: flex-end;
+             flex: 1 1 250px; /* Adjusted flex */
+             min-width: 200px;
+         }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px; /* Align with bottom padding of button */
+            flex-grow: 1; /* Allow it to take space */
+        }
+         .checkbox-container input[type="checkbox"] {
+             width: 18px; height: 18px; accent-color: #00ffe0; flex-shrink: 0;
+         }
+         .checkbox-container label { margin-bottom: 0; color: #ccc;}
+
+        /* Inputs and Buttons within controls */
+         .control-group input[type="file"],
+         .control-group select,
+         .control-group input[type="number"] {
+            padding: 10px; border-radius: 5px; border: 1px solid #333; font-size: 1rem; background: #1c1c1c; color: white; width: 100%; box-sizing: border-box;
+         }
+         .control-group input[type="file"] { background-color: #2a2a2a; cursor: pointer; }
+         .control-group input[type="file"]::-webkit-file-upload-button { background: #444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin-right: 10px; transition: background-color 0.2s; }
+         .control-group input[type="file"]:hover::-webkit-file-upload-button { background: #555; }
+
+        /* Button Styles */
+         #resizeButton, #downloadLink { padding: 12px 25px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; text-align: center; flex-shrink: 0; width: auto; margin-bottom: 0; }
+         #resizeButton { background: linear-gradient(45deg, #00ffe0, #ff00ff); color: #000; min-width: 130px; }
+         #resizeButton:hover { transform: scale(1.03); box-shadow: 0 4px 15px rgba(128, 0, 128, 0.4); }
+         #resizeButton:disabled { background: #444; cursor: not-allowed; transform: none; box-shadow: none; }
+         #downloadLink { display: inline-block; background-color: #38bdf8; color: #000; text-decoration: none; margin-bottom: 0; }
+         #downloadLink:hover { transform: scale(1.03); background-color: #7dd3fc; }
+         #downloadLink[aria-disabled="true"] { display: none; }
+
+        /* Preview Section */
+        .previews { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 1rem; }
+        .preview-box { border: 1px solid #333; padding: 1rem; border-radius: 10px; background-color: #111; text-align: center; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .preview-box h3 { margin-top: 0; margin-bottom: 1rem; color: #00ffe0; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; }
+        .preview-box img { max-width: 100%; max-height: 300px; height: auto; display: block; margin-bottom: 0.5rem; }
+        .dimensions { font-size: 0.85rem; color: #888; margin-top: 0.5rem; font-family: monospace; }
+        .preview-placeholder { color: #555; font-style: italic; }
+
+        /* Error Message */
+        #errorMessage { color: #ef4444; font-weight: bold; margin-top: 1rem; text-align: center; display: none; }
+
+    </style>
+</head>
+<body>
+    <div id="navbar-placeholder"></div>
+
+    <main id="resizer-main">
+        <h1 class="page-title">Image Resizer</h1>
+        <p class="page-subtitle">Upload an image and resize it using presets or custom dimensions.</p>
+
+        <div class="resizer-container">
+            <div class="controls">
+                <div class="control-group"> <label for="imageInput">1. Upload Image:</label>
+                    <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp, image/gif">
+                </div>
+
+                <div class="control-group"> <label for="presetSize">2. Choose Size:</label>
+                    <select id="presetSize" disabled>
+                        <option value="custom">Custom Dimensions</option>
+                        <option value="1500x500">Twitter Banner (1500x500)</option>
+                        <option value="1080x1080">Instagram Post (1080x1080)</option>
+                        <option value="500x500">Square PFP (500x500)</option>
+                        <option value="200x200">Small Logo (200x200)</option>
+                        <option value="original/2">50% Original Size</option>
+                        <option value="original/4">25% Original Size</option>
+                    </select>
+                </div>
+
+                 <div class="dimension-inputs"> <div class="control-group">
+                        <label for="customWidth">Width (px):</label>
+                        <input type="number" id="customWidth" min="1" placeholder="e.g., 800" disabled>
+                    </div>
+                    <div class="control-group">
+                        <label for="customHeight">Height (px):</label>
+                        <input type="number" id="customHeight" min="1" placeholder="e.g., 600" disabled>
+                    </div>
+                 </div>
+
+                 <div class="action-controls"> <div class="checkbox-container">
+                         <input type="checkbox" id="maintainAspectRatio" checked disabled>
+                         <label for="maintainAspectRatio">Maintain Aspect Ratio</label>
+                     </div>
+                     <button id="resizeButton" disabled>3. Resize Image</button>
+                 </div>
+            </div>
+
+             <p id="errorMessage"></p>
+
+            <div class="previews">
+                <div class="preview-box">
+                    <h3>Original</h3>
+                    <img id="originalPreview" src="" alt="Original image preview" style="display: none;"> <p class="dimensions" id="originalDimensions">&nbsp;</p>
+                    <p class="preview-placeholder" id="originalPlaceholder">Upload an image to see preview</p>
+                </div>
+                <div class="preview-box">
+                    <h3>Resized</h3>
+                    <img id="resizedPreview" src="" alt="Resized image preview" style="display: none;"> <p class="dimensions" id="resizedDimensions">&nbsp;</p>
+                     <p class="preview-placeholder" id="resizedPlaceholder">Resized image will appear here</p>
+                    <a id="downloadLink" href="#" download="resized-image.png" aria-disabled="true">Download Resized Image</a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="js/main.js"></script> <script>
+        // --- Get Element References ---
+        const imageInput = document.getElementById('imageInput');
+        const presetSizeSelect = document.getElementById('presetSize');
+        const customWidthInput = document.getElementById('customWidth');
+        const customHeightInput = document.getElementById('customHeight');
+        const maintainAspectRatioCheckbox = document.getElementById('maintainAspectRatio');
+        const resizeButton = document.getElementById('resizeButton');
+        const downloadLink = document.getElementById('downloadLink');
+        const originalPreview = document.getElementById('originalPreview');
+        const originalDimensionsDisplay = document.getElementById('originalDimensions');
+        const originalPlaceholder = document.getElementById('originalPlaceholder');
+        const resizedPreview = document.getElementById('resizedPreview');
+        const resizedDimensionsDisplay = document.getElementById('resizedDimensions');
+        const resizedPlaceholder = document.getElementById('resizedPlaceholder');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // --- State Variables ---
+        let originalImage = null;
+        let originalWidth = 0;
+        let originalHeight = 0;
+        let originalAspectRatio = 1;
+
+        // --- Helper Functions ---
+        function clearError() { errorMessage.textContent = ''; errorMessage.style.display = 'none'; }
+        function showError(message) { errorMessage.textContent = message; errorMessage.style.display = 'block'; }
+        function resetUI() { /* (Keep existing function from previous step) */ presetSizeSelect.disabled = true; presetSizeSelect.value = 'custom'; customWidthInput.disabled = true; customWidthInput.value = ''; customHeightInput.disabled = true; customHeightInput.value = ''; maintainAspectRatioCheckbox.disabled = true; maintainAspectRatioCheckbox.checked = true; resizeButton.disabled = true; originalPreview.src = ""; originalPreview.style.display = 'none'; originalPlaceholder.style.display = 'block'; originalDimensionsDisplay.textContent = '\u00A0'; originalImage = null; originalWidth = 0; originalHeight = 0; originalAspectRatio = 1; resetResizedPreview(); clearError(); }
+        function resetResizedPreview(){ /* (Keep existing function from previous step) */ resizedPreview.src = ""; resizedPreview.style.display = 'none'; resizedPlaceholder.style.display = 'block'; resizedDimensionsDisplay.textContent = '\u00A0'; downloadLink.href = "#"; downloadLink.setAttribute('aria-disabled', 'true'); }
+
+        // --- Event Listener for File Input ---
+        imageInput.addEventListener('change', (event) => {
+            console.log("File input changed!"); // DEBUGGING
+            const file = event.target.files[0];
+            if (!file) {
+                 console.log("No file selected."); // DEBUGGING
+                 resetUI(); // Reset if selection is cancelled
+                 return;
+            }
+             console.log("File selected:", file.name, file.type); // DEBUGGING
+
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file (PNG, JPG, WEBP, GIF).');
+                resetUI();
+                return;
+            }
+            clearError();
+
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                console.log("FileReader onload triggered."); // DEBUGGING
+                originalPreview.src = e.target.result; // Set src for preview
+                originalPlaceholder.style.display = 'none';
+                originalPreview.style.display = 'block';
+
+                // Use a separate Image object to get dimensions accurately
+                originalImage = new Image();
+                originalImage.onload = () => {
+                    console.log("Original image loaded into Image object."); // DEBUGGING
+                    originalWidth = originalImage.naturalWidth; // Use naturalWidth/Height
+                    originalHeight = originalImage.naturalHeight;
+                    if (originalWidth === 0 || originalHeight === 0) {
+                         showError('Could not determine image dimensions. File might be corrupted.');
+                         resetUI();
+                         return;
+                    }
+                    originalAspectRatio = originalWidth / originalHeight;
+                    originalDimensionsDisplay.textContent = `${originalWidth} x ${originalHeight} px`;
+                     console.log(`Dimensions: ${originalWidth}x${originalHeight}`); // DEBUGGING
+
+                    // Enable controls
+                    presetSizeSelect.disabled = false;
+                    customWidthInput.disabled = false;
+                    customHeightInput.disabled = false;
+                    maintainAspectRatioCheckbox.disabled = false;
+                    resizeButton.disabled = false;
+
+                    // Set initial values
+                    customWidthInput.value = originalWidth;
+                    customHeightInput.value = originalHeight;
+                    presetSizeSelect.value = 'custom';
+                    resetResizedPreview(); // Clear any previous resize result
+                     console.log("UI Enabled and values set."); // DEBUGGING
+                };
+                originalImage.onerror = (err) => {
+                     console.error("Error loading image into Image object:", err); // DEBUGGING
+                     showError('Could not load image data. The file might be invalid or corrupted.');
+                     resetUI();
+                }
+                originalImage.src = e.target.result; // Load the data URL into the Image object
+            };
+            reader.onerror = (err) => {
+                 console.error("FileReader error:", err); // DEBUGGING
+                 showError('Could not read file.');
+                 resetUI();
+            };
+
+            console.log("Reading file as DataURL..."); // DEBUGGING
+            reader.readAsDataURL(file); // Start reading
+        });
+
+        // --- Event Listener for Preset Selection ---
+        presetSizeSelect.addEventListener('change', () => { /* (Keep existing function from previous step) */ const value = presetSizeSelect.value; customWidthInput.disabled = true; customHeightInput.disabled = true; if (value === 'custom') { customWidthInput.disabled = false; customHeightInput.disabled = false; customWidthInput.value = originalWidth; customHeightInput.value = originalHeight; maintainAspectRatioCheckbox.checked = true; } else if (value.includes('x')) { const [width, height] = value.split('x').map(Number); customWidthInput.value = width; customHeightInput.value = height; maintainAspectRatioCheckbox.checked = false; } else if (value.includes('/')) { const factor = parseInt(value.split('/')[1], 10); if(originalWidth && originalHeight && factor){ customWidthInput.value = Math.round(originalWidth / factor); customHeightInput.value = Math.round(originalHeight / factor); } maintainAspectRatioCheckbox.checked = true; } });
+
+        // --- Event Listeners for Custom Dimensions & Aspect Ratio ---
+        customWidthInput.addEventListener('input', () => { /* (Keep existing function from previous step) */ presetSizeSelect.value = 'custom'; customWidthInput.disabled = false; customHeightInput.disabled = false; if (maintainAspectRatioCheckbox.checked && originalAspectRatio && customWidthInput.value > 0) { customHeightInput.value = Math.round(customWidthInput.value / originalAspectRatio); } });
+        customHeightInput.addEventListener('input', () => { /* (Keep existing function from previous step) */ presetSizeSelect.value = 'custom'; customWidthInput.disabled = false; customHeightInput.disabled = false; if (maintainAspectRatioCheckbox.checked && originalAspectRatio && customHeightInput.value > 0) { customWidthInput.value = Math.round(customHeightInput.value * originalAspectRatio); } });
+        maintainAspectRatioCheckbox.addEventListener('change', () => { /* (Keep existing function from previous step) */ if (maintainAspectRatioCheckbox.checked && originalAspectRatio) { if (customWidthInput.value > 0) { customHeightInput.value = Math.round(customWidthInput.value / originalAspectRatio); } else if (customHeightInput.value > 0) { customWidthInput.value = Math.round(customHeightInput.value * originalAspectRatio); } } });
+
+        // --- Event Listener for Resize Button ---
+        resizeButton.addEventListener('click', () => { /* (Keep existing function from previous step) */ if (!originalImage || originalWidth === 0) { showError('Please upload a valid image first.'); return; } clearError(); const targetWidth = parseInt(customWidthInput.value, 10); const targetHeight = parseInt(customHeightInput.value, 10); if (!(targetWidth > 0 && targetHeight > 0)) { showError('Please enter valid positive width and height.'); return; } const MAX_DIMENSION = 8000; if (targetWidth > MAX_DIMENSION || targetHeight > MAX_DIMENSION) { showError(`Dimensions too large. Max width/height is ${MAX_DIMENSION}px.`); return; } try { const canvas = document.createElement('canvas'); canvas.width = targetWidth; canvas.height = targetHeight; const ctx = canvas.getContext('2d'); ctx.drawImage(originalImage, 0, 0, targetWidth, targetHeight); let outputFormat = 'image/png'; const originalFileType = imageInput.files[0]?.type; if (originalFileType === 'image/jpeg') { outputFormat = 'image/jpeg'; } else if (originalFileType === 'image/webp') { outputFormat = 'image/webp'; } const resizedDataUrl = canvas.toDataURL(outputFormat, 0.9); resizedPreview.src = resizedDataUrl; resizedPlaceholder.style.display = 'none'; resizedPreview.style.display = 'block'; resizedDimensionsDisplay.textContent = `${targetWidth} x ${targetHeight} px`; downloadLink.href = resizedDataUrl; const fileExtension = outputFormat.split('/')[1]; downloadLink.download = `resized-${targetWidth}x${targetHeight}.${fileExtension}`; downloadLink.setAttribute('aria-disabled', 'false'); } catch (err) { console.error("Resizing error:", err); showError('An error occurred during resizing. The image might be too large or unsupported.'); resetResizedPreview(); } });
+
+    </script>
+
+</body>
+</html>
