@@ -68,7 +68,7 @@ body { background: #0e0e0e; color: #fff; font-family: 'Poppins', sans-serif; mar
     cursor: pointer; display: flex; align-items: center; gap: 5px;
     min-width: 100px; justify-content: space-between;
     /* Reset mobile styles */
-     width: auto; position: relative; z-index: auto;
+     width: auto; z-index: auto;
 }
 .profile-manager-button:hover,
 .profile-manager-button:focus { background-color: #444; border-color: #777; }
