@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meme Coin Site Builder - Advanced</title>
+  <title>Meme Coin Site Builder - Themed Edition</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
@@ -30,10 +30,10 @@
     }
     .form {
       width: 100%;
-      max-width: 700px; /* Increased width */
+      max-width: 800px; /* Wider form for more options */
       display: flex;
       flex-direction: column;
-      gap: 18px; /* Increased gap */
+      gap: 18px;
     }
     input, textarea, select, button {
       padding: 14px;
@@ -43,178 +43,93 @@
       background: #1c1c1c;
       color: white;
       transition: border-color 0.2s;
-      font-family: inherit; /* Ensure consistent font */
+      font-family: inherit;
     }
     input:focus, textarea:focus, select:focus {
       border-color: #00ffe0;
       outline: none;
     }
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
+    textarea { resize: vertical; min-height: 100px; }
     button {
       background: linear-gradient(45deg, #00ffe0, #ff00ff);
       color: #000;
       font-weight: bold;
       cursor: pointer;
       transition: transform 0.2s;
-      border: none; /* Ensure button border is removed */
+      border: none;
+      padding: 16px; /* Larger buttons */
+      margin-top: 10px;
     }
-    button:hover {
-      transform: scale(1.03);
-    }
+    button:hover { transform: scale(1.03); }
     iframe {
       margin-top: 40px;
       width: 100%;
-      max-width: 1100px;
-      height: 600px;
+      max-width: 1200px; /* Wider preview */
+      height: 700px; /* Taller preview */
       border: 2px solid #333;
       border-radius: 12px;
-      display: none; /* Hidden initially */
+      display: none;
     }
     label {
       font-size: 0.95rem;
       margin-bottom: 6px;
       color: #aaa;
-      display: block; /* Ensure label takes full width */
+      display: block;
     }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
+    .form-group { display: flex; flex-direction: column; }
     .checkbox-group {
-        background: #1c1c1c;
-        padding: 15px;
-        border-radius: 10px;
-        border: 1px solid #333;
+        background: #1c1c1c; padding: 15px; border-radius: 10px;
+        border: 1px solid #333; margin-bottom: 10px;
     }
-    .checkbox-group label {
-        color: #eee;
-        margin-bottom: 10px;
-        font-weight: bold;
+    .checkbox-group legend { /* Use legend for group title */
+        color: #eee; margin-bottom: 10px; font-weight: bold;
+        font-size: 1rem; padding: 0 5px;
     }
-    .checkbox-group div {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 8px;
-    }
+    .checkbox-group div { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
     .checkbox-group input[type="checkbox"] {
-        width: 18px; /* Style checkboxes */
-        height: 18px;
-        accent-color: #00ffe0; /* Color the check */
-        cursor: pointer;
+        width: 18px; height: 18px; accent-color: #00ffe0; cursor: pointer;
+        flex-shrink: 0; /* Prevent shrinking */
     }
-    .checkbox-group span {
-        font-size: 0.9rem;
-        color: #ccc;
+    .checkbox-group span { font-size: 0.9rem; color: #ccc; }
+    input[type="file"] { padding: 10px; cursor: pointer; }
+    input[type="file"]::-webkit-file-upload-button {
+        background: #333; color: white; border: none; padding: 8px 12px;
+        border-radius: 5px; cursor: pointer; margin-right: 10px;
     }
-    input[type="file"] {
-        padding: 10px; /* Adjust file input padding */
-        cursor: pointer;
-    }
-    input[type="file"]::-webkit-file-upload-button { /* Style file button */
-        background: #333;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-right: 10px;
-    }
-    input[type="file"]:hover::-webkit-file-upload-button {
-        background: #444;
-    }
-    hr {
-        border: none;
-        border-top: 1px solid #333;
-        margin: 20px 0;
-    }
+    input[type="file"]:hover::-webkit-file-upload-button { background: #444; }
+    hr { border: none; border-top: 1px solid #333; margin: 25px 0; }
     h2.form-section-title {
-        font-size: 1.2rem;
-        color: #00ffe0;
-        margin-top: 15px;
-        margin-bottom: 5px;
-        font-family: 'Orbitron', sans-serif;
-        border-bottom: 1px solid #333;
-        padding-bottom: 5px;
+        font-size: 1.3rem; color: #00ffe0; margin-top: 20px; margin-bottom: 10px;
+        font-family: 'Orbitron', sans-serif; border-bottom: 1px solid #333; padding-bottom: 8px;
     }
+    /* Style for FAQ input */
+     .faq-item { display: flex; gap: 10px; margin-bottom: 10px; }
+     .faq-item input { flex-grow: 1; }
+     #addFaqButton { background: #333; color: #fff; font-weight: normal; font-size: 0.9rem; padding: 8px 12px; margin-top: 0; }
   </style>
 </head>
 <body>
-  <h1>Meme Coin Site Builder 🚀</h1>
+  <h1>Meme Coin Site Builder ✨ Themed Edition</h1>
 
   <div class="form">
 
-    <h2 class="form-section-title">Core Details</h2>
+    <h2 class="form-section-title">General Setup</h2>
     <div class="form-group">
       <label for="coinName">Coin Name</label>
-      <input id="coinName" placeholder="$NUTPEPE" />
-    </div>
-    <div class="form-group">
-      <label for="tagline">Tagline</label>
-      <input id="tagline" placeholder="The future is dairy-fueled" />
-    </div>
-    <div class="form-group">
-      <label for="description">Description (Appears in 'About' section if included)</label>
-      <textarea id="description" placeholder="What is your coin about? Explain its vision, meme origin, or goals."></textarea>
-    </div>
-
-    <hr/>
-    <h2 class="form-section-title">Content Sections</h2>
-     <div class="checkbox-group">
-        <label>Include Website Sections:</label>
-        <div>
-            <input type="checkbox" id="includeAbout" value="true" checked>
-            <span>About Section (Uses Description above)</span>
-        </div>
-        <div>
-            <input type="checkbox" id="includeTokenomics" value="true" checked>
-            <span>Tokenomics Section</span>
-        </div>
-        <div>
-            <input type="checkbox" id="includeRoadmap" value="true" checked>
-            <span>Roadmap Section</span>
-        </div>
-         <div>
-            <input type="checkbox" id="includeCommunity" value="true" checked>
-            <span>Community / Social Links Section</span>
-        </div>
-    </div>
-
-    <div class="form-group">
-      <label for="tokenomics">Tokenomics Details (1 item per line)</label>
-      <textarea id="tokenomics" placeholder="e.g., Total Supply: 1 Quadrillion\n5% Buy Tax\n5% Sell Tax\nLiquidity Locked"></textarea>
-    </div>
-    <div class="form-group">
-      <label for="roadmap">Roadmap Phases (1 item per line)</label>
-      <textarea id="roadmap" placeholder="e.g., Phase 1: Launch & Stealth Fair Launch\nPhase 2: CMC & CG Listing\nPhase 3: Utility Development\nPhase 4: World Domination"></textarea>
-    </div>
-
-    <hr/>
-    <h2 class="form-section-title">Links & CTA</h2>
-    <div class="form-group">
-      <label for="telegram">Telegram Link</label>
-      <input id="telegram" type="url" placeholder="https://t.me/yourcoin" />
-    </div>
-    <div class="form-group">
-      <label for="twitter">Twitter/X Link</label>
-      <input id="twitter" type="url" placeholder="https://twitter.com/yourcoin" />
+      <input id="coinName" placeholder="$COSMOPEPE" />
     </div>
      <div class="form-group">
-      <label for="ctaText">Header CTA Button Text (Optional)</label>
-      <input id="ctaText" placeholder="e.g., Buy $NUTPEPE Now!" />
-    </div>
+        <label for="styleTheme">Overall Style Theme</label>
+        <select id="styleTheme">
+            <option value="default">Default (Neon Tech)</option>
+            <option value="sci-fi">Sci-Fi (Sharp & Futuristic)</option>
+            <option value="cartoony">Cartoony (Rounded & Bold)</option>
+            <option value="minimalist">Minimalist (Clean & Simple)</option>
+            <option value="retro-pixel">Retro Pixel (8-Bit Style)</option>
+        </select>
+     </div>
      <div class="form-group">
-      <label for="ctaLink">Header CTA Button Link (Optional)</label>
-      <input id="ctaLink" type="url" placeholder="Link to PancakeSwap, Uniswap, etc." />
-    </div>
-
-    <hr/>
-    <h2 class="form-section-title">Appearance & Branding</h2>
-    <div class="form-group">
-      <label for="colorTheme">Color Theme</label>
+      <label for="colorTheme">Color Theme (Primary / Secondary)</label>
       <select id="colorTheme">
         <option value="#00ffe0,#ff00ff">Neon (Teal + Magenta)</option>
         <option value="#facc15,#ef4444">Gold + Red</option>
@@ -224,33 +139,137 @@
         <option value="#f97316,#e11d48">Orange + Rose</option>
         <option value="#ffffff,#aaaaaa">Monochrome (White + Gray)</option>
         <option value="#ff5733,#c70039">Fiery (Orange + Dark Red)</option>
+        <option value="#FFD700,#FFA500">Gold & Orange</option>
+        <option value="#00FF00,#FFFF00">Lime & Yellow (Pixel)</option>
       </select>
     </div>
      <div class="form-group">
-        <label for="fontPair">Font Pairing (Heading / Body)</label>
+        <label for="fontPair">Font Pairing (Heading / Body) - Theme might override</label>
         <select id="fontPair">
-            <option value="Orbitron,Poppins">Orbitron / Poppins (Sci-Fi/Modern)</option>
-            <option value="Press Start 2P,VT323">Press Start 2P / VT323 (Retro Pixel)</option>
-            <option value="Montserrat,Lato">Montserrat / Lato (Clean Sans-Serif)</option>
-            <option value="Roboto Slab,Roboto">Roboto Slab / Roboto (Modern Serif/Sans)</option>
-            <option value="Bangers,Permanent Marker">Bangers / Permanent Marker (Comic/Handwritten)</option>
+            <option value="Orbitron,Poppins">Orbitron / Poppins</option>
+            <option value="Press Start 2P,VT323">Press Start 2P / VT323</option>
+            <option value="Montserrat,Lato">Montserrat / Lato</option>
+            <option value="Roboto Slab,Roboto">Roboto Slab / Roboto</option>
+            <option value="Bangers,Permanent Marker">Bangers / Permanent Marker</option>
+            <option value="Aldrich,Rajdhani">Aldrich / Rajdhani (Sci-Fi)</option>
+            <option value="Inter,Inter">Inter / Inter (Minimalist)</option>
         </select>
      </div>
+
+    <hr/>
+    <h2 class="form-section-title">Core Content & Header</h2>
     <div class="form-group">
-      <label for="bannerImage">Upload Banner Image (Recommended: 1920x1080)</label>
+      <label for="tagline">Tagline</label>
+      <input id="tagline" placeholder="The next intergalactic meme!" />
+    </div>
+    <div class="form-group">
+      <label for="description">Main Description (Used in 'About' section)</label>
+      <textarea id="description" placeholder="Explain your coin's unique story, mission, or meme power."></textarea>
+    </div>
+     <div class="form-group">
+      <label for="ctaText">Header CTA Button Text (Optional)</label>
+      <input id="ctaText" placeholder="e.g., Buy $COSMOPEPE Now!" />
+    </div>
+     <div class="form-group">
+      <label for="ctaLink">Header CTA Button Link (Optional)</label>
+      <input id="ctaLink" type="url" placeholder="Link to DEX/exchange" />
+    </div>
+    <div class="form-group">
+      <label for="whitepaperLink">Whitepaper Link (Optional - Adds a button/link)</label>
+      <input id="whitepaperLink" type="url" placeholder="Link to your whitepaper PDF/doc" />
+    </div>
+
+
+    <hr/>
+    <h2 class="form-section-title">Website Structure & Elements</h2>
+    <fieldset class="checkbox-group">
+        <legend>Toggle Website Elements:</legend>
+        <div><input type="checkbox" id="includeNavbar" checked><span>Top Navigation Bar</span></div>
+        <div><input type="checkbox" id="showTagline" checked><span>Show Tagline in Header</span></div>
+        <div><input type="checkbox" id="showLogo" checked><span>Show Logo Below Content</span></div>
+        <div><input type="checkbox" id="showFooterLinks" checked><span>Show Social Links in Footer</span></div>
+        <div><input type="checkbox" id="enableAnimations" checked><span>Enable Animations & Effects</span></div>
+    </fieldset>
+
+    <fieldset class="checkbox-group">
+        <legend>Include Content Sections:</legend>
+        <div><input type="checkbox" id="includeAbout" checked><span>About Section</span></div>
+        <div><input type="checkbox" id="includeHowToBuy" checked><span>How to Buy Section</span></div>
+        <div><input type="checkbox" id="includeTokenomics" checked><span>Tokenomics Section</span></div>
+        <div><input type="checkbox" id="includeRoadmap" checked><span>Roadmap Section</span></div>
+        <div><input type="checkbox" id="includeTeam"><span>Team Section (Optional)</span></div>
+        <div><input type="checkbox" id="includePartners"><span>Partners Section (Optional)</span></div>
+        <div><input type="checkbox" id="includeFAQ"><span>FAQ Section (Optional)</span></div>
+        <div><input type="checkbox" id="includeCommunity" checked><span>Community/Socials Section</span></div>
+    </fieldset>
+
+    <hr/>
+    <h2 class="form-section-title">Section Content Details</h2>
+    <div class="form-group">
+      <label for="howToBuyContent">How to Buy Steps (1 step per line)</label>
+      <textarea id="howToBuyContent" placeholder="1. Get a Wallet (e.g., MetaMask)\n2. Buy Base Coin (e.g., ETH/SOL)\n3. Swap on DEX (e.g., Uniswap/Raydium)\nContract: 0x123..."></textarea>
+    </div>
+    <div class="form-group">
+      <label for="tokenomics">Tokenomics Details (1 item per line)</label>
+      <textarea id="tokenomics" placeholder="Total Supply: 1 Trillion\nLiquidity: Burnt 🔥\nTax: 0% Buy / 0% Sell\nOwnership: Renounced"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="roadmap">Roadmap Phases (1 item per line)</label>
+      <textarea id="roadmap" placeholder="Phase 1: Launch & Memetic Spread\nPhase 2: Listings & Influencers\nPhase 3: Utility Sneak Peek\nPhase 4: ???"></textarea>
+    </div>
+     <div class="form-group">
+      <label for="teamContent">Team Description (Optional, 1 member/role per line)</label>
+      <textarea id="teamContent" placeholder="Lead Dev: Anon Chad\nMarketing Guru: Pepe Himself\nCommunity Mod: Based Wojak"></textarea>
+    </div>
+     <div class="form-group">
+      <label for="partnersContent">Partners (Optional, 1 partner per line - Name or simple text)</label>
+      <textarea id="partnersContent" placeholder="Partner DEX\nCool NFT Project\nBased Influencer"></textarea>
+    </div>
+     <div class="form-group">
+        <label>FAQ Section Content (Optional)</label>
+        <div id="faqList">
+            <div class="faq-item">
+                <input type="text" placeholder="Question 1" class="faq-q">
+                <input type="text" placeholder="Answer 1" class="faq-a">
+            </div>
+        </div>
+        <button type="button" id="addFaqButton" onclick="addFaqItem()">+ Add FAQ Item</button>
+     </div>
+
+
+    <hr/>
+    <h2 class="form-section-title">Branding & Socials</h2>
+     <div class="form-group">
+      <label for="bannerImage">Upload Banner Image (Header Background)</label>
       <input type="file" id="bannerImage" accept="image/*" />
     </div>
     <div class="form-group">
-      <label for="logoImage">Upload Logo Image (Recommended: Square, 512x512)</label>
+      <label for="logoImage">Upload Logo Image</label>
       <input type="file" id="logoImage" accept="image/*" />
     </div>
     <div class="form-group">
-      <label for="faviconImage">Upload Favicon (Recommended: .ico or .png, 32x32)</label>
+      <label for="faviconImage">Upload Favicon</label>
       <input type="file" id="faviconImage" accept="image/x-icon,image/png" />
+    </div>
+    <div class="form-group">
+      <label for="telegram">Telegram Link</label>
+      <input id="telegram" type="url" placeholder="https://t.me/yourcoin" />
+    </div>
+    <div class="form-group">
+      <label for="twitter">Twitter/X Link</label>
+      <input id="twitter" type="url" placeholder="https://twitter.com/yourcoin" />
+    </div>
+     <div class="form-group">
+      <label for="discord">Discord Link (Optional)</label>
+      <input id="discord" type="url" placeholder="https://discord.gg/yourserver" />
+    </div>
+     <div class="form-group">
+      <label for="otherLink">Other Link (e.g., Reddit, Medium - Optional)</label>
+      <input id="otherLink" type="url" placeholder="https://..." />
     </div>
      <div class="form-group">
       <label for="footerText">Custom Footer Text (Optional, short)</label>
-      <input id="footerText" placeholder="e.g., Not financial advice. DYOR." />
+      <input id="footerText" placeholder="e.g., For entertainment purposes only." />
     </div>
 
     <hr/>
@@ -263,33 +282,20 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script>
+    // --- Global Variables & Helpers ---
     let bannerData = '', logoData = '', faviconData = '';
 
-    // Helper to safely get element value or default
-    const getValue = (id, defaultValue = '') => {
-      const el = document.getElementById(id);
-      return el ? el.value.trim() : defaultValue;
-    };
-     // Helper to safely get checkbox state
-    const isChecked = (id) => {
-        const el = document.getElementById(id);
-        return el ? el.checked : false;
-    };
+    const getValue = (id, defaultValue = '') => document.getElementById(id)?.value.trim() ?? defaultValue;
+    const isChecked = (id) => document.getElementById(id)?.checked ?? false;
 
-    // Image to Base64 Conversion
     function setupImageUpload(inputId, callback) {
         const input = document.getElementById(inputId);
-        if (input) {
-            input.addEventListener('change', e => {
-                if (e.target.files && e.target.files[0]) {
-                    toBase64(e.target.files[0], callback);
-                } else {
-                    callback(''); // Clear data if no file selected
-                }
-            });
-        }
+        input?.addEventListener('change', e => {
+            if (e.target.files && e.target.files[0]) {
+                toBase64(e.target.files[0], callback);
+            } else { callback(''); }
+        });
     }
-
     setupImageUpload('bannerImage', d => bannerData = d);
     setupImageUpload('logoImage', d => logoData = d);
     setupImageUpload('faviconImage', d => faviconData = d);
@@ -297,119 +303,219 @@
     function toBase64(file, callback) {
       const reader = new FileReader();
       reader.onload = () => callback(reader.result);
-      reader.onerror = () => callback(''); // Handle error
+      reader.onerror = () => callback('');
       reader.readAsDataURL(file);
     }
 
-    // Map Google Font names to URL-friendly names if needed (usually lowercase with + for spaces)
+    function addFaqItem() {
+        const list = document.getElementById('faqList');
+        const count = list.children.length + 1;
+        const newItem = document.createElement('div');
+        newItem.className = 'faq-item';
+        newItem.innerHTML = `
+            <input type="text" placeholder="Question ${count}" class="faq-q">
+            <input type="text" placeholder="Answer ${count}" class="faq-a">
+        `;
+        list.appendChild(newItem);
+    }
+
+    // Map Google Font names to URL fragments
     const fontUrlMap = {
-        'Orbitron': 'Orbitron:wght@600;900',
-        'Poppins': 'Poppins:wght@300;400;600;800',
-        'Press Start 2P': 'Press+Start+2P',
-        'VT323': 'VT323',
-        'Montserrat': 'Montserrat:wght@400;700;900',
-        'Lato': 'Lato:wght@300;400;700',
-        'Roboto Slab': 'Roboto+Slab:wght@400;700',
-        'Roboto': 'Roboto:wght@300;400;700',
-        'Bangers': 'Bangers',
-        'Permanent Marker': 'Permanent+Marker'
+        'Orbitron': 'Orbitron:wght@600;900', 'Poppins': 'Poppins:wght@300;400;600;800',
+        'Press Start 2P': 'Press+Start+2P', 'VT323': 'VT323',
+        'Montserrat': 'Montserrat:wght@400;700;900', 'Lato': 'Lato:wght@300;400;700',
+        'Roboto Slab': 'Roboto+Slab:wght@400;700', 'Roboto': 'Roboto:wght@300;400;700',
+        'Bangers': 'Bangers', 'Permanent Marker': 'Permanent+Marker',
+        'Aldrich': 'Aldrich', 'Rajdhani': 'Rajdhani:wght@400;600;700',
+        'Inter': 'Inter:wght@300;400;600;800'
+        // Add more fonts needed by themes here
     };
 
+    // Theme Defaults (can be overridden by Font Selector)
+    const themeDefaults = {
+        'default': { heading: 'Orbitron', body: 'Poppins' },
+        'sci-fi': { heading: 'Aldrich', body: 'Rajdhani' },
+        'cartoony': { heading: 'Bangers', body: 'Permanent Marker' },
+        'minimalist': { heading: 'Montserrat', body: 'Lato' }, // Or Inter/Inter
+        'retro-pixel': { heading: 'Press Start 2P', body: 'VT323' }
+    };
+
+    // --- Main HTML Builder Function ---
     function buildHTML() {
-        // --- Get Data ---
+        // --- Get All Input Data ---
         const name = getValue('coinName', 'Meme Coin');
         const tagline = getValue('tagline', 'To the Moon!');
         const description = getValue('description');
-        const tokenomicsRaw = getValue('tokenomics');
-        const roadmapRaw = getValue('roadmap');
-        const telegram = getValue('telegram');
-        const twitter = getValue('twitter');
         const ctaText = getValue('ctaText');
         const ctaLink = getValue('ctaLink');
+        const whitepaperLink = getValue('whitepaperLink');
+        const styleTheme = getValue('styleTheme', 'default');
         const colors = getValue('colorTheme', '#00ffe0,#ff00ff').split(',');
-        const fontPair = getValue('fontPair', 'Orbitron,Poppins').split(',');
+        const selectedFontPair = getValue('fontPair', '').split(','); // User's explicit choice
         const footerText = getValue('footerText');
 
-        // Section visibility
-        const showAbout = isChecked('includeAbout');
-        const showTokenomics = isChecked('includeTokenomics');
-        const showRoadmap = isChecked('includeRoadmap');
-        const showCommunity = isChecked('includeCommunity');
+        // Structure & Element Toggles
+        const includeNavbar = isChecked('includeNavbar');
+        const showTagline = isChecked('showTagline');
+        const showLogo = isChecked('showLogo');
+        const showFooterLinks = isChecked('showFooterLinks');
+        const enableAnimations = isChecked('enableAnimations');
 
-        // Process lists
-        const tokenomicsList = tokenomicsRaw ? tokenomicsRaw.split("\n").map(t => `<li>${t.trim()}</li>`).join('') : '';
-        const roadmapList = roadmapRaw ? roadmapRaw.split("\n").map(r => `<li>${r.trim()}</li>`).join('') : '';
+        // Section Includes
+        const includeAbout = isChecked('includeAbout');
+        const includeHowToBuy = isChecked('includeHowToBuy');
+        const includeTokenomics = isChecked('includeTokenomics');
+        const includeRoadmap = isChecked('includeRoadmap');
+        const includeTeam = isChecked('includeTeam');
+        const includePartners = isChecked('includePartners');
+        const includeFAQ = isChecked('includeFAQ');
+        const includeCommunity = isChecked('includeCommunity');
 
-        // Determine fonts
-        const headingFont = fontPair[0].trim();
-        const bodyFont = fontPair[1].trim();
+        // Section Content
+        const howToBuyRaw = getValue('howToBuyContent');
+        const tokenomicsRaw = getValue('tokenomics');
+        const roadmapRaw = getValue('roadmap');
+        const teamRaw = getValue('teamContent');
+        const partnersRaw = getValue('partnersContent');
+        // FAQ Data
+        const faqItems = [];
+        document.querySelectorAll('#faqList .faq-item').forEach(item => {
+            const q = item.querySelector('.faq-q')?.value.trim();
+            const a = item.querySelector('.faq-a')?.value.trim();
+            if (q && a) faqItems.push({ q, a });
+        });
+
+        // Social Links
+        const telegram = getValue('telegram');
+        const twitter = getValue('twitter');
+        const discord = getValue('discord');
+        const otherLink = getValue('otherLink');
+
+
+        // --- Process Data ---
+
+        // Determine Fonts (Theme default overridden by manual selection)
+        let headingFont = themeDefaults[styleTheme]?.heading || 'Orbitron';
+        let bodyFont = themeDefaults[styleTheme]?.body || 'Poppins';
+        if (selectedFontPair.length === 2 && selectedFontPair[0] && selectedFontPair[1]) {
+            headingFont = selectedFontPair[0].trim();
+            bodyFont = selectedFontPair[1].trim();
+        }
         const googleFontParams = [fontUrlMap[headingFont], fontUrlMap[bodyFont]].filter(Boolean).join('&family=');
         const googleFontLink = googleFontParams ? `<link href="https://fonts.googleapis.com/css2?family=${googleFontParams}&display=swap" rel="stylesheet">` : '';
 
-        // Determine Favicon link
-        const faviconHref = faviconData || logoData || 'favicon.ico'; // Use uploaded favicon, fallback to logo, then default
+        // Favicon
+        const faviconHref = faviconData || logoData || 'favicon.ico';
 
-        // --- Build HTML Sections ---
+        // Process Lists
+        const processList = (raw) => raw ? raw.split("\n").map(item => `<li>${item.trim()}</li>`).join('') : '';
+        const howToBuyList = processList(howToBuyRaw);
+        const tokenomicsList = processList(tokenomicsRaw);
+        const roadmapList = processList(roadmapRaw);
+        const teamList = processList(teamRaw);
+        const partnersList = processList(partnersRaw);
+        const faqListHTML = faqItems.map(item => `<details><summary>${item.q}</summary><p>${item.a}</p></details>`).join('');
+
+
+        // --- Build HTML Sections Conditionally ---
+        const sections = []; // Store included sections for Navbar
+        if (includeAbout && description) sections.push({ id: 'about', title: 'About' });
+        if (includeHowToBuy && howToBuyList) sections.push({ id: 'how-to-buy', title: 'How to Buy' });
+        if (includeTokenomics && tokenomicsList) sections.push({ id: 'tokenomics', title: 'Tokenomics' });
+        if (includeRoadmap && roadmapList) sections.push({ id: 'roadmap', title: 'Roadmap' });
+        if (includeTeam && teamList) sections.push({ id: 'team', title: 'Team' });
+        if (includePartners && partnersList) sections.push({ id: 'partners', title: 'Partners' });
+        if (includeFAQ && faqListHTML) sections.push({ id: 'faq', title: 'FAQ' });
+        if (includeCommunity && (telegram || twitter || discord || otherLink)) sections.push({ id: 'community', title: 'Community' });
+
+
+        // Navbar HTML
+        const navbarHTML = includeNavbar ? `
+          <nav class="navbar">
+            <div class="nav-container">
+              <a href="#" class="nav-brand">${name}</a>
+              <ul class="nav-links">
+                ${sections.map(s => `<li><a href="#${s.id}">${s.title}</a></li>`).join('')}
+                ${whitepaperLink ? `<li><a href="${whitepaperLink}" target="_blank" class="nav-button">Whitepaper</a></li>` : ''}
+              </ul>
+            </div>
+          </nav>` : '';
+
+        // Header HTML
         const headerSection = `
           <header>
             ${bannerData ? `<img src="${bannerData}" class="banner" alt="Banner" loading="lazy" />` : ''}
             <h1>${name}</h1>
-            <h2>${tagline}</h2>
-            ${ctaText && ctaLink ? `<a href="${ctaLink}" target="_blank" class="cta-button">${ctaText}</a>` : ''}
+            ${showTagline ? `<h2>${tagline}</h2>` : ''}
+            <div class="header-buttons">
+              ${ctaText && ctaLink ? `<a href="${ctaLink}" target="_blank" class="cta-button primary-cta">${ctaText}</a>` : ''}
+              ${whitepaperLink && !includeNavbar ? `<a href="${whitepaperLink}" target="_blank" class="cta-button secondary-cta">Whitepaper</a>` : ''}
+             </div>
           </header>`;
 
-        const aboutSection = showAbout && description ? `
-          <section id="about">
-            <h3>About ${name}</h3>
-            <p>${description.replace(/\n/g, '<br>')}</p> {/* Handle newlines in desc */}
-          </section>` : '';
+        // Build Content Sections HTML
+        const contentSectionsHTML = sections.map(section => {
+           let content = '';
+           let icon = ''; // Theme can add icons
+           switch(section.id) {
+               case 'about': content = `<p>${description.replace(/\n/g, '<br>')}</p>`; icon = 'ℹ️'; break;
+               case 'how-to-buy': content = `<ol>${howToBuyList.replace(/<li>/g, '<li class="step">')}</ol>`; icon = '🛒'; break; // Use <ol> for steps
+               case 'tokenomics': content = `<ul>${tokenomicsList}</ul>`; icon = '📊'; break;
+               case 'roadmap': content = `<ul>${roadmapList}</ul>`; icon = '🗺️'; break;
+               case 'team': content = `<ul class="team-list">${teamList}</ul>`; icon = '🧑‍🤝‍🧑'; break;
+               case 'partners': content = `<ul class="partners-list">${partnersList}</ul>`; icon = '🤝'; break;
+               case 'faq': content = `<div class="faq-container">${faqListHTML}</div>`; icon = '❓'; break;
+               case 'community':
+                   const socialLinks = [
+                       { link: telegram, text: 'Telegram', icon: '✈️' },
+                       { link: twitter, text: 'Twitter/X', icon: '🐦' },
+                       { link: discord, text: 'Discord', icon: '💬' },
+                       { link: otherLink, text: 'Link', icon: '🔗' } // Generic icon
+                   ].filter(item => item.link);
+                   content = `<div class="social-links">${socialLinks.map(sl => `<a href="${sl.link}" target="_blank" class="social-button"><span class="social-icon">${sl.icon}</span> ${sl.text}</a>`).join('')}</div>`;
+                   icon = '🌐';
+                   break;
+           }
+           return `<section id="${section.id}"><h3><span class="section-icon">${icon}</span> ${section.title}</h3>${content}</section>`;
+        }).join('');
 
-        const tokenomicsSection = showTokenomics && tokenomicsList ? `
-          <section id="tokenomics">
-            <h3>Tokenomics</h3>
-            <ul>${tokenomicsList}</ul>
-          </section>` : '';
 
-        const roadmapSection = showRoadmap && roadmapList ? `
-          <section id="roadmap">
-            <h3>Roadmap</h3>
-            <ul>${roadmapList}</ul>
-          </section>` : '';
+        // Logo HTML
+        const logoHTML = showLogo && logoData ? `
+            <div class="logo-container">
+              <img src="${logoData}" class="logo" alt="${name} Logo" loading="lazy" />
+            </div>` : '';
 
-        const communitySection = showCommunity && (telegram || twitter) ? `
-          <section id="community">
-            <h3>Join Our Community</h3>
-            <div class="social-links">
-              ${telegram ? `<a href="${telegram}" target="_blank">Telegram</a>` : ''}
-              ${twitter ? `<a href="${twitter}" target="_blank">Twitter/X</a>` : ''}
-            </div>
-          </section>` : '';
+        // Footer HTML
+        const footerSocialLinks = [
+            { link: telegram, text: 'Telegram'}, { link: twitter, text: 'Twitter/X'},
+            { link: discord, text: 'Discord'}, { link: otherLink, text: 'Link'}
+        ].filter(item => item.link);
 
         const footerSection = `
           <footer>
             <p>© ${new Date().getFullYear()} ${name}. All Rights Reserved.</p>
             ${footerText ? `<p class="footer-disclaimer">${footerText}</p>` : ''}
-            ${(telegram || twitter) && showCommunity ? /* Avoid duplicating links if community section exists */ '' :
+            ${showFooterLinks && footerSocialLinks.length > 0 ?
               `<p class="footer-links">
-                ${telegram ? `<a href="${telegram}" target="_blank">Telegram</a>` : ''}
-                ${telegram && twitter ? ' | ' : ''}
-                ${twitter ? `<a href="${twitter}" target="_blank">Twitter/X</a>` : ''}
-              </p>`
+                ${footerSocialLinks.map(sl => `<a href="${sl.link}" target="_blank">${sl.text}</a>`).join(' | ')}
+              </p>` : ''
             }
           </footer>`;
 
-      // --- Return Full HTML Document ---
+      // --- Assemble Full HTML Document ---
       return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="${tagline} - Join the ${name} meme coin revolution!">
-  <meta name="keywords" content="${name}, meme coin, crypto, cryptocurrency, token, ${tagline.split(' ').join(', ')}">
-  <title>${name} - ${tagline}</title>
+  <meta name="description" content="${tagline} - Join the ${name} meme coin!">
+  <meta name="keywords" content="${name}, meme coin, crypto, token, ${tagline.split(' ').join(', ')}">
+  <title>${name} - ${tagline || 'Meme Coin'}</title>
   ${googleFontLink}
   <link rel="icon" href="${faviconHref}">
   <style>
+    /* --- Base Styles & Variables --- */
     :root {
       --font-heading: '${headingFont}', sans-serif;
       --font-body: '${bodyFont}', sans-serif;
@@ -419,382 +525,337 @@
       --color-secondary-transparent: ${colors[1]}20;
       --color-primary-shadow: ${colors[0]}80;
       --color-secondary-shadow: ${colors[1]}80;
+      --background-color: #0a0a0a;
+      --text-color: #fff;
+      --text-color-muted: #ccc;
+      --card-background: rgba(18, 18, 18, 0.85);
+      --card-border: #222;
+      --border-radius-small: 5px;
+      --border-radius-medium: 10px;
+      --border-radius-large: 15px;
+      --shadow-color: rgba(0, 0, 0, 0.6);
+      --shadow-light: 0 4px 15px var(--shadow-color);
+      --shadow-medium: 0 8px 30px var(--shadow-color);
+      --header-overlay: linear-gradient(rgba(10, 10, 10, 0.7), rgba(10, 10, 10, 0.9));
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
     body {
       font-family: var(--font-body);
-      background: #0a0a0a;
-      color: #fff;
-      line-height: 1.7; /* Slightly increased line-height */
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.7;
       overflow-x: hidden;
       position: relative;
     }
+    body.animations-disabled * { animation: none !important; transition: none !important; }
 
-    /* Header */
-    header {
-      position: relative;
-      min-height: 70vh; /* Adjusted height */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 5rem 2rem; /* Increased padding */
-      overflow: hidden;
-      background: linear-gradient(rgba(10, 10, 10, 0.7), rgba(10, 10, 10, 0.9)); /* Dark overlay */
+    /* --- Basic Elements --- */
+    h1, h2, h3 { font-family: var(--font-heading); line-height: 1.3; }
+    h1 { font-size: clamp(2.5rem, 10vw, 5.5rem); font-weight: 900; }
+    h2 { font-size: clamp(1.2rem, 5vw, 2rem); font-weight: 400; color: var(--text-color-muted); margin-bottom: 1.5rem; }
+    h3 { font-size: clamp(1.8rem, 6vw, 2.8rem); color: var(--color-primary); margin-bottom: 2rem; position: relative; padding-bottom: 0.5rem; border-bottom: 2px solid var(--color-primary-transparent); display: inline-block; }
+    h3 .section-icon { margin-right: 10px; display: inline-block; /* Allows transform */ }
+    p { margin-bottom: 1rem; color: var(--text-color-muted); }
+    a { color: var(--color-secondary); text-decoration: none; transition: color 0.3s ease; }
+    a:hover { color: var(--color-primary); }
+    ul, ol { list-style: none; padding-left: 0; }
+    section ul li, section ol li {
+        position: relative; padding: 0.8rem 0 0.8rem 35px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 0.5rem;
     }
-    header img.banner {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      object-fit: cover;
-      z-index: -1; /* Behind overlay */
-      filter: brightness(0.6); /* Further dim */
-      opacity: 0.8;
+    section ul li:last-child, section ol li:last-child { border-bottom: none; }
+    section ul li::before, section ol li::before { /* List item marker */
+        content: '»'; /* Default marker */
+        position: absolute; left: 5px; top: 50%; transform: translateY(-50%);
+        font-size: 1.4rem; color: var(--color-primary); font-weight: bold;
     }
-    /* Removed header::before pseudo-element for cleaner overlay */
-    header h1 {
-      font-family: var(--font-heading);
-      font-size: clamp(2.5rem, 10vw, 5.5rem); /* Responsive font size */
-      font-weight: 900; /* Make heading bolder if font supports */
-      color: var(--color-primary);
-      text-shadow: 0 0 20px var(--color-primary-shadow), 0 0 35px var(--color-secondary-shadow);
-      margin: 1rem 0;
-      z-index: 2;
-      position: relative;
-      animation: glow 2.5s ease-in-out infinite alternate;
-    }
-    header h2 {
-      font-size: clamp(1.2rem, 5vw, 2rem); /* Responsive font size */
-      font-weight: 400;
-      color: #eee; /* Slightly off-white */
-      text-shadow: 1px 1px 10px rgba(0,0,0,0.7);
-      z-index: 2;
-      position: relative;
-      margin-bottom: 2rem; /* Space before CTA */
-      max-width: 800px; /* Limit width */
-      animation: fadeInUp 1s ease-out forwards;
-    }
-    .cta-button {
-        font-family: var(--font-heading);
-        background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
-        color: #000;
-        padding: 15px 35px;
-        border-radius: 50px;
-        text-decoration: none;
-        font-size: clamp(1rem, 4vw, 1.3rem);
-        font-weight: 600; /* Bolder CTA */
-        z-index: 2;
-        position: relative;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        box-shadow: 0 5px 25px var(--color-primary-shadow);
-        display: inline-block; /* Allow margin */
-        margin-top: 1rem;
-    }
-    .cta-button:hover {
-        transform: scale(1.08);
-        box-shadow: 0 8px 35px var(--color-secondary-shadow);
+    ol { counter-reset: step-counter; }
+    ol li.step { padding-left: 45px; /* Make space for number */ }
+    ol li.step::before {
+        content: counter(step-counter); counter-increment: step-counter;
+        left: 5px; width: 25px; height: 25px; line-height: 25px; text-align: center;
+        border-radius: 50%; background: var(--color-primary); color: #000; font-size: 0.9rem; font-weight: bold;
     }
 
-    /* Content */
-    .content {
-      max-width: 1100px; /* Slightly narrower */
-      margin: -50px auto 0 auto; /* Pull content slightly over header bottom */
-      padding: 3rem 1.5rem; /* Adjusted padding */
-      position: relative;
-      z-index: 3; /* Above header elements */
-      display: flex;
-      flex-direction: column;
-      gap: 4rem; /* Spacing between sections */
-    }
-
-    /* General Section Styling */
+    /* --- Layout & Structure --- */
+    .content { max-width: 1100px; margin: -50px auto 0 auto; padding: 3rem 1.5rem; position: relative; z-index: 3; display: flex; flex-direction: column; gap: 4rem; }
     section {
-        padding: 3rem clamp(1rem, 5vw, 3rem); /* Responsive padding */
-        background: rgba(18, 18, 18, 0.85); /* Slightly lighter bg */
-        border-radius: 15px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-        border: 1px solid #222; /* Subtle border */
-        backdrop-filter: blur(5px); /* Frosted glass effect if supported */
-        position: relative;
-        overflow: hidden; /* Contain pseudo-elements */
-    }
-    section h3 {
-        font-family: var(--font-heading);
-        font-size: clamp(1.8rem, 6vw, 2.8rem); /* Responsive */
-        color: var(--color-primary);
-        margin-bottom: 2rem;
-        text-shadow: 0 0 15px var(--color-primary-shadow);
-        position: relative;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid var(--color-primary-transparent);
-        display: inline-block; /* Fit border to text */
-    }
-    section ul {
-        font-size: clamp(1rem, 3vw, 1.1rem); /* Responsive */
-        color: #ccc;
-        list-style: none;
-        padding-left: 0; /* Remove default padding */
-    }
-     section ul li {
-        position: relative;
-        padding: 0.8rem 0 0.8rem 35px; /* Adjusted padding */
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        transition: all 0.3s ease;
-        margin-bottom: 0.5rem; /* Spacing between list items */
-    }
-    section ul li:last-child {
-        border-bottom: none;
-    }
-    section ul li:hover {
-        color: var(--color-secondary);
-        transform: translateX(5px);
-        background-color: rgba(255, 255, 255, 0.03);
-    }
-    section ul li::before { /* General list item icon */
-        content: '⚡'; /* Default icon */
-        position: absolute;
-        left: 5px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 1.4rem;
-        color: var(--color-primary);
+        padding: 3rem clamp(1rem, 5vw, 3rem); background: var(--card-background);
+        border-radius: var(--border-radius-large); box-shadow: var(--shadow-medium);
+        border: 1px solid var(--card-border); backdrop-filter: blur(5px);
+        position: relative; overflow: hidden;
     }
 
-
-    /* Section Specific Styles & Icons */
-    section#about { background: rgba(25, 25, 25, 0.9); }
-    section#about h3::before { content: 'ℹ️'; margin-right: 15px; }
-    section#about p { font-size: clamp(1rem, 3vw, 1.15rem); color: #ddd; }
-
-    section#tokenomics { border-left: 5px solid var(--color-secondary); }
-    section#tokenomics h3::before { content: '📊'; margin-right: 15px; }
-    section#tokenomics ul li::before { content: '💰'; }
-
-    section#roadmap { border-left: 5px solid var(--color-primary); }
-    section#roadmap h3::before { content: '🗺️'; margin-right: 15px; }
-    section#roadmap ul li::before { content: '🚀'; }
-
-    section#community { text-align: center; background: linear-gradient(135deg, var(--color-primary-transparent), var(--color-secondary-transparent)); }
-    section#community h3 { display: block; border-bottom: none; } /* Center heading */
-    section#community h3::before { content: '🌐'; margin-right: 15px; }
-    section#community .social-links {
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      margin-top: 1.5rem;
+    /* --- Navbar --- */
+    .navbar {
+        background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px);
+        padding: 1rem 2rem; position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+        border-bottom: 1px solid var(--card-border); box-shadow: var(--shadow-light);
     }
-    section#community a {
-      color: #0a0a0a; /* Dark text on bright button */
-      font-weight: 600;
-      text-decoration: none;
-      padding: 0.8rem 1.8rem; /* Adjusted padding */
-      background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
-      border-radius: 50px;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 15px var(--color-primary-shadow);
-      font-family: var(--font-heading);
-      font-size: clamp(0.9rem, 3vw, 1.1rem);
-      text-transform: uppercase;
-      border: 2px solid transparent;
+    .navbar .nav-container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+    .navbar .nav-brand { font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-primary); font-weight: bold; }
+    .navbar .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .navbar .nav-links a { color: var(--text-color-muted); font-weight: 500; }
+    .navbar .nav-links a:hover { color: var(--color-primary); }
+    .navbar .nav-button {
+        background: var(--color-secondary); color: #000; padding: 0.5rem 1rem; border-radius: var(--border-radius-small);
+        font-weight: bold; transition: transform 0.2s ease, background 0.3s ease;
     }
-    section#community a:hover {
-      transform: translateY(-5px) scale(1.05);
-      box-shadow: 0 5px 25px var(--color-secondary-shadow);
-      background: linear-gradient(45deg, var(--color-secondary), var(--color-primary)); /* Flip gradient */
-      color: #000;
-    }
+    .navbar .nav-button:hover { background: var(--color-primary); transform: scale(1.05); }
+    /* Add mobile menu toggle later if needed */
+    body { padding-top: 70px; /* Adjust if navbar height changes */ }
 
-    /* Logo */
-    .logo-container { /* Add container for centering */
-       text-align: center;
-       padding: 2rem 0;
-       margin-top: 2rem;
+
+    /* --- Header --- */
+    header {
+      position: relative; min-height: 70vh; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center; padding: 5rem 2rem; overflow: hidden;
+      background: var(--header-overlay); margin-top: -70px; /* Offset navbar */
     }
+    header img.banner { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; filter: brightness(0.6); opacity: 0.8; }
+    header h1 { color: var(--color-primary); text-shadow: 0 0 20px var(--color-primary-shadow), 0 0 35px var(--color-secondary-shadow); margin: 1rem 0; z-index: 2; animation: glow 2.5s ease-in-out infinite alternate; }
+    header h2 { text-shadow: 1px 1px 10px rgba(0,0,0,0.7); z-index: 2; max-width: 800px; animation: fadeInUp 1s ease-out forwards; }
+    .header-buttons { margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; z-index: 2; }
+    .cta-button {
+        font-family: var(--font-heading); color: #000; padding: 15px 35px; border-radius: 50px; text-decoration: none;
+        font-size: clamp(1rem, 4vw, 1.3rem); font-weight: 600; transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: inline-block;
+    }
+    .cta-button.primary-cta { background: linear-gradient(45deg, var(--color-primary), var(--color-secondary)); box-shadow: 0 5px 25px var(--color-primary-shadow); }
+    .cta-button.secondary-cta { background: var(--text-color-muted); color: #000; box-shadow: 0 3px 15px rgba(0,0,0,0.4); }
+    .cta-button:hover { transform: scale(1.08); }
+    .cta-button.primary-cta:hover { box-shadow: 0 8px 35px var(--color-secondary-shadow); }
+    .cta-button.secondary-cta:hover { background: var(--text-color); }
+
+
+    /* --- Specific Sections Styling --- */
+    #how-to-buy {} /* Already handled by ol li.step */
+    #tokenomics ul li::before { content: '📊'; }
+    #roadmap ul li::before { content: '🚀'; }
+    #team .team-list li::before { content: '👤'; }
+    #partners .partners-list li::before { content: '🤝'; }
+    #faq .faq-container { display: flex; flex-direction: column; gap: 1rem; }
+    #faq details { background: rgba(255,255,255,0.05); border-radius: var(--border-radius-medium); border: 1px solid rgba(255,255,255,0.1); }
+    #faq summary { padding: 1rem; cursor: pointer; font-weight: bold; color: var(--color-primary); list-style-type: '❓ '; }
+    #faq details[open] summary { list-style-type: '❕ '; }
+    #faq details p { padding: 0 1rem 1rem 1rem; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 0.5rem; }
+    #community { text-align: center; }
+    #community .social-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.5rem; }
+    .social-button {
+        color: #0a0a0a; font-weight: 600; text-decoration: none; padding: 0.8rem 1.8rem;
+        background: linear-gradient(45deg, var(--color-primary), var(--color-secondary)); border-radius: 50px;
+        transition: all 0.3s ease; box-shadow: 0 0 15px var(--color-primary-shadow); font-family: var(--font-heading);
+        font-size: clamp(0.9rem, 3vw, 1.1rem); text-transform: uppercase; border: 2px solid transparent; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .social-button:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 5px 25px var(--color-secondary-shadow); background: linear-gradient(45deg, var(--color-secondary), var(--color-primary)); }
+    .social-icon { display: inline-block; }
+
+    /* --- Logo --- */
+    .logo-container { text-align: center; padding: 2rem 0; margin-top: 2rem; }
     .logo {
-      width: clamp(100px, 20vw, 150px); /* Responsive */
-      border-radius: 50%;
-      border: 4px solid var(--color-primary);
-      box-shadow: 0 0 25px var(--color-primary-shadow);
-      transition: all 0.5s ease;
-      animation: spinGlow 8s linear infinite alternate; /* Slower spin */
-      display: inline-block; /* Needed for text-align center */
+      width: clamp(100px, 20vw, 150px); border-radius: 50%; border: 4px solid var(--color-primary);
+      box-shadow: 0 0 25px var(--color-primary-shadow); transition: all 0.5s ease; animation: spinGlow 8s linear infinite alternate; display: inline-block;
     }
-    .logo:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 40px var(--color-secondary-shadow); /* Glow with secondary on hover */
-    }
+    .logo:hover { transform: scale(1.1); box-shadow: 0 0 40px var(--color-secondary-shadow); }
 
-    /* Footer */
+    /* --- Footer --- */
     footer {
-      background: #050505; /* Darker footer */
-      padding: 2.5rem 1rem;
-      text-align: center;
-      border-top: 3px solid var(--color-primary); /* Thicker border */
-      margin-top: 4rem; /* More space before footer */
+      background: #050505; padding: 2.5rem 1rem; text-align: center; border-top: 3px solid var(--color-primary); margin-top: 4rem;
     }
-    footer p {
-      font-size: clamp(0.9rem, 2.5vw, 1rem);
-      color: #aaa;
-      margin-bottom: 0.8rem;
-    }
-    footer p.footer-disclaimer {
-        font-size: 0.85rem;
-        color: #777;
-        font-style: italic;
-    }
-    footer a {
-      color: var(--color-secondary);
-      font-weight: 500; /* Slightly less bold */
-      text-decoration: none;
-      transition: all 0.3s ease;
-      margin: 0 8px; /* Spacing for inline links */
-    }
-    footer a:hover {
-      color: var(--color-primary);
-      text-shadow: 0 0 8px var(--color-primary-shadow);
-    }
+    footer p { font-size: clamp(0.9rem, 2.5vw, 1rem); color: #aaa; margin-bottom: 0.8rem; }
+    footer p.footer-disclaimer { font-size: 0.85rem; color: #777; font-style: italic; }
+    footer .footer-links a { margin: 0 8px; }
 
+    /* --- Animations --- */
+    @keyframes glow { from { text-shadow: 0 0 15px var(--color-primary-shadow), 0 0 25px var(--color-secondary-shadow); } to { text-shadow: 0 0 25px var(--color-primary-shadow), 0 0 40px var(--color-secondary-shadow); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spinGlow { 0% { transform: rotate(0deg); box-shadow: 0 0 25px var(--color-primary-shadow); border-color: var(--color-primary); } 50% { transform: rotate(180deg); box-shadow: 0 0 35px var(--color-secondary-shadow); border-color: var(--color-secondary); } 100% { transform: rotate(360deg); box-shadow: 0 0 25px var(--color-primary-shadow); border-color: var(--color-primary); } }
 
-    /* Animations */
-    @keyframes glow {
-      from { text-shadow: 0 0 15px var(--color-primary-shadow), 0 0 25px var(--color-secondary-shadow); }
-      to { text-shadow: 0 0 25px var(--color-primary-shadow), 0 0 40px var(--color-secondary-shadow); }
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(25px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes spinGlow {
-      0% { transform: rotate(0deg); box-shadow: 0 0 25px var(--color-primary-shadow); border-color: var(--color-primary); }
-      50% { transform: rotate(180deg); box-shadow: 0 0 35px var(--color-secondary-shadow); border-color: var(--color-secondary); }
-      100% { transform: rotate(360deg); box-shadow: 0 0 25px var(--color-primary-shadow); border-color: var(--color-primary); }
-    }
-
-    /* Responsive */
+    /* --- Responsiveness --- */
     @media (max-width: 768px) {
-      header { min-height: 60vh; padding: 4rem 1rem; }
+      body { padding-top: 60px; /* Adjust for smaller navbar */ }
+      .navbar { padding: 0.8rem 1rem; }
+      .navbar .nav-container { /* Basic mobile toggle setup - non-functional JS needed */ flex-wrap: wrap; }
+      .navbar .nav-links { display: none; /* Hide links by default on mobile */ width: 100%; flex-direction: column; align-items: flex-start; padding-top: 1rem; }
+      /* Need JS to show/hide .nav-links on mobile */
+      header { min-height: 60vh; padding: 4rem 1rem; margin-top: -60px; }
       .content { margin-top: -30px; padding: 2rem 1rem; gap: 2.5rem; }
       section { padding: 2rem; }
-      section h3 { font-size: 1.8rem; }
-      section ul { font-size: 0.95rem; }
-      section ul li { padding-left: 30px; }
-      section ul li::before { font-size: 1.2rem; left: 0; }
-      section#community a { padding: 0.7rem 1.5rem; font-size: 0.9rem;}
+      h1 { font-size: 2.5rem; } h2 { font-size: 1.3rem; } h3 { font-size: 1.8rem; }
       .cta-button { padding: 12px 30px; font-size: 1.1rem; }
+      .social-button { padding: 0.7rem 1.5rem; font-size: 0.9rem;}
     }
      @media (max-width: 480px) {
-         header h1 { font-size: 2.2rem; }
-         header h2 { font-size: 1.1rem; }
-         section h3 { font-size: 1.6rem; }
+         h1 { font-size: 2.2rem; } h2 { font-size: 1.1rem; } h3 { font-size: 1.6rem; }
          .cta-button { padding: 10px 25px; font-size: 1rem; }
-         section#community .social-links { gap: 1rem; }
-         section#community a { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
+         .social-button { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
      }
+
+
+    /* --- ✨ Style Theme Overrides ✨ --- */
+
+    /* --- Sci-Fi Theme --- */
+    .theme-sci-fi {
+        --border-radius-small: 2px; --border-radius-medium: 4px; --border-radius-large: 6px;
+        --card-background: rgba(10, 20, 30, 0.8);
+        --card-border: var(--color-primary-transparent);
+        --header-overlay: linear-gradient(rgba(5, 10, 20, 0.8), rgba(5, 15, 25, 0.95));
+    }
+    .theme-sci-fi h1, .theme-sci-fi h2, .theme-sci-fi h3 { text-transform: uppercase; letter-spacing: 1px; }
+    .theme-sci-fi section { border-left: 3px solid var(--color-primary); border-right: 3px solid var(--color-secondary); }
+    .theme-sci-fi .cta-button, .theme-sci-fi .social-button, .theme-sci-fi .navbar .nav-button { border-radius: var(--border-radius-small); }
+    .theme-sci-fi .logo { border-radius: 10%; border-width: 2px; animation: none; /* Optional: different animation */ }
+    .theme-sci-fi section ul li::before, .theme-sci-fi section ol li::before { content: '>'; font-weight: bold; font-size: 1.5rem; }
+    .theme-sci-fi ol li.step::before { border-radius: 2px; } /* Sharp step counter */
+    .theme-sci-fi #faq details { border: 1px solid var(--color-primary-transparent); }
+    .theme-sci-fi #faq summary { list-style-type: '+ '; }
+    .theme-sci-fi #faq details[open] summary { list-style-type: '- '; }
+
+
+    /* --- Cartoony Theme --- */
+    .theme-cartoony {
+        --border-radius-small: 15px; --border-radius-medium: 25px; --border-radius-large: 35px;
+        --card-background: rgba(25, 25, 25, 0.9);
+        --card-border: transparent; /* Rely on shadow */
+        --shadow-color: rgba(0, 0, 0, 0.4);
+        --shadow-medium: 5px 5px 0px var(--color-primary), 10px 10px 0px var(--color-secondary); /* Hard shadow */
+    }
+    .theme-cartoony body { background: linear-gradient(45deg, #111, #222); }
+    .theme-cartoony h1, .theme-cartoony h2, .theme-cartoony h3 { text-shadow: 3px 3px 0px #000; }
+    .theme-cartoony section { box-shadow: var(--shadow-medium); border: 3px solid #000; }
+    .theme-cartoony .cta-button, .theme-cartoony .social-button, .theme-cartoony .navbar .nav-button {
+        border-radius: 50px; border: 2px solid #000; box-shadow: 3px 3px 0px #000;
+        transform: scale(1); /* Reset base transform */
+    }
+    .theme-cartoony .cta-button:hover, .theme-cartoony .social-button:hover, .theme-cartoony .navbar .nav-button:hover {
+        transform: translate(-2px, -2px); box-shadow: 5px 5px 0px #000;
+    }
+    .theme-cartoony .logo { border-radius: 50%; border-width: 5px; border-style: dashed; animation: spinGlow 10s linear infinite; }
+    .theme-cartoony section ul li::before, .theme-cartoony section ol li::before { content: '⭐'; font-size: 1.6rem; }
+    .theme-cartoony ol li.step::before { border-radius: 50%; border: 2px solid #000; }
+    .theme-cartoony #faq details { border: 2px solid #000; box-shadow: 2px 2px 0 #000; }
+    .theme-cartoony #faq summary { list-style-type: '👉 '; }
+    .theme-cartoony #faq details[open] summary { list-style-type: '👇 '; }
+
+    /* --- Minimalist Theme --- */
+    .theme-minimalist {
+        --border-radius-small: 4px; --border-radius-medium: 8px; --border-radius-large: 12px;
+        --background-color: #f8f9fa; /* Light background */
+        --text-color: #212529; /* Dark text */
+        --text-color-muted: #6c757d;
+        --card-background: #ffffff;
+        --card-border: #dee2e6;
+        --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.1);
+        --header-overlay: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+    }
+    .theme-minimalist body { padding-top: 60px; }
+    .theme-minimalist .navbar { background: rgba(255, 255, 255, 0.9); border-bottom-color: #e9ecef; }
+    .theme-minimalist .navbar a { color: #495057; }
+    .theme-minimalist .navbar .nav-brand { color: var(--color-primary); }
+    .theme-minimalist .navbar .nav-links a:hover { color: var(--color-primary); }
+    .theme-minimalist .navbar .nav-button { background: var(--color-primary); color: var(--text-color); }
+    .theme-minimalist .navbar .nav-button:hover { background: var(--color-secondary); }
+    .theme-minimalist header img.banner { opacity: 0.5; filter: grayscale(50%) brightness(1.2); }
+    .theme-minimalist header h1 { color: var(--color-primary); text-shadow: none; animation: none; }
+    .theme-minimalist header h2 { color: var(--text-color-muted); text-shadow: none; animation: none; }
+    .theme-minimalist section { box-shadow: var(--shadow-medium); border: 1px solid var(--card-border); }
+    .theme-minimalist h3 { color: #343a40; border-bottom-color: #dee2e6; }
+    .theme-minimalist .cta-button, .theme-minimalist .social-button { border-radius: var(--border-radius-medium); box-shadow: var(--shadow-light); animation: none; }
+    .theme-minimalist .cta-button.primary-cta { background: var(--color-primary); color: #fff; } /* Ensure contrast */
+    .theme-minimalist .cta-button.secondary-cta { background: #e9ecef; color: #495057; }
+    .theme-minimalist .cta-button:hover { transform: translateY(-2px); }
+    .theme-minimalist .social-button { background: #f1f3f5; color: #495057; box-shadow: none; border: 1px solid #dee2e6; }
+    .theme-minimalist .social-button:hover { background: #e9ecef; }
+    .theme-minimalist .logo { border-radius: var(--border-radius-medium); border: 2px solid var(--card-border); box-shadow: none; animation: none; }
+    .theme-minimalist footer { background: #e9ecef; color: #6c757d; border-top-color: var(--color-primary); }
+    .theme-minimalist footer a { color: var(--color-primary); }
+    .theme-minimalist footer a:hover { color: var(--color-secondary); }
+    .theme-minimalist section ul li::before, .theme-minimalist section ol li::before { content: '•'; color: var(--color-primary); }
+    .theme-minimalist ol li.step::before { background: #e9ecef; color: #495057; }
+    .theme-minimalist #faq details { background: #f8f9fa; border-color: #dee2e6; }
+    .theme-minimalist #faq summary { color: var(--color-primary); }
+
+    /* --- Retro Pixel Theme --- */
+    .theme-retro-pixel {
+        --border-radius-small: 0; --border-radius-medium: 0; --border-radius-large: 0;
+        --card-background: rgba(30, 30, 30, 0.9);
+        --card-border: var(--color-primary);
+        --background-color: #000;
+        image-rendering: pixelated; /* Make images pixely */
+    }
+    .theme-retro-pixel body { background: #000 url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4"><path fill="%23222" d="M0 0h2v2H0zM2 2h2v2H2z"/></svg>'); }
+    .theme-retro-pixel h1, .theme-retro-pixel h2, .theme-retro-pixel h3 { text-shadow: 2px 2px 0 var(--color-secondary); letter-spacing: 1px; }
+    .theme-retro-pixel section { border: 2px solid var(--color-primary); box-shadow: 4px 4px 0px var(--color-secondary); }
+    .theme-retro-pixel .navbar { background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--color-primary); }
+    .theme-retro-pixel .navbar .nav-button { background: var(--color-primary); color: #000; border: 1px solid var(--color-secondary); }
+    .theme-retro-pixel header img.banner { filter: contrast(1.5) brightness(0.8); }
+    .theme-retro-pixel .cta-button, .theme-retro-pixel .social-button {
+        border: 2px solid var(--color-primary); box-shadow: 3px 3px 0px var(--color-secondary);
+        transform: scale(1);
+    }
+    .theme-retro-pixel .cta-button:hover, .theme-retro-pixel .social-button:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0px var(--color-secondary); }
+    .theme-retro-pixel .logo { border: 3px solid var(--color-primary); animation: none; image-rendering: pixelated; }
+    .theme-retro-pixel section ul li::before, .theme-retro-pixel section ol li::before { content: '#'; color: var(--color-primary); }
+    .theme-retro-pixel ol li.step::before { background: var(--color-primary); color: #000; }
+    .theme-retro-pixel #faq details { border: 1px solid var(--color-primary); }
+    .theme-retro-pixel #faq summary::before { content: '[+] '; }
+    .theme-retro-pixel #faq details[open] summary::before { content: '[-] '; }
+    .theme-retro-pixel #faq summary { list-style-type: none; } /* Remove default marker */
 
   </style>
 </head>
-<body>
+<body class="theme-${styleTheme} ${enableAnimations ? '' : 'animations-disabled'}">
 
+  ${navbarHTML}
   ${headerSection}
 
   <div class="content">
-    ${aboutSection}
-    ${tokenomicsSection}
-    ${roadmapSection}
-    ${communitySection}
+    ${contentSectionsHTML}
   </div>
 
-  ${logoData ? `<div class="logo-container"><img src="${logoData}" class="logo" alt="${name} Logo" loading="lazy" /></div>` : ''}
-
+  ${logoHTML}
   ${footerSection}
 
 </body>
 </html>`;
     } // End of buildHTML function
 
+
+    // --- Event Listeners & Utils ---
     function generatePreview() {
       const preview = document.getElementById("previewFrame");
       try {
           const html = buildHTML();
           const blob = new Blob([html], { type: "text/html" });
           const url = URL.createObjectURL(blob);
-          preview.src = url; // Set the source
-          preview.style.display = "block"; // Make it visible
-          // Optional: Scroll to the preview
+          preview.src = url;
+          preview.style.display = "block";
           preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // Revoke previous URL if exists to free memory
-          if (preview.dataset.previousUrl) {
-              URL.revokeObjectURL(preview.dataset.previousUrl);
-          }
-          preview.dataset.previousUrl = url; // Store current URL
+          if (preview.dataset.previousUrl) { URL.revokeObjectURL(preview.dataset.previousUrl); }
+          preview.dataset.previousUrl = url;
       } catch (error) {
           console.error("Error generating preview:", error);
-          alert("An error occurred while generating the preview. Check the console for details.");
-          preview.style.display = "none"; // Hide iframe on error
+          alert("Preview Error. Check console.");
+          preview.style.display = "none";
       }
     }
 
     function downloadSite() {
       try {
-          const html = buildHTML();
+          const html = buildHTML(); // Regenerate with latest options
           const name = getValue('coinName').replace(/[^a-zA-Z0-9]/g, '') || 'memecoin';
           const zip = new JSZip();
-
-          // Add HTML file
           zip.file("index.html", html);
-
-          // Create an images folder in the zip
-          const imgFolder = zip.folder("images");
-
-          // Add images if they exist, extracting base64 data
-          if (bannerData) {
-              imgFolder.file("banner." + bannerData.substring(bannerData.indexOf('/') + 1, bannerData.indexOf(';')), bannerData.split(",")[1], {base64: true});
-          }
-          if (logoData) {
-              imgFolder.file("logo." + logoData.substring(logoData.indexOf('/') + 1, logoData.indexOf(';')), logoData.split(",")[1], {base64: true});
-          }
-           if (faviconData) {
-               // Determine extension for favicon
-               let faviconExt = 'png'; // default
-               if (faviconData.startsWith('data:image/x-icon')) {
-                   faviconExt = 'ico';
-               } else if (faviconData.startsWith('data:image/png')) {
-                   faviconExt = 'png';
-               } // Add more types if needed (gif, jpg etc)
-              // Favicon usually goes in the root, but can also be in images
-              // Let's put it in root for convention, but adjust buildHTML to link correctly if needed.
-              // buildHTML currently links directly to base64 favicon or logo, which is fine for single page.
-              // If linking externally: zip.file("favicon." + faviconExt, faviconData.split(",")[1], {base64: true});
-              // For simplicity with base64 embedding, no separate file needed in zip unless specifically linking relatively.
-              // Let's adjust buildHTML to prefer linking relatively if files are downloaded.
-              // --- Re-evaluating: Simpler to keep embedding for single HTML download ---
-              // However, if user wants separate files:
-              zip.file("favicon." + faviconExt, faviconData.split(",")[1], { base64: true });
-              // Then, buildHTML would need modification to link relatively: <link rel="icon" href="favicon.ico">
-              // For now, stick with embedded base64 for simplicity in both preview and download.
-          }
-
-
-          // Generate and download the zip file
+          // Note: Images are embedded via Base64 in this version for simplicity.
+          // No need to add separate image files to the zip unless index.html is modified to link relatively.
           zip.generateAsync({ type: "blob" }).then(content => {
               saveAs(content, `${name}-website.zip`);
-          }).catch(err => {
-             console.error("Error generating ZIP:", err);
-             alert("Could not generate the ZIP file.");
-          });
-
-      } catch (error) {
-           console.error("Error preparing download:", error);
-           alert("An error occurred while preparing the download. Check the console for details.");
-      }
+          }).catch(err => { console.error("ZIP Error:", err); alert("Could not generate ZIP."); });
+      } catch (error) { console.error("Download Error:", error); alert("Download Prep Error. Check console."); }
     }
 
-    // Add event listener to generate preview on initial load if needed (optional)
-    // window.addEventListener('DOMContentLoaded', () => {
-    //     // You could pre-fill some defaults and generate an initial preview
-    //     // generatePreview();
-    // });
+    // Optional: Add listener to update preview when theme changes
+    // document.getElementById('styleTheme')?.addEventListener('change', generatePreview);
 
   </script>
 </body>
