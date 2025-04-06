@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Portal - Raid Team Services</title>
+    <link rel="icon" href="images/logo.png">
+    <link rel="stylesheet" href="style.css"> <style>
+        main#raid-main { padding-top: 2rem; }
+        .raid-info-container {
+            background-color: #1a1a1a; padding: 2rem; border-radius: 15px;
+            border: 1px solid #333; width: 100%; max-width: 960px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column;
+            gap: 2.5rem; margin-left: auto; margin-right: auto;
+        }
+        .service-section {
+            border-bottom: 1px solid #333;
+            padding-bottom: 2rem;
+        }
+        .service-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .service-section h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: #00ffe0;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.6rem;
+        }
+        .service-section h3 {
+            color: #eee;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #444;
+            padding-bottom: 0.3rem;
+            display: inline-block;
+        }
+        .service-section p, .service-section li {
+            color: #ccc;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+        .service-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        /* Styling for pricing list items */
+        .service-section ul li.pricing-item { /* Added class for specific styling */
+            background-color: #222;
+            padding: 1rem 1.5rem; /* Increased padding */
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #00ffe0;
+        }
+         .service-section li strong { /* Highlight key info */
+            color: #fff;
+            font-weight: 600;
+         }
+         /* Styling for general info list items */
+         .service-section ul li:not(.pricing-item) {
+             padding-left: 1.2em; /* Indent general list items */
+             position: relative;
+             margin-bottom: 0.5rem;
+         }
+          .service-section ul li:not(.pricing-item)::before {
+              content: '»'; /* Bullet point */
+              position: absolute;
+              left: 0;
+              color: #00ffe0;
+              font-weight: bold;
+          }
+
+        .pricing-note {
+            font-size: 0.9rem;
+            color: #aaa;
+            background-color: #252525;
+            padding: 0.8rem 1rem; /* Adjusted padding */
+            border-radius: 5px;
+            border-left: 3px solid #facc15; /* Gold/Yellow accent */
+            margin-top: 1rem;
+            line-height: 1.5;
+        }
+         .contact-info {
+             text-align: center;
+             margin-top: 1rem;
+             padding: 1.5rem;
+             background-color: #222;
+             border-radius: 8px;
+         }
+         .contact-info p {
+             margin-bottom: 0.5rem;
+             font-size: 1.1rem;
+             color: #eee;
+         }
+         .contact-info a { /* Style contact link if added */
+             color: #38bdf8; /* Sky blue */
+             font-weight: bold;
+             text-decoration: none;
+         }
+         .contact-info a:hover {
+             text-decoration: underline;
+         }
+    </style>
+</head>
+<body>
+    <div id="navbar-placeholder"></div>
+
+    <main id="raid-main">
+        <h1 class="page-title">Raid Team Services ⚔️</h1>
+        <p class="page-subtitle">Amplify your project's reach on X/Twitter with coordinated engagement.</p>
+
+        <div class="raid-info-container">
+
+            <section class="service-section">
+                <h2>What is a Raid Team?</h2>
+                <p>
+                    A Raid Team is a dedicated group focused on promoting your coin by strategically engaging with posts from crypto influencers and relevant accounts on X (Twitter). This involves activities like replying, liking, and retweeting to increase your project's visibility within the target community.
+                </p>
+                <p>
+                    We utilize tools like Telegram bots (e.g., RaidBot) to organize these efforts efficiently, track engagement, earn "energy" for participation, and potentially climb leaderboards for added exposure. Classic raids to involve the community without specifically targeting the raidboard are part of our standard service.
+                </p>
+            </section>
+
+            <section class="service-section">
+                <h2>Weekly Service Packages</h2>
+                <p>Choose the level of engagement that best suits your project's needs and budget. All packages include coordination and standard raiding strategies.</p>
+                <ul>
+                    <li class="pricing-item"><strong>6 Hours / Day:</strong> Consistent daily presence during key engagement periods. Ideal for steady growth.<br><strong>Price: $250 USD / week</strong></li>
+                    <li class="pricing-item"><strong>12 Hours / Day:</strong> Extended coverage across more time zones and peak activity windows.<br><strong>Price: $500 USD / week</strong></li>
+                    <li class="pricing-item"><strong>24/7 Full Rotation:</strong> Continuous, round-the-clock raiding for maximum visibility and engagement momentum.<br><strong>Price: $1200 USD / week</strong></li>
+                </ul>
+                <div class="pricing-note">
+                    <strong>Timezone & Night Shifts:</strong> Our standard operating timezone is UTC+1. Night shifts outside standard coverage (relative to UTC+1) incur an additional surcharge of $200 USD weekly.
+                </div>
+                 <div class="pricing-note">
+                     <strong>Targeted Raidboard Option:</strong> If you require a focused effort specifically targeting official raid leaderboards (like RaidBot's), the price for your chosen package doubles due to the increased intensity and resources needed.
+                </div>
+            </section>
+
+            <section class="service-section">
+                <h2>How It Works</h2>
+                <p>
+                    Upon starting a service package, we create a dedicated, private Telegram group for seamless communication. This group includes your team representatives and our assigned Raid Leader.
+                </p>
+                 <h3>Coordination Process:</h3>
+                <ul>
+                    <li>Raid targets and specific post "recipes" (content suggestions) are shared within the group.</li>
+                    <li>You can directly interact with the Raid Leader to coordinate specific actions, adjust strategy, or provide key project updates.</li>
+                    <li>Engagement progress and feedback are regularly discussed.</li>
+                </ul>
+            </section>
+
+            <section class="service-section">
+                 <h2>Get Started</h2>
+                 <div class="contact-info">
+                     <p>Ready to boost your project's visibility?</p>
+                     <p>Contact us on Telegram to discuss your needs and get your raid team activated!</p>
+                     <p><a href="https://t.me/GrimService" target="_blank" rel="noopener noreferrer"><strong>Telegram: @drexxy_1</strong></a></p>
+                 </div>
+            </section>
+
+        </div> </main>
+
+    <footer style="text-align: center; padding: 1rem; margin-top: 2rem; border-top: 1px solid #333; font-size: 0.9rem; color: #888;">
+        Meme Portal &copy; 2025 | Tools for Degens, by Degens
+    </footer>
+
+    <script src="js/main.js"></script> </body>
+</html>
