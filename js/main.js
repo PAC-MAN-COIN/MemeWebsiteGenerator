@@ -2,28 +2,38 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const navbarPlaceholder = document.getElementById('navbar-placeholder');
-    const navPath = '_nav.html'; // Adjust path if _nav.html is not in the same directory
+    // UPDATED PATH: Use relative path to go up one directory from js/
+    const navPath = '../_nav.html';
 
     if (navbarPlaceholder) {
-        fetch(navPath)
+        fetch(navPath) // Fetch the navigation HTML file using the corrected path
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} loading ${navPath}`);
+                    // Throw an error with more specific info for debugging
+                    throw new Error(`HTTP error! status: ${response.status} while fetching ${navPath}`);
                 }
-                return response.text();
+                return response.text(); // Get the HTML as text
             })
             .then(html => {
-                navbarPlaceholder.innerHTML = html;
+                navbarPlaceholder.innerHTML = html; // Insert the HTML into the placeholder
+
+                // --- Now that the nav HTML is loaded, attach functionality ---
+
+                // 1. Set Active Link based on current page
                 setActiveNavLink();
+
+                // 2. Attach Mobile Toggle Listener
                 attachNavToggle();
             })
             .catch(error => {
+                // Log the error to the console for easier debugging
                 console.error('Error loading navigation:', error);
-                navbarPlaceholder.innerHTML = '<p style="color:red; text-align:center;">Failed to load navigation.</p>';
+                // Display a user-friendly error message in the placeholder
+                navbarPlaceholder.innerHTML = '<p style="color:red; text-align:center; padding: 10px;">Error loading navigation bar.</p>';
             });
     }
 
-     // Inject SR-only styles if needed elsewhere (like builder page)
+     // Inject SR-only styles if needed (useful for accessibility labels)
      if (!document.querySelector('style#sr-only-style')) {
         const srOnlyStyle = document.createElement('style');
         srOnlyStyle.id = 'sr-only-style';
@@ -33,37 +43,52 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setActiveNavLink() {
+    // Find all navigation links within the loaded navigation bar
     const navLinks = document.querySelectorAll('#portal-nav-links li a');
-    // More robust way to get the filename, handles potential trailing slash
-    const pathSegments = window.location.pathname.split('/');
-    const currentPageFile = pathSegments[pathSegments.length - 1] || 'index.html'; // Default to index.html if path ends in /
+    if (!navLinks || navLinks.length === 0) return; // Exit if no links found
+
+    // Get the current page's filename (e.g., "index.html", "builder.html")
+    // Handles cases where URL might end with / or have parameters/hash
+    const currentPath = window.location.pathname;
+    const currentPageFile = currentPath.substring(currentPath.lastIndexOf('/') + 1) || 'index.html'; // Default to index.html if path is just '/'
 
     navLinks.forEach(link => {
         const linkHref = link.getAttribute('href');
-        if (!linkHref) return; // Skip if no href
+        if (!linkHref) return; // Skip links without href
 
+        // Get the filename from the link's href
         const linkFile = linkHref.split('/').pop();
 
-        // Check if the link file matches the current page file
+        // Remove active class initially from all links
+        link.classList.remove('active');
+
+        // Add active class if the link's filename matches the current page's filename
         if (linkFile === currentPageFile) {
             link.classList.add('active');
-        } else {
-            link.classList.remove('active');
         }
+        // Special case: If the current page IS index.html, ensure no other link is active
+        // (This handles the case where index.html might also be linked as just '/')
+        else if (currentPageFile === 'index.html' && (linkFile === '' || linkFile === '/')) {
+             link.classList.add('active'); // Or remove if you don't want index active
+        }
+
     });
 }
 
 
 function attachNavToggle() {
+    // Select elements within the loaded navigation structure
     const toggleBtn = document.getElementById('portal-nav-toggle-btn');
-    const navMenu = document.getElementById('portal-nav');
+    const navMenu = document.getElementById('portal-nav'); // The main <nav> element
 
     if (toggleBtn && navMenu) {
-        toggleBtn.addEventListener('click', () => {
+        toggleBtn.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent event bubbling if needed
             navMenu.classList.toggle('portal-nav-open');
             const isExpanded = navMenu.classList.contains('portal-nav-open');
             toggleBtn.setAttribute('aria-expanded', isExpanded);
         });
+
         // Optional: Close mobile nav when a link is clicked
         navMenu.querySelectorAll('#portal-nav-links a').forEach(link => {
             link.addEventListener('click', () => {
@@ -73,5 +98,18 @@ function attachNavToggle() {
                 }
             });
         });
+
+        // Optional: Close mobile nav if clicking outside of it
+        document.addEventListener('click', (event) => {
+             if (navMenu.classList.contains('portal-nav-open') && !navMenu.contains(event.target)) {
+                  navMenu.classList.remove('portal-nav-open');
+                  toggleBtn.setAttribute('aria-expanded', 'false');
+             }
+        });
+
+    } else {
+        // Log error if elements aren't found after fetch (helps debugging)
+        if (!toggleBtn) console.error("Nav toggle button not found after loading nav.");
+        if (!navMenu) console.error("Nav menu element not found after loading nav.");
     }
 }
