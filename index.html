@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meme Portal - Website Builder</title>
-	<link rel="icon" href="images/logo.png">
+    <link rel="icon" href="images/logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         /* --- Reset Base Styles for Builder Page --- */
@@ -113,7 +113,7 @@
                  gap: 0; /* Reset gap, use padding on items */
                  align-items: stretch; /* Make items full width */
              }
-              /* Rule to show links when nav is open */
+             /* Rule to show links when nav is open */
              #portal-nav.portal-nav-open #portal-nav-links {
                   display: flex; /* Show as flex column */
              }
@@ -185,7 +185,7 @@
         #addFaqButton:hover { background: #444; }
         .preview-note { font-size: 0.85rem; color: #888; text-align: center; margin-bottom: 15px; max-width: 600px;}
     </style>
-	
+
 </head>
 <body>
     <nav id="portal-nav">
@@ -295,37 +295,37 @@
                      <span class="drag-handle">↕️</span>
                      <input type="checkbox" id="includeHowToBuyCheck" checked>
                      <span>How to Buy Section</span>
-                  </div>
+                   </div>
                 <div class="section-item" draggable="true" data-section-id="tokenomics">
                      <span class="drag-handle">↕️</span>
                      <input type="checkbox" id="includeTokenomicsCheck" checked>
                      <span>Tokenomics Section</span>
-                  </div>
+                   </div>
                 <div class="section-item" draggable="true" data-section-id="roadmap">
                      <span class="drag-handle">↕️</span>
                      <input type="checkbox" id="includeRoadmapCheck" checked>
                      <span>Roadmap Section</span>
-                  </div>
+                   </div>
                 <div class="section-item" draggable="true" data-section-id="team">
                      <span class="drag-handle">↕️</span>
                      <input type="checkbox" id="includeTeamCheck">
                      <span>Team Section (Optional)</span>
-                  </div>
+                   </div>
                 <div class="section-item" draggable="true" data-section-id="partners">
                      <span class="drag-handle">↕️</span>
                      <input type="checkbox" id="includePartnersCheck">
                      <span>Partners Section (Optional)</span>
-                  </div>
+                   </div>
                 <div class="section-item" draggable="true" data-section-id="faq">
                      <span class="drag-handle">↕️</span>
                      <input type="checkbox" id="includeFAQCheck">
                      <span>FAQ Section (Optional)</span>
-                  </div>
+                   </div>
                 <div class="section-item" draggable="true" data-section-id="community">
                      <span class="drag-handle">↕️</span>
                      <input type="checkbox" id="includeCommunityCheck" checked>
                      <span>Community/Socials Section</span>
-                  </div>
+                   </div>
             </div>
         </fieldset>
 
@@ -352,15 +352,15 @@
           <textarea id="partnersContent" placeholder="Partner DEX\nCool NFT Project\nBased Influencer"></textarea>
         </div>
          <div class="form-group">
-            <label>FAQ Section Content (Optional)</label>
-            <div id="faqList">
-                <div class="faq-item">
-                    <input type="text" placeholder="Question 1" class="faq-q">
-                    <input type="text" placeholder="Answer 1" class="faq-a">
-                </div>
-            </div>
-            <button type="button" id="addFaqButton" onclick="addFaqItem()">+ Add FAQ Item</button>
-         </div>
+             <label>FAQ Section Content (Optional)</label>
+             <div id="faqList">
+                 <div class="faq-item">
+                     <input type="text" placeholder="Question 1" class="faq-q">
+                     <input type="text" placeholder="Answer 1" class="faq-a">
+                 </div>
+             </div>
+             <button type="button" id="addFaqButton" onclick="addFaqItem()">+ Add FAQ Item</button>
+          </div>
 
 
         <hr/>
@@ -377,6 +377,7 @@
           <label for="faviconImage">Upload Favicon (.png or .ico)</label>
           <input type="file" id="faviconImage" accept="image/x-icon,image/png,image/vnd.microsoft.icon" />
         </div>
+
         <div class="form-group">
           <label for="telegram">Telegram Link</label>
           <input id="telegram" type="url" placeholder="https://t.me/yourcoin" />
@@ -448,13 +449,33 @@
          }
 
         // Font mapping and theme defaults (Unaltered)
-         const fontUrlMap = { /* ... */ }; // Assume V3.5 data
-         const themeDefaults = { /* ... */ }; // Assume V3.5 data
+        // NOTE: Simplified fontUrlMap for example clarity, ensure you have the correct mappings
+         const fontUrlMap = {
+            'Orbitron': 'Orbitron:wght@400;600;900',
+            'Poppins': 'Poppins:wght@400;500;600',
+            'Press Start 2P': 'Press+Start+2P',
+            'VT323': 'VT323',
+            'Montserrat': 'Montserrat:wght@400;700',
+            'Lato': 'Lato:wght@400;700',
+            'Roboto Slab': 'Roboto+Slab:wght@400;700',
+            'Roboto': 'Roboto:wght@400;500',
+            'Bangers': 'Bangers',
+            'Permanent Marker': 'Permanent+Marker',
+            'Aldrich': 'Aldrich',
+            'Rajdhani': 'Rajdhani:wght@400;600',
+            'Inter': 'Inter:wght@400;500;700'
+         };
+         const themeDefaults = {
+            'default': { heading: 'Orbitron', body: 'Poppins'},
+            'sci-fi': { heading: 'Aldrich', body: 'Rajdhani'},
+            'cartoony': { heading: 'Bangers', body: 'Poppins'}, // Body font might be overridden by selection
+            'minimalist': { heading: 'Inter', body: 'Inter'},
+            'retro-pixel': { heading: 'Press Start 2P', body: 'VT323'}
+         };
 
         // Drag and Drop Logic (Unaltered)
         const sectionListContainer = document.getElementById('section-list');
         let draggedItem = null;
-        // ... (All drag/drop event listeners remain the same) ...
         sectionListContainer.addEventListener('dragstart', (e) => { const targetItem = e.target.closest('.section-item'); if (!targetItem) return; draggedItem = targetItem; setTimeout(() => { if(draggedItem) draggedItem.classList.add('dragging'); }, 0); });
         sectionListContainer.addEventListener('dragend', (e) => { if (draggedItem) { draggedItem.classList.remove('dragging'); draggedItem = null; } });
         sectionListContainer.addEventListener('dragover', (e) => { e.preventDefault(); const targetItem = e.target.closest('.section-item'); const container = sectionListContainer; if (targetItem && draggedItem && targetItem !== draggedItem) { const targetRect = targetItem.getBoundingClientRect(); const isAfter = e.clientY > targetRect.top + targetRect.height / 2; if (isAfter) { container.insertBefore(draggedItem, targetItem.nextSibling); } else { container.insertBefore(draggedItem, targetItem); } } });
@@ -463,7 +484,7 @@
         sectionListContainer.addEventListener('drop', (e) => { e.preventDefault(); const targetItem = e.target.closest('.section-item'); if (targetItem) { targetItem.classList.remove('drag-over'); } });
 
 
-        // --- Main HTML Builder Function (Favicon path updated) ---
+        // --- Main HTML Builder Function (Favicon path updated, THEME CSS ADDED) ---
         function buildHTML() {
             // ... (Get Input Data - Unaltered) ...
              const name = getValue('coinName', 'Meme Coin');
@@ -498,87 +519,770 @@
              });
 
             // --- Process Data ---
-            // Fonts (Unaltered)
+            // Fonts (Unaltered - Theme might suggest defaults, user selection takes priority)
              let headingFont = themeDefaults[styleTheme]?.heading || 'Orbitron';
              let bodyFont = themeDefaults[styleTheme]?.body || 'Poppins';
              if (selectedFontPair.length === 2 && selectedFontPair[0] && selectedFontPair[1]) { headingFont = selectedFontPair[0]; bodyFont = selectedFontPair[1]; }
-             const googleFontParams = [fontUrlMap[headingFont], fontUrlMap[bodyFont]].filter(Boolean).map(f => f.replace(/ /g, '+')).join('&family=');
-             const googleFontLink = googleFontParams ? `<link href="https://fonts.googleapis.com/css2?family=${googleFontParams}&display=swap" rel="stylesheet">` : '';
+
+             // Filter out potential duplicates if heading/body are same
+             const fontNames = [...new Set([headingFont, bodyFont])];
+             const googleFontParams = fontNames
+                .map(fontName => fontUrlMap[fontName])
+                .filter(Boolean) // Remove undefined/null entries
+                .map(f => `family=${f.replace(/ /g, '+')}`)
+                .join('&');
+
+             const googleFontLink = googleFontParams ? `<link href="https://fonts.googleapis.com/css2?${googleFontParams}&display=swap" rel="stylesheet">` : '';
+
 
             // Images (Base64)
-            // CORRECTED Favicon Path (relative)
-            const faviconHref = faviconData || logoData || 'images/logo.png';
+            // CORRECTED Favicon Path (uses data or falls back)
+            // Use Favicon Data if available, otherwise Logo Data, otherwise a default (which won't exist in the final download, placeholder)
+            const faviconHref = faviconData ? faviconData : (logoData ? logoData : 'favicon.ico'); // Use uploaded favicon, fallback to logo, then placeholder
+
 
             // Process Lists (Unaltered)
-            const processList = (raw) => raw ? raw.split("\n").map(item => { const trimmed = item.trim(); const sanitized = trimmed.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); return `<li>${sanitized}</li>`; }).join('') : '';
+             const processList = (raw) => raw ? raw.split("\n").map(item => { const trimmed = item.trim(); const sanitized = trimmed.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); return `<li>${sanitized}</li>`; }).join('') : '';
              const howToBuyList = processList(howToBuyRaw); const tokenomicsList = processList(tokenomicsRaw);
              const roadmapList = processList(roadmapRaw); const teamList = processList(teamRaw);
              const partnersList = processList(partnersRaw);
              const faqListHTML = faqItems.map(item => `<details><summary>${item.q}</summary><p>${item.a}</p></details>`).join('');
 
             // --- Build HTML Sections based on DOM Order (Unaltered) ---
-            const sections = []; let contentSectionsHTML = '';
-            const sectionItems = document.querySelectorAll('#section-list .section-item');
-            sectionItems.forEach(item => { // Unaltered logic
-                const sectionId = item.dataset.sectionId;
-                const checkbox = item.querySelector('input[type="checkbox"]');
-                const isIncluded = checkbox ? checkbox.checked : false;
-                if (!isIncluded) return;
-                let sectionTitle = '', content = '', icon = '';
-                switch(sectionId) {
-                    case 'about': if (!description) return; content = `<p>${description.replace(/\n/g, '<br>')}</p>`; icon = 'ℹ️'; sectionTitle = 'About'; break;
-                    case 'how-to-buy': if (!howToBuyList) return; content = `<ol>${howToBuyList.replace(/<li>/g, '<li class="step">')}</ol>`; icon = '🛒'; sectionTitle = 'How to Buy'; break;
-                    case 'tokenomics': if (!tokenomicsList) return; content = `<ul>${tokenomicsList}</ul>`; icon = '📊'; sectionTitle = 'Tokenomics'; break;
-                    case 'roadmap': if (!roadmapList) return; content = `<ul>${roadmapList}</ul>`; icon = '🗺️'; sectionTitle = 'Roadmap'; break;
-                    case 'team': if (!teamList) return; content = `<ul class="team-list">${teamList}</ul>`; icon = '🧑‍🤝‍🧑'; sectionTitle = 'Team'; break;
-                    case 'partners': if (!partnersList) return; content = `<ul class="partners-list">${partnersList}</ul>`; icon = '🤝'; sectionTitle = 'Partners'; break;
-                    case 'faq': if (!faqListHTML) return; content = `<div class="faq-container">${faqListHTML}</div>`; icon = '❓'; sectionTitle = 'FAQ'; break;
-                    case 'community':
-                       const socialLinksArr = [ { link: telegram, text: 'Telegram', icon: '💬' }, { link: twitter, text: 'Twitter/X', icon: '🐦' }, { link: discord, text: 'Discord', icon: '🎧' }, { link: otherLink, text: 'Community', icon: '🔗' } ].filter(item => item.link);
-                       if (socialLinksArr.length === 0) return;
-                       content = `<div class="social-links">${socialLinksArr.map(sl => `<a href="${encodeURI(sl.link)}" target="_blank" class="social-button"><span class="social-icon">${sl.icon}</span> ${sl.text}</a>`).join('')}</div>`; icon = '🌐'; sectionTitle = 'Community'; break;
-                }
-                if (sectionTitle) { sections.push({ id: sectionId, title: sectionTitle }); contentSectionsHTML += `<section id="${sectionId}"><h3><span class="section-icon">${icon}</span> ${sectionTitle}</h3>${content}</section>\n`; }
+             const sections = []; let contentSectionsHTML = '';
+             const sectionItems = document.querySelectorAll('#section-list .section-item');
+             sectionItems.forEach(item => { // Unaltered logic
+                 const sectionId = item.dataset.sectionId;
+                 const checkbox = item.querySelector('input[type="checkbox"]');
+                 const isIncluded = checkbox ? checkbox.checked : false;
+                 if (!isIncluded) return;
+                 let sectionTitle = '', content = '', icon = '';
+                 switch(sectionId) {
+                     case 'about': if (!description) return; content = `<p>${description.replace(/\n/g, '<br>')}</p>`; icon = 'ℹ️'; sectionTitle = 'About'; break;
+                     case 'how-to-buy': if (!howToBuyList) return; content = `<ol>${howToBuyList.replace(/<li>/g, '<li class="step">')}</ol>`; icon = '🛒'; sectionTitle = 'How to Buy'; break;
+                     case 'tokenomics': if (!tokenomicsList) return; content = `<ul>${tokenomicsList}</ul>`; icon = '📊'; sectionTitle = 'Tokenomics'; break;
+                     case 'roadmap': if (!roadmapList) return; content = `<ul>${roadmapList}</ul>`; icon = '🗺️'; sectionTitle = 'Roadmap'; break;
+                     case 'team': if (!teamList) return; content = `<ul class="team-list">${teamList}</ul>`; icon = '🧑‍🤝‍🧑'; sectionTitle = 'Team'; break;
+                     case 'partners': if (!partnersList) return; content = `<ul class="partners-list">${partnersList}</ul>`; icon = '🤝'; sectionTitle = 'Partners'; break;
+                     case 'faq': if (!faqListHTML) return; content = `<div class="faq-container">${faqListHTML}</div>`; icon = '❓'; sectionTitle = 'FAQ'; break;
+                     case 'community':
+                         const socialLinksArr = [ { link: telegram, text: 'Telegram', icon: '💬' }, { link: twitter, text: 'Twitter/X', icon: '🐦' }, { link: discord, text: 'Discord', icon: '🎧' }, { link: otherLink, text: 'Community', icon: '🔗' } ].filter(item => item.link);
+                         if (socialLinksArr.length === 0) return;
+                         content = `<div class="social-links">${socialLinksArr.map(sl => `<a href="${encodeURI(sl.link)}" target="_blank" class="social-button"><span class="social-icon">${sl.icon}</span> ${sl.text}</a>`).join('')}</div>`; icon = '🌐'; sectionTitle = 'Community'; break;
+                 }
+                 if (sectionTitle) { sections.push({ id: sectionId, title: sectionTitle }); contentSectionsHTML += `<section id="${sectionId}"><h3><span class="section-icon">${icon}</span> ${sectionTitle}</h3>${content}</section>\n`; }
              });
 
             // Navbar HTML (Generated Site Navbar) (Unaltered)
              const navbarHTML = includeNavbar ? `
-             <nav class="navbar"> <div class="nav-container"> <a href="#" class="nav-brand">${name}</a> <ul class="nav-links"> ${sections.map(s => `<li><a href="#${s.id}">${s.title}</a></li>`).join('')} ${whitepaperLink ? `<li><a href="${encodeURI(whitepaperLink)}" target="_blank" class="nav-button">Whitepaper</a></li>` : ''} </ul> </div> </nav>` : '';
+             <nav class="navbar"> <div class="nav-container"> <a href="#" class="nav-brand">${name}</a> <ul class="nav-links"> ${sections.map(s => `<li><a href="#${s.id}">${s.title}</a></li>`).join('')} ${whitepaperLink ? `<li><a href="${encodeURI(whitepaperLink)}" target="_blank" class="nav-button">Whitepaper</a></li>` : ''} </ul> <button class="nav-toggle" aria-label="Toggle navigation">☰</button> </div> </nav>` : ''; // Added toggle button for generated site nav
             // Header HTML (Unaltered)
-            const headerSection = ` <header> ${bannerData ? `<img src="${bannerData}" class="banner" alt="Banner" loading="lazy" />` : ''} <h1>${name}</h1> ${showTagline ? `<h2>${tagline.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h2>` : ''} <div class="header-buttons"> ${ctaText && ctaLink ? `<a href="${encodeURI(ctaLink)}" target="_blank" class="cta-button primary-cta">${ctaText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</a>` : ''} ${whitepaperLink && !includeNavbar ? `<a href="${encodeURI(whitepaperLink)}" target="_blank" class="cta-button secondary-cta">Whitepaper</a>` : ''} </div> </header>`;
+             const headerSection = ` <header> ${bannerData ? `<img src="${bannerData}" class="banner" alt="Banner" loading="lazy" />` : ''} <h1>${name}</h1> ${showTagline ? `<h2>${tagline.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h2>` : ''} <div class="header-buttons"> ${ctaText && ctaLink ? `<a href="${encodeURI(ctaLink)}" target="_blank" class="cta-button primary-cta">${ctaText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</a>` : ''} ${whitepaperLink && !includeNavbar ? `<a href="${encodeURI(whitepaperLink)}" target="_blank" class="cta-button secondary-cta">Whitepaper</a>` : ''} </div> </header>`;
             // Logo HTML (Unaltered)
-            const logoHTML = showLogo && logoData ? `<div class="logo-container"><img src="${logoData}" class="logo" alt="${name} Logo" loading="lazy" /></div>` : '';
+             const logoHTML = showLogo && logoData ? `<div class="logo-container"><img src="${logoData}" class="logo" alt="${name} Logo" loading="lazy" /></div>` : '';
             // Footer HTML (Unaltered)
              const footerSocialLinks = [ { link: telegram, text: 'Telegram'}, { link: twitter, text: 'Twitter/X'}, { link: discord, text: 'Discord'}, { link: otherLink, text: 'Other'} ].filter(item => item.link);
-              const sanitizedFooterText = footerText ? `<p class="footer-disclaimer">${footerText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>` : '';
-              const footerLinksHTML = showFooterLinks && footerSocialLinks.length > 0 ? `<p class="footer-links">${footerSocialLinks.map(sl => `<a href="${encodeURI(sl.link)}" target="_blank">${sl.text}</a>`).join(' | ')}</p>` : '';
-              const footerSection = `<footer><p>© ${new Date().getFullYear()} ${name}. All Rights Reserved.</p>${sanitizedFooterText}${footerLinksHTML}</footer>`;
+             const sanitizedFooterText = footerText ? `<p class="footer-disclaimer">${footerText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>` : '';
+             const footerLinksHTML = showFooterLinks && footerSocialLinks.length > 0 ? `<p class="footer-links">${footerSocialLinks.map(sl => `<a href="${encodeURI(sl.link)}" target="_blank">${sl.text}</a>`).join(' | ')}</p>` : '';
+             const footerSection = `<footer><p>© ${new Date().getFullYear()} ${name}. All Rights Reserved.</p>${sanitizedFooterText}${footerLinksHTML}</footer>`;
 
 
-            // --- Assemble Full HTML Document (Unaltered) ---
-            return `<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <meta name="description" content="${tagline.replace(/"/g, '&quot;')} - Join the ${name} meme coin!"> <meta name="keywords" content="${name}, meme coin, crypto, token, ${tagline.split(' ').filter(w => w.length > 2).join(', ')}"> <title>${name} - ${tagline || 'Meme Coin'}</title> ${googleFontLink} <link rel="icon" href="${faviconHref}"> <style> /* Paste the full generated CSS here (Base + Themes) */ :root { /* CSS Variables */ --font-heading: '${headingFont}', sans-serif; --font-body: '${bodyFont}', sans-serif; --color-primary: ${colors[0]}; --color-secondary: ${colors[1]}; --color-primary-transparent: ${colors[0]}20; --color-secondary-transparent: ${colors[1]}20; --color-primary-shadow: ${colors[0]}80; --color-secondary-shadow: ${colors[1]}80; --background-color: #0a0a0a; --text-color: #fff; --text-color-muted: #ccc; --card-background: rgba(18, 18, 18, 0.85); --card-border: #222; --border-radius-small: 5px; --border-radius-medium: 10px; --border-radius-large: 15px; --shadow-color: rgba(0, 0, 0, 0.6); --shadow-light: 0 4px 15px var(--shadow-color); --shadow-medium: 0 8px 30px var(--shadow-color); --header-overlay: linear-gradient(rgba(10, 10, 10, 0.7), rgba(10, 10, 10, 0.9)); } * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; } body { font-family: var(--font-body); background-color: var(--background-color); color: var(--text-color); line-height: 1.7; overflow-x: hidden; position: relative; -webkit-overflow-scrolling: touch; overflow-y: scroll; } html, body { height: 100%; } body.animations-disabled * { animation: none !important; transition: none !important; } .logo { width: clamp(100px, 20vw, 150px); border-radius: 50%; border: 4px solid var(--color-primary); box-shadow: 0 0 25px var(--color-primary-shadow); transition: all 0.5s ease; display: inline-block; } body:not(.animations-disabled) .theme-default .logo, body:not(.animations-disabled) .theme-cartoony .logo { animation: spinGlow 8s linear infinite alternate; } body.theme-sci-fi .logo, body.theme-minimalist .logo, body.theme-retro-pixel .logo { animation: none; } .logo:hover { transform: scale(1.1); box-shadow: 0 0 40px var(--color-secondary-shadow); } h1, h2, h3 { font-family: var(--font-heading); line-height: 1.3; } h1 { font-size: clamp(2.5rem, 10vw, 5.5rem); font-weight: 900; } h2 { font-size: clamp(1.2rem, 5vw, 2rem); font-weight: 400; color: var(--text-color-muted); margin-bottom: 1.5rem; } h3 { font-size: clamp(1.8rem, 6vw, 2.8rem); color: var(--color-primary); margin-bottom: 2rem; position: relative; padding-bottom: 0.5rem; border-bottom: 2px solid var(--color-primary-transparent); display: inline-block; } h3 .section-icon { margin-right: 10px; display: inline-block; } p { margin-bottom: 1rem; color: var(--text-color-muted); } a { color: var(--color-secondary); text-decoration: none; transition: color 0.3s ease; } a:hover { color: var(--color-primary); } ul, ol { list-style: none; padding-left: 0; } section ul li, section ol li { position: relative; padding: 0.8rem 0 0.8rem 35px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 0.5rem; } section ul li:last-child, section ol li:last-child { border-bottom: none; } section ul li::before, section ol li::before { content: '»'; position: absolute; left: 5px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; color: var(--color-primary); font-weight: bold; } ol { counter-reset: step-counter; } ol li.step { padding-left: 45px; } ol li.step::before { content: counter(step-counter); counter-increment: step-counter; left: 5px; width: 25px; height: 25px; line-height: 25px; text-align: center; border-radius: 50%; background: var(--color-primary); color: #000; font-size: 0.9rem; font-weight: bold; } .content { max-width: 1100px; margin: -50px auto 0 auto; padding: 3rem 1.5rem; position: relative; z-index: 3; display: flex; flex-direction: column; gap: 4rem; } section { padding: 3rem clamp(1rem, 5vw, 3rem); background: var(--card-background); border-radius: var(--border-radius-large); box-shadow: var(--shadow-medium); border: 1px solid var(--card-border); backdrop-filter: blur(5px); position: relative; overflow: hidden; } .navbar { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px); padding: 1rem 2rem; position: fixed; top: 0; left: 0; width: 100%; z-index: 100; border-bottom: 1px solid var(--card-border); box-shadow: var(--shadow-light); } .navbar .nav-container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; } .navbar .nav-brand { font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-primary); font-weight: bold; } .navbar .nav-links { display: flex; gap: 1.5rem; align-items: center; list-style: none; } .navbar .nav-links a { color: var(--text-color-muted); font-weight: 500; } .navbar .nav-links a:hover { color: var(--color-primary); } .navbar .nav-button { background: var(--color-secondary); color: #000; padding: 0.5rem 1rem; border-radius: var(--border-radius-small); font-weight: bold; transition: transform 0.2s ease, background 0.3s ease; } .navbar .nav-button:hover { background: var(--color-primary); transform: scale(1.05); } body.nav-active { padding-top: 70px; } header { position: relative; min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 5rem 2rem; overflow: hidden; background: var(--header-overlay); } body.nav-active header { margin-top: -70px; } header img.banner { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; filter: brightness(0.6); opacity: 0.8; } header h1 { color: var(--color-primary); text-shadow: 0 0 20px var(--color-primary-shadow), 0 0 35px var(--color-secondary-shadow); margin: 1rem 0; z-index: 2; animation: glow 2.5s ease-in-out infinite alternate; } header h2 { text-shadow: 1px 1px 10px rgba(0,0,0,0.7); z-index: 2; max-width: 800px; animation: fadeInUp 1s ease-out forwards; } .header-buttons { margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; z-index: 2; } .cta-button { font-family: var(--font-heading); color: #000; padding: 15px 35px; border-radius: 50px; text-decoration: none; font-size: clamp(1rem, 4vw, 1.3rem); font-weight: 600; transition: transform 0.3s ease, box-shadow 0.3s ease; display: inline-block; } .cta-button.primary-cta { background: linear-gradient(45deg, var(--color-primary), var(--color-secondary)); box-shadow: 0 5px 25px var(--color-primary-shadow); } .cta-button.secondary-cta { background: var(--text-color-muted); color: #000; box-shadow: 0 3px 15px rgba(0,0,0,0.4); } .cta-button:hover { transform: scale(1.08); } .cta-button.primary-cta:hover { box-shadow: 0 8px 35px var(--color-secondary-shadow); } .cta-button.secondary-cta:hover { background: var(--text-color); } #tokenomics ul li::before { content: '📊'; } #roadmap ul li::before { content: '🚀'; } #team .team-list li::before { content: '👤'; } #partners .partners-list li::before { content: '🤝'; } #faq .faq-container { display: flex; flex-direction: column; gap: 1rem; } #faq details { background: rgba(255,255,255,0.05); border-radius: var(--border-radius-medium); border: 1px solid rgba(255,255,255,0.1); } #faq summary { padding: 1rem; cursor: pointer; font-weight: bold; color: var(--color-primary); list-style-type: '❓ '; } #faq details[open] summary { list-style-type: '❕ '; } #faq details p { padding: 0 1rem 1rem 1rem; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 0.5rem; } #community { text-align: center; } #community .social-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.5rem; } .social-button { color: #0a0a0a; font-weight: 600; text-decoration: none; padding: 0.8rem 1.8rem; background: linear-gradient(45deg, var(--color-primary), var(--color-secondary)); border-radius: 50px; transition: all 0.3s ease; box-shadow: 0 0 15px var(--color-primary-shadow); font-family: var(--font-heading); font-size: clamp(0.9rem, 3vw, 1.1rem); text-transform: uppercase; border: 2px solid transparent; display: inline-flex; align-items: center; gap: 8px; } .social-button:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 5px 25px var(--color-secondary-shadow); background: linear-gradient(45deg, var(--color-secondary), var(--color-primary)); } .social-icon { display: inline-block; } .logo-container { text-align: center; padding: 2rem 0; margin-top: 2rem; } footer { background: #050505; padding: 2.5rem 1rem; text-align: center; border-top: 3px solid var(--color-primary); margin-top: 4rem; } footer p { font-size: clamp(0.9rem, 2.5vw, 1rem); color: #aaa; margin-bottom: 0.8rem; } footer p.footer-disclaimer { font-size: 0.85rem; color: #777; font-style: italic; } footer .footer-links a { margin: 0 8px; } @keyframes glow { from { text-shadow: 0 0 15px var(--color-primary-shadow), 0 0 25px var(--color-secondary-shadow); } to { text-shadow: 0 0 25px var(--color-primary-shadow), 0 0 40px var(--color-secondary-shadow); } } @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } } @keyframes spinGlow { 0% { transform: rotate(0deg); box-shadow: 0 0 25px var(--color-primary-shadow); border-color: var(--color-primary); } 50% { transform: rotate(180deg); box-shadow: 0 0 35px var(--color-secondary-shadow); border-color: var(--color-secondary); } 100% { transform: rotate(360deg); box-shadow: 0 0 25px var(--color-primary-shadow); border-color: var(--color-primary); } } @media (max-width: 768px) { body.nav-active { padding-top: 60px; } .navbar { padding: 0.8rem 1rem; } .navbar .nav-container { flex-wrap: wrap; } .navbar .nav-links { display: none; width: 100%; flex-direction: column; align-items: flex-start; padding-top: 1rem; background: rgba(10, 10, 10, 0.95); } header { min-height: 60vh; padding: 4rem 1rem; } body.nav-active header { margin-top: -60px; } .content { margin-top: -30px; padding: 2rem 1rem; gap: 2.5rem; } section { padding: 2rem; } h1 { font-size: 2.5rem; } h2 { font-size: 1.3rem; } h3 { font-size: 1.8rem; } .cta-button { padding: 12px 30px; font-size: 1.1rem; } .social-button { padding: 0.7rem 1.5rem; font-size: 0.9rem;} } @media (max-width: 480px) { h1 { font-size: 2.2rem; } h2 { font-size: 1.1rem; } h3 { font-size: 1.6rem; } .cta-button { padding: 10px 25px; font-size: 1rem; } .social-button { padding: 0.6rem 1.2rem; font-size: 0.8rem; } } /* Style Theme Overrides */ .theme-sci-fi { /* Sci-Fi Theme */ } .theme-cartoony { /* Cartoony Theme */ } .theme-minimalist { /* Minimalist Theme */ } .theme-retro-pixel { /* Retro Pixel Theme */ } /* (Include full theme CSS from V3.5) */ </style> </head> <body class="theme-${styleTheme} ${enableAnimations ? '' : 'animations-disabled'} ${includeNavbar ? 'nav-active' : ''}"> ${navbarHTML} ${headerSection} <div class="content"> ${contentSectionsHTML} </div> ${logoHTML} ${footerSection} </body> </html>`;
+            // --- Assemble Full HTML Document (ADDED THEME CSS) ---
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="${tagline.replace(/"/g, '&quot;')} - Join the ${name} meme coin!">
+    <meta name="keywords" content="${name}, meme coin, crypto, token, ${tagline.split(' ').filter(w => w.length > 2).join(', ')}">
+    <title>${name} - ${tagline || 'Meme Coin'}</title>
+    ${googleFontLink}
+    <link rel="icon" href="${faviconHref}">
+    <style>
+        /* Base CSS Variables & Reset */
+        :root {
+            --font-heading: '${headingFont}', sans-serif;
+            --font-body: '${bodyFont}', sans-serif;
+            --color-primary: ${colors[0]};
+            --color-secondary: ${colors[1]};
+            --color-primary-transparent: ${colors[0]}20; /* 12.5% opacity */
+            --color-secondary-transparent: ${colors[1]}20;
+            --color-primary-shadow: ${colors[0]}80; /* 50% opacity */
+            --color-secondary-shadow: ${colors[1]}80;
+            --background-color: #0a0a0a;
+            --text-color: #fff;
+            --text-color-muted: #ccc;
+            --card-background: rgba(18, 18, 18, 0.85);
+            --card-border: #222;
+            --border-radius-small: 5px;
+            --border-radius-medium: 10px;
+            --border-radius-large: 15px;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --shadow-light: 0 4px 15px var(--shadow-color);
+            --shadow-medium: 0 8px 30px var(--shadow-color);
+            --header-overlay: linear-gradient(rgba(10, 10, 10, 0.7), rgba(10, 10, 10, 0.9));
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-body);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+            overflow-y: scroll; /* Always show scrollbar to prevent layout shift */
+        }
+        html, body { height: 100%; } /* Ensure body takes full height */
+
+        /* Disable Animations Class */
+        body.animations-disabled * { animation: none !important; transition: none !important; }
+
+        /* Logo Styles */
+        .logo {
+            width: clamp(100px, 20vw, 150px);
+            border-radius: 50%;
+            border: 4px solid var(--color-primary);
+            box-shadow: 0 0 25px var(--color-primary-shadow);
+            transition: all 0.5s ease;
+            display: inline-block;
+            background-color: #111; /* Fallback bg */
+        }
+        body:not(.animations-disabled) .logo {
+            /* Default animation - can be overridden by themes */
+             animation: spinGlow 8s linear infinite alternate;
+        }
+        .logo:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px var(--color-secondary-shadow);
+        }
+        .logo-container { text-align: center; padding: 2rem 0; margin-top: 2rem; }
+
+
+        /* Typography */
+        h1, h2, h3 { font-family: var(--font-heading); line-height: 1.3; }
+        h1 { font-size: clamp(2.5rem, 10vw, 5.5rem); font-weight: 900; }
+        h2 { font-size: clamp(1.2rem, 5vw, 2rem); font-weight: 400; color: var(--text-color-muted); margin-bottom: 1.5rem; }
+        h3 {
+            font-size: clamp(1.8rem, 6vw, 2.8rem);
+            color: var(--color-primary);
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--color-primary-transparent);
+            display: inline-block; /* Fit content width */
+        }
+        h3 .section-icon { margin-right: 10px; display: inline-block; /* vertical-align: middle; */ }
+        p { margin-bottom: 1rem; color: var(--text-color-muted); }
+        a { color: var(--color-secondary); text-decoration: none; transition: color 0.3s ease; }
+        a:hover { color: var(--color-primary); }
+
+        /* Lists (General) */
+        ul, ol { list-style: none; padding-left: 0; }
+        section ul li, section ol li {
+            position: relative;
+            padding: 0.8rem 0 0.8rem 35px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 0.5rem;
+        }
+        section ul li:last-child, section ol li:last-child { border-bottom: none; }
+        /* Default list bullet */
+        section ul li::before {
+            content: '»';
+            position: absolute; left: 5px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.4rem; color: var(--color-primary); font-weight: bold;
+        }
+        /* How-to-buy Numbered List */
+        ol { counter-reset: step-counter; }
+        ol li.step { padding-left: 45px; } /* More space for number */
+        ol li.step::before {
+            content: counter(step-counter);
+            counter-increment: step-counter;
+            position: absolute; left: 5px; top: 50%;
+            transform: translateY(-50%);
+            width: 25px; height: 25px; line-height: 25px;
+            text-align: center; border-radius: 50%;
+            background: var(--color-primary); color: #000;
+            font-size: 0.9rem; font-weight: bold;
+            font-family: var(--font-body); /* Use body font for numbers */
+        }
+
+        /* Content & Sections */
+        .content {
+            max-width: 1100px;
+            margin: -50px auto 0 auto; /* Overlap header slightly */
+            padding: 3rem 1.5rem;
+            position: relative; z-index: 3;
+            display: flex; flex-direction: column; gap: 4rem;
+        }
+        section {
+            padding: 3rem clamp(1rem, 5vw, 3rem);
+            background: var(--card-background);
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px); /* Safari */
+            position: relative; /* For pseudo-elements if needed */
+            overflow: hidden; /* Prevent content spill */
+        }
+
+        /* Navigation Bar (Generated Site) */
+        .navbar {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: fixed; top: 0; left: 0; width: 100%;
+            z-index: 100;
+            border-bottom: 1px solid var(--card-border);
+            box-shadow: var(--shadow-light);
+            transition: padding 0.3s ease;
+        }
+        .navbar .nav-container {
+            display: flex; justify-content: space-between; align-items: center;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .navbar .nav-brand {
+            font-family: var(--font-heading); font-size: 1.5rem;
+            color: var(--color-primary); font-weight: bold;
+        }
+        .navbar .nav-links {
+            display: flex; gap: 1.5rem; align-items: center;
+            list-style: none; margin: 0; padding: 0;
+        }
+        .navbar .nav-links a { color: var(--text-color-muted); font-weight: 500; }
+        .navbar .nav-links a:hover { color: var(--color-primary); }
+        .navbar .nav-button { /* Whitepaper button in nav */
+            background: var(--color-secondary); color: #000;
+            padding: 0.5rem 1rem; border-radius: var(--border-radius-small);
+            font-weight: bold; transition: transform 0.2s ease, background 0.3s ease;
+        }
+        .navbar .nav-button:hover {
+            background: var(--color-primary); transform: scale(1.05);
+        }
+        .navbar .nav-toggle { /* Hamburger Button */
+             display: none; /* Hidden by default */
+             background: none; border: 1px solid #555; color: #ccc;
+             font-size: 1.8rem; padding: 2px 8px; border-radius: 4px;
+             cursor: pointer; line-height: 1;
+         }
+        body.nav-active { padding-top: 70px; /* Adjust based on final nav height */ } /* Add padding when nav is fixed */
+
+
+        /* Header */
+        header {
+            position: relative; /* For banner positioning */
+            min-height: 70vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 5rem 2rem;
+            overflow: hidden; /* Contain banner */
+            background: var(--header-overlay); /* Overlay on top of image */
+        }
+        /* Adjust header top margin if nav is present and fixed */
+        body.nav-active header {
+             margin-top: -70px; /* Pull header up behind fixed nav */
+        }
+        header img.banner {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: -1; /* Behind content */
+            filter: brightness(0.6); opacity: 0.8;
+        }
+        header h1 {
+            color: var(--color-primary);
+            text-shadow: 0 0 20px var(--color-primary-shadow), 0 0 35px var(--color-secondary-shadow);
+            margin: 1rem 0; z-index: 2;
+            animation: glow 2.5s ease-in-out infinite alternate;
+        }
+        body.animations-disabled header h1 { animation: none; }
+        header h2 { /* Tagline */
+            text-shadow: 1px 1px 10px rgba(0,0,0,0.7); z-index: 2;
+            max-width: 800px;
+            animation: fadeInUp 1s ease-out forwards;
+            opacity: 0; /* Start hidden for animation */
+        }
+        body.animations-disabled header h2 { opacity: 1; animation: none; }
+
+        /* Header Buttons (CTA) */
+        .header-buttons {
+            margin-top: 1.5rem; display: flex; gap: 1rem;
+            flex-wrap: wrap; justify-content: center; z-index: 2;
+        }
+        .cta-button {
+            font-family: var(--font-heading);
+            color: #000;
+            padding: 15px 35px;
+            border-radius: 50px; /* Default pill shape */
+            text-decoration: none;
+            font-size: clamp(1rem, 4vw, 1.3rem);
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: inline-block;
+            border: none; /* Remove default border */
+        }
+        .cta-button.primary-cta {
+            background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+            box-shadow: 0 5px 25px var(--color-primary-shadow);
+        }
+        .cta-button.secondary-cta { /* Whitepaper button in header */
+            background: var(--text-color-muted); color: #000;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.4);
+        }
+        .cta-button:hover { transform: scale(1.08); }
+        .cta-button.primary-cta:hover {
+            box-shadow: 0 8px 35px var(--color-secondary-shadow);
+        }
+        .cta-button.secondary-cta:hover { background: var(--text-color); }
+
+        /* Section Specific Styling */
+        /* Using attribute selectors for slightly better targeting */
+        section[id="tokenomics"] ul li::before { content: '📊'; }
+        section[id="roadmap"] ul li::before { content: '🚀'; }
+        section[id="team"] .team-list li::before { content: '👤'; }
+        section[id="partners"] .partners-list li::before { content: '🤝'; }
+
+        /* FAQ Section */
+        section[id="faq"] .faq-container {
+            display: flex; flex-direction: column; gap: 1rem;
+        }
+        section[id="faq"] details {
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--border-radius-medium);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: background-color 0.2s ease;
+        }
+        section[id="faq"] details:hover { background: rgba(255,255,255,0.08); }
+        section[id="faq"] summary {
+            padding: 1rem; cursor: pointer; font-weight: bold;
+            color: var(--color-primary);
+            list-style-type: '❓ '; /* Default closed state */
+        }
+        section[id="faq"] details[open] summary {
+            list-style-type: '❕ '; /* Open state */
+            color: var(--color-secondary);
+        }
+        section[id="faq"] details p {
+            padding: 0 1rem 1rem 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 0.5rem;
+            color: var(--text-color-muted);
+        }
+
+        /* Community/Socials Section */
+        section[id="community"] { text-align: center; }
+        section[id="community"] .social-links {
+            display: flex; justify-content: center; gap: 1.5rem;
+            flex-wrap: wrap; margin-top: 1.5rem;
+        }
+        .social-button {
+            color: #0a0a0a; font-weight: 600; text-decoration: none;
+            padding: 0.8rem 1.8rem;
+            background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+            border-radius: 50px; /* Default pill shape */
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--color-primary-shadow);
+            font-family: var(--font-heading);
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            text-transform: uppercase;
+            border: 2px solid transparent;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .social-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 5px 25px var(--color-secondary-shadow);
+            background: linear-gradient(45deg, var(--color-secondary), var(--color-primary));
+        }
+        .social-icon { display: inline-block; }
+
+
+        /* Footer */
+        footer {
+            background: #050505;
+            padding: 2.5rem 1rem; text-align: center;
+            border-top: 3px solid var(--color-primary);
+            margin-top: 4rem;
+        }
+        footer p {
+            font-size: clamp(0.9rem, 2.5vw, 1rem); color: #aaa;
+            margin-bottom: 0.8rem;
+        }
+        footer p.footer-disclaimer {
+            font-size: 0.85rem; color: #777; font-style: italic;
+        }
+        footer .footer-links a { margin: 0 8px; color: #aaa; }
+        footer .footer-links a:hover { color: var(--color-secondary); }
+
+        /* Animations */
+        @keyframes glow {
+            from { text-shadow: 0 0 15px var(--color-primary-shadow), 0 0 25px var(--color-secondary-shadow); }
+            to { text-shadow: 0 0 25px var(--color-primary-shadow), 0 0 40px var(--color-secondary-shadow); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spinGlow {
+             0% { transform: rotate(0deg); box-shadow: 0 0 25px var(--color-primary-shadow); border-color: var(--color-primary); }
+             50% { transform: rotate(180deg); box-shadow: 0 0 35px var(--color-secondary-shadow); border-color: var(--color-secondary); }
+             100% { transform: rotate(360deg); box-shadow: 0 0 25px var(--color-primary-shadow); border-color: var(--color-primary); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body.nav-active { padding-top: 60px; /* Adjust if nav height changes */ }
+            .navbar { padding: 0.8rem 1rem; }
+            .navbar .nav-container { flex-wrap: wrap; } /* Allow wrap */
+            .navbar .nav-links {
+                 display: none; /* Hide desktop links */
+                 flex-direction: column; width: 100%;
+                 align-items: center; /* Center mobile links */
+                 background: rgba(10, 10, 10, 0.98);
+                 position: absolute; top: 100%; left: 0;
+                 padding: 1rem 0; border-top: 1px solid var(--card-border);
+                 box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+             }
+            .navbar.nav-open .nav-links { display: flex; } /* Show when open */
+            .navbar .nav-links li { width: 100%; text-align: center; }
+            .navbar .nav-links a { padding: 0.8rem 1rem; width: 100%; border-bottom: 1px solid #222; }
+            .navbar .nav-links li:last-child a { border-bottom: none; }
+            .navbar .nav-button { width: calc(100% - 2rem); margin: 0.5rem 1rem; text-align: center; } /* Full width button */
+
+            .navbar .nav-toggle { display: block; } /* Show hamburger */
+
+            header { min-height: 60vh; padding: 4rem 1rem; }
+            body.nav-active header { margin-top: -60px; /* Match padding top */ }
+
+            .content { margin-top: -30px; padding: 2rem 1rem; gap: 2.5rem; }
+            section { padding: 2rem; }
+            h1 { font-size: 2.5rem; } h2 { font-size: 1.3rem; } h3 { font-size: 1.8rem; }
+            .cta-button { padding: 12px 30px; font-size: 1.1rem; }
+            .social-button { padding: 0.7rem 1.5rem; font-size: 0.9rem;}
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; } h2 { font-size: 1.1rem; } h3 { font-size: 1.6rem; }
+            .cta-button { padding: 10px 25px; font-size: 1rem; }
+            .social-button { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
+            section { padding: 1.5rem; }
+        }
+
+        /* ============================ */
+        /* === STYLE THEME OVERRIDES === */
+        /* ============================ */
+
+        /* --- Sci-Fi Theme --- */
+        .theme-sci-fi {
+            --border-radius-small: 2px;
+            --border-radius-medium: 4px;
+            --border-radius-large: 6px;
+            --card-background: rgba(10, 15, 30, 0.85); /* Dark blueish */
+            --card-border: rgba(var(--color-primary), 0.3);
+            --shadow-medium: 0 0 20px rgba(var(--color-primary), 0.2); /* Subtle glow */
+        }
+        /* Use user-selected fonts primarily, but suggest theme fonts via themeDefaults */
+         /* .theme-sci-fi { font-family: 'Rajdhani', sans-serif; } */
+         /* .theme-sci-fi h1, .theme-sci-fi h2, .theme-sci-fi h3 { font-family: 'Aldrich', sans-serif; } */
+        .theme-sci-fi h3 {
+            border-bottom-style: solid;
+            border-image: linear-gradient(to right, var(--color-primary), transparent) 1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .theme-sci-fi section {
+            border-radius: var(--border-radius-large);
+            border: 1px solid var(--card-border);
+            box-shadow: inset 0 0 10px rgba(var(--color-secondary), 0.1);
+        }
+        .theme-sci-fi .cta-button,
+        .theme-sci-fi .social-button,
+        .theme-sci-fi .navbar .nav-button {
+            border-radius: var(--border-radius-small); /* Sharp corners */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 10px var(--color-primary-shadow);
+        }
+        .theme-sci-fi .logo {
+            border-radius: var(--border-radius-medium); /* Slightly rounded square */
+            border-width: 2px;
+            animation: none !important; /* No spin */
+            box-shadow: 0 0 15px var(--color-primary-shadow);
+        }
+        .theme-sci-fi ol li.step::before {
+             border-radius: var(--border-radius-small); /* Square number */
+         }
+
+        /* --- Cartoony Theme --- */
+        .theme-cartoony {
+            --border-radius-small: 10px;
+            --border-radius-medium: 20px;
+            --border-radius-large: 30px;
+            --card-background: rgba(30, 30, 30, 0.9); /* Slightly lighter dark */
+            --card-border: #444;
+        }
+        /* Use user-selected fonts primarily */
+         /* .theme-cartoony { font-family: 'Poppins', sans-serif; } */
+         /* .theme-cartoony h1, .theme-cartoony h2, .theme-cartoony h3 { font-family: 'Bangers', cursive; } */
+        .theme-cartoony h3 {
+            font-weight: 700; /* Bolder */
+            border-bottom: 3px solid var(--color-primary-transparent);
+            color: var(--color-primary);
+            text-shadow: 1px 1px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000; /* Outline */
+        }
+        .theme-cartoony section {
+            border-radius: var(--border-radius-large);
+            border: 3px solid #111; /* Thick border */
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.3); /* Drop shadow */
+        }
+        .theme-cartoony .cta-button,
+        .theme-cartoony .social-button,
+        .theme-cartoony .navbar .nav-button {
+            border-radius: 50px; /* Very round */
+            font-weight: bold;
+            border: 3px solid #000; /* Outline */
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.5); /* Simple drop shadow */
+            transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+        }
+        .theme-cartoony .cta-button:hover,
+        .theme-cartoony .social-button:hover,
+        .theme-cartoony .navbar .nav-button:hover {
+            transform: translate(2px, 2px); /* Shift on hover */
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+        }
+        .theme-cartoony .logo {
+            border-radius: 50%; /* Keep it round */
+            border-width: 5px;
+            border-color: var(--color-primary);
+            /* Keep spinGlow animation */
+        }
+        .theme-cartoony section ul li::before,
+        .theme-cartoony ol li.step::before {
+            /* Slightly larger bullet/number? */
+            transform: translateY(-50%) scale(1.1);
+        }
+        .theme-cartoony #faq details { border-width: 2px; border-color: #333; }
+        .theme-cartoony #faq summary { text-shadow: 1px 1px 0px #000; }
+
+
+        /* --- Minimalist Theme --- */
+        .theme-minimalist {
+            --border-radius-small: 3px;
+            --border-radius-medium: 5px;
+            --border-radius-large: 8px;
+            --card-background: #121212; /* Near black solid */
+            --card-border: #333;
+            --shadow-light: none;
+            --shadow-medium: none;
+            --header-overlay: rgba(10, 10, 10, 0.8); /* Less gradient */
+        }
+        /* Use user-selected fonts, Inter is a good default */
+         /* .theme-minimalist { font-family: 'Inter', sans-serif; } */
+         /* .theme-minimalist h1, .theme-minimalist h2, .theme-minimalist h3 { font-family: 'Inter', sans-serif; } */
+        .theme-minimalist h1 { text-shadow: none; animation: none !important; }
+        .theme-minimalist h2 { font-weight: 400; }
+        .theme-minimalist h3 {
+            font-weight: 500; /* Lighter headings */
+            color: var(--text-color); /* Use text color, less emphasis on primary */
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0.3rem;
+            letter-spacing: 0.5px;
+        }
+        .theme-minimalist section {
+            box-shadow: none;
+            border-radius: var(--border-radius-medium);
+            backdrop-filter: none; -webkit-backdrop-filter: none; /* No blur */
+            background: var(--card-background);
+        }
+        .theme-minimalist .cta-button,
+        .theme-minimalist .social-button,
+        .theme-minimalist .navbar .nav-button {
+            border-radius: var(--border-radius-small);
+            box-shadow: none;
+            background: var(--color-primary); /* Flat color */
+            color: #000;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            text-transform: none; /* No uppercase */
+            padding: 12px 25px; /* Slightly smaller padding */
+        }
+        .theme-minimalist .cta-button:hover,
+        .theme-minimalist .social-button:hover,
+        .theme-minimalist .navbar .nav-button:hover {
+            background: var(--color-secondary);
+            transform: none; /* No hover movement */
+        }
+        .theme-minimalist .navbar { background: #0a0a0a; backdrop-filter: none; -webkit-backdrop-filter: none;}
+        .theme-minimalist footer { border-top-color: #333; }
+        .theme-minimalist .logo {
+            border-radius: var(--border-radius-medium); /* Square-ish */
+            border-width: 2px; border-color: #555;
+            box-shadow: none;
+            animation: none !important; /* No spin/glow */
+        }
+        .theme-minimalist ol li.step::before,
+        .theme-minimalist section ul li::before {
+             font-size: 1rem; /* Smaller markers */
+             color: #888;
+         }
+         .theme-minimalist #faq details { border-color: #333; background: #1a1a1a; }
+         .theme-minimalist #faq summary { color: var(--text-color); }
+
+
+        /* --- Retro Pixel Theme --- */
+        .theme-retro-pixel {
+            --border-radius-small: 0;
+            --border-radius-medium: 0;
+            --border-radius-large: 0;
+            --card-background: rgba(10, 10, 10, 0.95); /* Solid dark */
+            --card-border: var(--color-primary); /* Use primary color for borders */
+             image-rendering: pixelated; /* Make images blocky */
+             image-rendering: -moz-crisp-edges;
+             image-rendering: crisp-edges;
+        }
+        /* Force pixel fonts */
+        .theme-retro-pixel body { font-family: 'VT323', monospace !important; }
+        .theme-retro-pixel h1, .theme-retro-pixel h2, .theme-retro-pixel h3,
+        .theme-retro-pixel .navbar .nav-brand,
+        .theme-retro-pixel .cta-button, .theme-retro-pixel .social-button,
+        .theme-retro-pixel .navbar .nav-button {
+            font-family: 'Press Start 2P', cursive !important;
+        }
+        .theme-retro-pixel h1 {
+            font-size: clamp(1.8rem, 8vw, 3.5rem); /* Smaller H1 */
+             text-shadow: 3px 3px 0px var(--color-secondary), -3px -3px 0px rgba(0,0,0,0.5);
+             animation: none !important;
+        }
+        .theme-retro-pixel h2 { font-size: clamp(1rem, 4vw, 1.5rem); color: #bbb; text-shadow: 1px 1px 0px #000;}
+        .theme-retro-pixel h3 {
+            font-size: clamp(1.3rem, 5vw, 1.8rem);
+            color: var(--color-primary);
+            text-shadow: 2px 2px 0px #000;
+            border-bottom: 3px solid var(--color-secondary);
+            padding-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .theme-retro-pixel section {
+            border-radius: 0;
+            border: 3px solid var(--card-border);
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.6); /* Hard shadow */
+            backdrop-filter: none; -webkit-backdrop-filter: none;
+        }
+        .theme-retro-pixel .cta-button,
+        .theme-retro-pixel .social-button,
+        .theme-retro-pixel .navbar .nav-button {
+            border-radius: 0;
+            background: var(--color-primary);
+            color: #000;
+            box-shadow: 3px 3px 0px var(--color-secondary);
+            border: 2px solid #000;
+            padding: 10px 20px;
+            font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+            transition: transform 0.1s linear, box-shadow 0.1s linear;
+            text-transform: uppercase;
+        }
+        .theme-retro-pixel .cta-button:hover,
+        .theme-retro-pixel .social-button:hover,
+        .theme-retro-pixel .navbar .nav-button:hover {
+            transform: translate(1px, 1px); /* Shift on hover */
+            box-shadow: 2px 2px 0px var(--color-secondary);
+        }
+        .theme-retro-pixel .navbar { border-bottom-width: 3px; border-bottom-color: var(--color-secondary);}
+        .theme-retro-pixel footer { border-top-width: 4px; border-top-color: var(--color-secondary);}
+        .theme-retro-pixel .logo {
+            border-radius: 0;
+            border-width: 3px;
+            border-color: var(--color-secondary);
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+            animation: none !important;
+        }
+        .theme-retro-pixel section ul li::before,
+        .theme-retro-pixel ol li.step::before {
+            font-family: 'VT323', monospace; /* Use body pixel font */
+            font-weight: normal;
+            color: var(--color-primary);
+            background: none; /* Remove background from number */
+            border: 1px solid var(--color-primary); /* Box around number */
+            width: 18px; height: 18px; line-height: 18px; font-size: 0.8rem;
+        }
+        .theme-retro-pixel section ul li::before { content: '*'; border: none; } /* Simple star */
+        .theme-retro-pixel #faq details { border-width: 2px; border-color: var(--color-secondary); }
+        .theme-retro-pixel #faq summary { text-shadow: 1px 1px 0px #000; }
+
+    </style>
+</head>
+<body class="theme-${styleTheme} ${enableAnimations ? '' : 'animations-disabled'} ${includeNavbar ? 'nav-active' : ''}">
+
+    ${navbarHTML}
+
+    ${headerSection}
+
+    <main class="content">
+        ${contentSectionsHTML}
+    </main>
+
+    ${logoHTML}
+
+    ${footerSection}
+
+
+    ${ includeNavbar ? `
+    <script>
+        // Simple mobile nav toggle for generated site
+        const navToggle = document.querySelector('.navbar .nav-toggle');
+        const navMenu = document.querySelector('.navbar');
+        if (navToggle && navMenu) {
+            navToggle.addEventListener('click', () => {
+                navMenu.classList.toggle('nav-open');
+            });
+            // Close nav if clicking a link within it
+            navMenu.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (navMenu.classList.contains('nav-open')) {
+                         navMenu.classList.remove('nav-open');
+                    }
+                });
+            });
+        }
+    <\/script>` : ''}
+
+</body>
+</html>`;
         } // End of buildHTML function
 
 
         // --- Event Listeners & Utils (Unaltered) ---
         function generatePreview() { // Unaltered
-            // ... Preview logic ...
-             const preview = document.getElementById("previewFrame");
-             preview.style.display = 'block';
-             preview.srcdoc = '<!DOCTYPE html><html><head><style>body{background:#111; color:#555; display:flex; justify-content:center; align-items:center; height:100vh; font-family: sans-serif;}p{border:1px solid #333; padding: 20px; border-radius: 5px;}</style></head><body><p>Generating Preview...</p></body></html>';
-             setTimeout(() => {
-                 try { const html = buildHTML(); preview.srcdoc = html; } catch (error) { console.error("Error generating preview:", error); preview.srcdoc = '<!DOCTYPE html><html><head><style>body{background:darkred; color:white; display:flex; justify-content:center; align-items:center; height:100vh; font-family: sans-serif;}p{border:1px solid #eee; padding: 20px; border-radius: 5px;}</style></head><body><p>Error generating preview. Check console.</p></body></html>'; }
-             }, 0);
+            const preview = document.getElementById("previewFrame");
+            preview.style.display = 'block';
+            // Initial loading message
+            preview.srcdoc = '<!DOCTYPE html><html><head><style>body{background:#111; color:#555; display:flex; justify-content:center; align-items:center; height:100vh; font-family: sans-serif;}p{border:1px solid #333; padding: 20px; border-radius: 5px;}</style></head><body><p>Generating Preview...</p></body></html>';
+
+            // Defer the actual build to avoid blocking UI
+            setTimeout(() => {
+                try {
+                    const html = buildHTML();
+                    preview.srcdoc = html;
+                } catch (error) {
+                    console.error("Error generating preview:", error);
+                    preview.srcdoc = '<!DOCTYPE html><html><head><style>body{background:darkred; color:white; display:flex; justify-content:center; align-items:center; height:100vh; font-family: sans-serif;}p{border:1px solid #eee; padding: 20px; border-radius: 5px;}</style></head><body><p>Error generating preview. Check console.</p></body></html>';
+                }
+            }, 0);
          }
         function downloadSite() { // Unaltered
-            // ... Download logic ...
-             try { const html = buildHTML(); const name = getValue('coinName').replace(/[^a-zA-Z0-9]/g, '') || 'memecoin'; const blob = new Blob([html], { type: "text/html;charset=utf-8" }); saveAs(blob, `${name}-website.html`); } catch (error) { console.error("Download Error:", error); alert("Download Prep Error. Check console."); }
+            try {
+                const html = buildHTML();
+                const name = getValue('coinName').replace(/[^a-zA-Z0-9]/g, '') || 'memecoin';
+                const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+                saveAs(blob, `${name}-website.html`);
+            } catch (error) {
+                console.error("Download Error:", error);
+                alert("Error preparing download. Check console for details.");
+            }
          }
 
-        // --- ADDED: Mobile Nav Toggle ---
+        // --- ADDED: Mobile Nav Toggle for the Builder Interface ---
         document.addEventListener('DOMContentLoaded', () => {
             const toggleBtn = document.getElementById('portal-nav-toggle-btn');
-            const navMenu = document.getElementById('portal-nav'); // Add class to the main nav element
+            const navMenu = document.getElementById('portal-nav'); // Target the main nav element
 
             if (toggleBtn && navMenu) {
                 toggleBtn.addEventListener('click', () => {
