@@ -17,11 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(html => {
                 navbarPlaceholder.innerHTML = html;
 
-                // --- Create Mobile Nav Content Wrapper (if it doesn't exist in nav.html) ---
-                let mobileNavContent = document.getElementById('mobile-nav-content');
-                if (!mobileNavContent) {
+                // --- Create Mobile Nav Content Wrapper ONLY if mobile toggle exists in HTML ---
+                // This prevents restructuring the HTML on desktop views.
+                const toggleBtnExists = document.getElementById('portal-nav-toggle-btn');
+                let mobileNavContent = document.getElementById('mobile-nav-content'); // Check if it exists in nav.html first
+
+                if (toggleBtnExists && !mobileNavContent) { // Only create if toggle is present AND wrapper not already in HTML
                     const portalNav = document.getElementById('portal-nav');
                     if(portalNav) {
+                        console.log("Creating #mobile-nav-content wrapper via JS for mobile view."); // Debug log
                         mobileNavContent = document.createElement('div');
                         mobileNavContent.id = 'mobile-nav-content';
                         // Move existing links and profile manager into the wrapper
@@ -29,13 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         const profileMgr = document.getElementById('profileManagerNav');
                         if(links) mobileNavContent.appendChild(links);
                         if(profileMgr) mobileNavContent.appendChild(profileMgr);
-                        // Insert wrapper into the main nav element
-                        portalNav.appendChild(mobileNavContent);
+                        portalNav.appendChild(mobileNavContent); // Append wrapper to #portal-nav
                     } else {
                          console.error("#portal-nav not found, cannot create #mobile-nav-content wrapper.");
                     }
+                } else if (toggleBtnExists && mobileNavContent) {
+                     console.log("#mobile-nav-content wrapper already exists in nav.html."); // Debug log
+                } else {
+                    console.log("Toggle button not found, assuming desktop view, skipping mobile wrapper creation/check."); // Debug log
                 }
-
 
                 // --- Initialize and Setup ---
                 initProfileManager();     // Initialize profile system (from profile-manager.js)
@@ -60,33 +66,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- Core Navigation Functions ---
 function setActiveNavLink() {
-    const navLinks = document.querySelectorAll('#portal-nav-links li a');
+    // Use #portal-nav-links specifically, in case other links exist elsewhere
+    const navLinks = document.querySelectorAll('#portal-nav #portal-nav-links li a');
     if (!navLinks || navLinks.length === 0) return;
+
     const currentPath = window.location.pathname;
     const currentPageFile = currentPath.substring(currentPath.lastIndexOf('/') + 1).split('?')[0].split('#')[0] || 'index.html';
 
     navLinks.forEach(link => {
         const linkHref = link.getAttribute('href');
         if (!linkHref) return;
-        const linkFile = linkHref.split('/').pop().split('?')[0].split('#')[0];
+        // Handle relative paths potentially starting with ../ or ./
+        const linkPath = new URL(linkHref, window.location.href).pathname;
+        const linkFile = linkPath.substring(linkPath.lastIndexOf('/') + 1).split('?')[0].split('#')[0] || 'index.html';
+
         link.classList.remove('active');
-        if (linkFile === currentPageFile || (currentPageFile === 'index.html' && (linkFile === '' || linkHref === 'index.html'))) {
+
+        if (linkFile === currentPageFile || (currentPageFile === 'index.html' && (linkFile === '' || linkHref === 'index.html' || linkHref === './'))) {
             link.classList.add('active');
         }
     });
 }
 
+
 function attachNavToggle() {
     const toggleBtn = document.getElementById('portal-nav-toggle-btn');
     const navMenu = document.getElementById('portal-nav'); // The main nav element
-    const mobileNavContent = document.getElementById('mobile-nav-content'); // The wrapper for mobile content
+    // Mobile content wrapper might or might not exist depending on view/HTML structure
+    const mobileNavContent = document.getElementById('mobile-nav-content');
 
-    if (!toggleBtn || !navMenu || !mobileNavContent) {
-        if (!toggleBtn) console.error("Nav toggle button (#portal-nav-toggle-btn) not found.");
-        if (!navMenu) console.error("Nav menu element (#portal-nav) not found.");
-        if (!mobileNavContent) console.error("Mobile nav content wrapper (#mobile-nav-content) not found.");
+    // Only proceed if the toggle button exists (implies mobile context potentially)
+    if (!toggleBtn || !navMenu) {
+        // No error needed if button doesn't exist (desktop view)
+        // if (!navMenu) console.error("Nav menu element (#portal-nav) not found.");
         return;
     }
+
+    console.log("Attaching mobile nav toggle listener."); // Debug log
 
     toggleBtn.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -104,19 +120,27 @@ function attachNavToggle() {
         }
     });
 
-    // Close mobile menu if a main navigation link is clicked
-    mobileNavContent.querySelectorAll('#portal-nav-links a').forEach(link => {
-        link.addEventListener('click', () => {
-            if (navMenu.classList.contains('portal-nav-open')) {
-                navMenu.classList.remove('portal-nav-open');
-                toggleBtn.setAttribute('aria-expanded', 'false');
-            }
+    // Use navMenu to find links, as mobileNavContent might not exist if built into nav.html
+    const linksContainer = navMenu.querySelector('#portal-nav-links');
+    if (linksContainer) {
+        // Close mobile menu if a main navigation link is clicked
+        linksContainer.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (navMenu.classList.contains('portal-nav-open')) {
+                    navMenu.classList.remove('portal-nav-open');
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
         });
-    });
+    }
+
 
     // Close mobile menu or profile dropdown if clicking outside
     document.addEventListener('click', (event) => {
-        const profileManagerNav = document.getElementById('profileManagerNav'); // Profile section container
+        // Don't run outside-click logic if the mobile nav isn't even potentially open
+        if (!toggleBtn) return;
+
+        const profileManagerNav = document.getElementById('profileManagerNav');
         const profileDropdownContent = document.getElementById('profileDropdownContent');
         const profileDropdownButton = document.getElementById('profileDropdownButton');
 
@@ -187,34 +211,34 @@ function setupProfileDropdown() {
              }
         }
 
-        // Add Separator
-        if(dropdownContent.children.length > 0) { // Add HR only if there were items before it
+        // Add Separator (only if switch links or messages were added)
+        if(dropdownContent.children.length > 0) {
              const hr = document.createElement('hr');
              dropdownContent.appendChild(hr);
         }
 
 
-        // Add "Create New Profile" Link
+        // Add "Create New Profile" Link Dynamically
         const createLink = document.createElement('a');
         createLink.href="#";
         createLink.id = 'createProfileDropdownLink'; // Specific ID
         createLink.textContent = "Create New Profile";
         createLink.addEventListener('click', (event) => {
              event.preventDefault();
-             event.stopPropagation(); // Prevent closing immediately
+             event.stopPropagation();
              openCreateProfileModal();
              closeDropdown();
         });
         dropdownContent.appendChild(createLink);
 
-        // Add "Manage Profiles" Link
+        // Add "Manage Profiles" Link Dynamically
         const manageLink = document.createElement('a');
         manageLink.href="#";
         manageLink.id = 'manageProfilesDropdownLink'; // Specific ID
         manageLink.textContent = "Manage Profiles";
         manageLink.addEventListener('click', (event) => {
              event.preventDefault();
-             event.stopPropagation(); // Prevent closing immediately
+             event.stopPropagation();
              openManageProfilesModal();
              closeDropdown();
         });
@@ -236,7 +260,6 @@ function setupProfileDropdown() {
         const profileName = event.target.dataset.profileName;
         if (profileName && profileName !== getCurrentProfile()) {
             setCurrentProfile(profileName);
-            // No need to populate here, page reload handles it
             closeDropdown();
             window.location.reload();
         } else {
@@ -246,28 +269,33 @@ function setupProfileDropdown() {
 
     // Toggle dropdown visibility
     dropdownButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        console.log("Profile dropdown button clicked"); // DEBUG LOG
+        event.stopPropagation(); // Prevent document click handler
+        // console.log("Profile dropdown button clicked"); // DEBUG LOG
+        // Check if click target is inside the mobile open menu context if needed
+        const isMobileOpen = document.getElementById('portal-nav')?.classList.contains('portal-nav-open');
+
         populateNavDropdownList(); // Always repopulate before showing/toggling
         const isCurrentlyShown = dropdownContent.classList.contains('show');
         const isExpanded = dropdownContent.classList.toggle('show');
         dropdownButton.setAttribute('aria-expanded', isExpanded);
-        console.log("Dropdown 'show' class toggled. Is now shown:", isExpanded); // DEBUG LOG
+        // console.log(`Dropdown toggled. Was shown: ${isCurrentlyShown}, Is now shown: ${isExpanded}, Mobile Open: ${isMobileOpen}`); // DEBUG LOG
 
-        // Debug mobile issue: check parent visibility
-        if (window.innerWidth <= 768 && document.getElementById('portal-nav').classList.contains('portal-nav-open')) {
-            console.log("Mobile nav open, checking parent visibility:", dropdownContent.offsetParent !== null);
-        }
+        // // Debug mobile issue: check parent visibility
+        // if (isMobileOpen && isExpanded) {
+        //     setTimeout(() => { // Allow styles to apply
+        //         console.log("Mobile nav open, checking dropdown visibility:", dropdownContent.offsetParent !== null, getComputedStyle(dropdownContent).display);
+        //     }, 0);
+        // }
     });
 
-    // Initial population of the button text (doesn't populate dropdown list yet)
+    // Initial population of the button text
      const initialProfile = getCurrentProfile();
      currentProfileDisplay.textContent = initialProfile ? initialProfile : "No Profile";
      currentProfileDisplay.title = initialProfile ? `Current Profile: ${initialProfile}` : "No profile selected";
 }
 
 
-// --- Modal Creation & Handling Functions --- (Unchanged from previous version)
+// --- Modal Creation & Handling Functions --- (Unchanged)
 function createModal(id, titleHtml, contentHtml, buttonsHtml) {
     closeAllModals();
     const overlay = document.createElement('div');
@@ -299,7 +327,7 @@ function closeAllModals() {
         setTimeout(() => { if (!modal.classList.contains('show')) modal.remove(); }, 500);
     });
 }
-// --- Create Profile Modal --- (Unchanged from previous version)
+// --- Create Profile Modal --- (Unchanged)
 function openCreateProfileModal() {
     const modalContent = `<div class="control-group"><label for="newProfileNameInput">New Profile Name:</label><input type="text" id="newProfileNameInput" placeholder="e.g., $MyAwesomeCoin" required><p id="createProfileError" class="modal-error-message" aria-live="assertive"></p></div>`;
     const modalButtons = `<button type="button" class="modal-button-cancel" id="createCancelBtn">Cancel</button><button type="button" class="modal-button-confirm" id="createSaveBtn">Create & Switch</button>`;
@@ -310,7 +338,7 @@ function openCreateProfileModal() {
     inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') saveBtn.click(); });
     cancelBtn.onclick = closeAllModals;
 }
-// --- Manage Profiles Modal --- (Unchanged from previous version)
+// --- Manage Profiles Modal --- (Unchanged)
 function openManageProfilesModal() {
     const modalContent = `<p>Select a profile to delete it permanently.</p><ul class="modal-profile-list" id="modalProfileList"></ul>`;
     const modalButtons = `<button type="button" class="modal-button-cancel" id="manageCloseBtn">Close</button>`;
@@ -318,13 +346,13 @@ function openManageProfilesModal() {
     const listElement = contentDiv.querySelector('#modalProfileList'); const closeBtn = buttonsDiv.querySelector('#manageCloseBtn');
     populateModalProfileList(listElement); closeBtn.onclick = closeAllModals;
 }
-// --- Populate list inside Manage modal --- (Unchanged from previous version)
+// --- Populate list inside Manage modal --- (Unchanged)
 function populateModalProfileList(listElement) {
     listElement.innerHTML = ''; const profiles = getProfileNames(); const currentProfile = getCurrentProfile();
     if (profiles.length === 0) { listElement.innerHTML = '<li class="no-profiles-message">No profiles to manage.</li>'; return; }
     profiles.forEach(name => { const item = document.createElement('li'); item.className = 'modal-profile-item'; const nameSpan = document.createElement('span'); nameSpan.textContent = name; if (name === currentProfile) { nameSpan.innerHTML += ' <small>(Active)</small>'; nameSpan.style.fontWeight = 'bold'; } item.appendChild(nameSpan); const deleteBtn = document.createElement('button'); deleteBtn.textContent = 'Delete'; deleteBtn.title = `Delete profile: ${name}`; deleteBtn.className = 'modal-delete-btn'; deleteBtn.dataset.profileName = name; deleteBtn.addEventListener('click', () => { openConfirmDeleteModal(name, listElement); }); item.appendChild(deleteBtn); listElement.appendChild(item); });
 }
-// --- Confirm Delete Profile Modal --- (Unchanged from previous version)
+// --- Confirm Delete Profile Modal --- (Unchanged)
 function openConfirmDeleteModal(profileNameToDelete, listElementToRefresh) {
     const currentActiveProfile = getCurrentProfile(); let message = `Permanently delete profile "<strong>${profileNameToDelete}</strong>"?<br><br>All associated data will be lost. This cannot be undone.`; if (profileNameToDelete === currentActiveProfile) { message += "<br><br><strong>Warning: This is your currently active profile!</strong> Deleting it will clear the active profile setting."; }
     const modalContent = `<p>${message}</p><p id="deleteErrorMsg" class="modal-error-message" aria-live="assertive" style="display:none;"></p>`;
