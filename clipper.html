@@ -1,308 +1,308 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Memeportal — Clipper</title>
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-  /* page-specific helpers (fixed) */
-  .stage{position:relative;background:#0b0f17;border:1px solid var(--border);border-radius:14px;min-height:220px;max-height:60vh;display:grid;place-items:center;padding:8px}
-  .player{width:100%;height:100%;aspect-ratio:16/9;display:grid;place-items:center}
-  .stage video{width:100%;height:100%;object-fit:contain;border-radius:12px;background:#000}
-  .progress{width:100%;height:10px;border-radius:999px;background:#1a2034;overflow:hidden;border:1px solid var(--border)}
-  .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
-  .clips{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
-  .clip-card video{width:100%;height:auto;background:#000;border-radius:10px}
-  .muted-note{font-size:11px;color:#9aa6c6}
-  .clips-header{position:sticky;top:8px;z-index:3;background:transparent;padding:6px 0}
-  @media (max-width:900px){
-    .stage{max-height:46vh}
+  /* Page‑specific polish (keeps global style.css intact) */
+  .app{grid-template-columns:360px minmax(0,1fr)}
+  .player-wrap{display:grid;grid-template-rows:auto 1fr;gap:10px;height:100%}
+  .aspect-video{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:12px;border:1px solid var(--border);overflow:hidden}
+  .aspect-video > video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+  .clips-panel{display:grid;grid-template-rows:auto 1fr;gap:10px;height:420px}
+  .clips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;overflow:auto}
+  .clip-card{background:#0b0f17;border:1px solid var(--border);border-radius:12px;padding:8px;display:grid;gap:8px}
+  .clip-thumb{aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden}
+  .toolbar.sticky{position:sticky;top:0;background:linear-gradient(180deg,rgba(0,0,0,.3),rgba(0,0,0,.0));backdrop-filter:saturate(1.1) blur(6px);padding:8px;border-radius:12px;border:1px solid var(--border)}
+  .kv{font-size:12px;color:#9aa6c6}
+  .kv strong{color:var(--text)}
+  /* keep side scroll from eating sliders */
+  aside .section{scroll-margin-top:10px}
+  @media (max-width: 900px){
+    .app{grid-template-columns:1fr}
+    .clips-panel{height:360px}
   }
 </style>
 </head>
 <body>
+  <!-- nav host (you said you’ll wire it) -->
   <div id="site-header"></div>
-  <script>
-    // load shared nav + burger
-    (async()=>{try{
-      const host = document.getElementById('site-header');
-      host.innerHTML = await (await fetch('nav.html')).text();
-      const btn=host.querySelector('.menu-toggle'), menu=host.querySelector('#mobileMenu');
-      if(!btn||!menu) return;
-      const close=()=>{menu.setAttribute('hidden','');btn.setAttribute('aria-expanded','false');document.removeEventListener('click',away);}
-      const open =()=>{menu.removeAttribute('hidden');btn.setAttribute('aria-expanded','true');setTimeout(()=>document.addEventListener('click',away),0)}
-      const away=e=>{if(!menu.contains(e.target)&&!btn.contains(e.target)) close();}
-      btn.addEventListener('click',e=>{e.stopPropagation();menu.hasAttribute('hidden')?open():close();});
-      window.matchMedia('(min-width:900px)').addEventListener?.('change',e=>{if(e.matches) close();});
-      close();
-    }catch(e){console.warn('nav load failed',e)}})();
-  </script>
 
-  <div class="app" style="grid-template-columns:420px minmax(0,1fr)">
+  <div class="app">
     <aside>
-      <!-- Upload -->
+      <!-- VIDEO -->
       <div class="card section">
         <h2>Video</h2>
-        <div id="drop" class="drop">
+        <div class="drop" id="drop">
           <input id="videoFile" type="file" accept="video/*">
           <div><strong>Drag & drop</strong> a video or <button class="btn ghost" id="browseBtn">Browse</button></div>
-          <div class="tiny muted" style="margin-top:6px">MP4/WebM recommended. Processed 100% in your browser.</div>
+          <div class="tiny muted">MP4/WebM recommended. Processed 100% in your browser.</div>
         </div>
-        <div id="videoInfo" class="footer">No video loaded.</div>
+        <div id="meta" class="footer">No video loaded.</div>
       </div>
 
-      <!-- Settings -->
+      <!-- CLIPS & LENGTH -->
       <div class="card section">
         <h2>Clips & length</h2>
         <div class="grid">
-          <div class="range-wrap">
-            <label>Number of clips</label>
+          <div>
+            <div class="small muted" style="display:flex;justify-content:space-between">
+              <span>Number of clips</span><span id="countLabel">5</span>
+            </div>
             <input id="clipCount" type="range" min="1" max="30" value="5">
-            <span id="clipCountLabel" class="tiny muted">5</span>
           </div>
-          <div class="range-wrap">
-            <label>Average clip length (seconds)</label>
+          <div>
+            <div class="small muted" style="display:flex;justify-content:space-between">
+              <span>Average clip length (seconds)</span><span id="lenLabel">6</span>
+            </div>
             <input id="clipLen" type="range" min="1" max="30" value="6">
-            <span id="clipLenLabel" class="tiny muted">6</span>
           </div>
-          <div class="flex"><input id="randomDur" type="checkbox" checked><label for="randomDur" style="margin:0">Vary durations randomly (±50%)</label></div>
-          <div class="flex"><input id="avoidCuts" type="checkbox"><label for="avoidCuts" style="margin:0">Heuristic: nudge away from big scene changes</label></div>
+          <div class="flex">
+            <input id="vary" type="checkbox" checked>
+            <label for="vary" style="margin:0">Vary durations randomly (±50%)</label>
+          </div>
+          <div class="flex">
+            <input id="heur" type="checkbox">
+            <label for="heur" style="margin:0">Heuristic: nudge away from big scene changes</label>
+          </div>
         </div>
       </div>
 
-      <!-- Export -->
+      <!-- EXPORT -->
       <div class="card section">
         <h2>Export</h2>
         <div class="grid two">
           <div>
-            <label>Format</label>
-            <select id="exportFormat">
-              <option value="webm" selected>WebM (fast)</option>
+            <label for="fmt">Format</label>
+            <select id="fmt">
+              <option value="webm">WebM (fast)</option>
               <option value="mp4">MP4 label (falls back to WebM)</option>
             </select>
           </div>
           <div>
-            <label>FPS</label>
-            <input id="fps" type="number" min="10" max="60" value="30">
+            <label for="fps">FPS</label>
+            <select id="fps">
+              <option>24</option><option selected>30</option><option>60</option>
+            </select>
           </div>
         </div>
-        <div class="toolbar" style="margin-top:10px;justify-content:flex-end">
+        <div class="toolbar" style="margin-top:8px">
           <button class="btn" id="clearBtn">Clear</button>
-          <button class="btn primary" id="generateBtn">Generate clips</button>
+          <button class="btn primary" id="genBtn">Generate clips</button>
         </div>
-        <div id="progressWrap" class="hidden" style="margin-top:10px">
-          <div class="tiny muted" style="margin-bottom:6px">Progress</div>
-          <div class="progress"><div id="progressBar" class="bar"></div></div>
-          <div id="progressText" class="tiny muted" style="margin-top:6px">Starting…</div>
-        </div>
-        <div class="muted-note" style="margin-top:8px">Note: Most browsers can’t encode MP4 via MediaRecorder; you’ll still get WebM.</div>
+        <div id="progress" class="tiny muted" style="margin-top:8px">Idle.</div>
+        <div class="tiny muted" style="margin-top:8px">Note: Most browsers can’t encode MP4 via MediaRecorder; the MP4 option still produces WebM (labeled accordingly).</div>
       </div>
     </aside>
 
     <main>
-      <div class="card section" style="height:100%;display:grid;grid-template-rows:auto auto minmax(220px,1fr) auto">
-        <div class="kicker">Preview</div>
-        <div class="hr"></div>
-
-        <!-- BOUNDED PLAYER -->
-        <div class="stage checker">
-          <div class="player"><video id="mainPreview" controls playsinline></video></div>
-        </div>
-
-        <!-- Sticky header + clips grid -->
-        <div style="margin-top:14px">
-          <div class="clips-header flex" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-            <h1 style="font-size:18px;margin:0">Generated clips</h1>
-            <button id="downloadAllBtn" class="btn success">Download All (ZIP)</button>
+      <div class="card section" style="height:100%">
+        <div class="player-wrap">
+          <div>
+            <div class="kicker">Preview</div>
           </div>
-          <div id="clipsGrid" class="clips"></div>
+          <div class="aspect-video">
+            <video id="preview" controls playsinline></video>
+          </div>
+
+          <div class="clips-panel" style="margin-top:12px">
+            <div class="toolbar sticky" style="display:flex;gap:10px;align-items:center">
+              <div class="kicker" style="flex:1">Generated clips</div>
+              <button class="btn success" id="zipBtn" disabled>Download All (ZIP)</button>
+            </div>
+            <div id="clips" class="clips-grid"></div>
+          </div>
         </div>
       </div>
     </main>
   </div>
 
-<!-- Hidden processing elements -->
-<video id="processingVideo" style="display:none" playsinline></video>
-<canvas id="processingCanvas" style="display:none"></canvas>
-
 <script>
 (function(){
-  // helpers
+  // ---------- Elements
   const $ = id => document.getElementById(id);
-  const fmtTime = s => { if(!isFinite(s)) return '--:--'; const m=Math.floor(s/60).toString().padStart(2,'0'); const sec=Math.floor(s%60).toString().padStart(2,'0'); return m+':'+sec; };
+  const fileInput = $('videoFile'), browseBtn=$('browseBtn'), drop=$('drop');
+  const preview = $('preview'), meta=$('meta'), progress=$('progress');
+  const clipCount=$('clipCount'), clipLen=$('clipLen'), countLabel=$('countLabel'), lenLabel=$('lenLabel');
+  const vary=$('vary'), heur=$('heur'), fmt=$('fmt'), fps=$('fps');
+  const genBtn=$('genBtn'), clearBtn=$('clearBtn'), clipsEl=$('clips'), zipBtn=$('zipBtn');
 
-  // els
-  const videoFile=$('videoFile'), browseBtn=$('browseBtn'), mainPreview=$('mainPreview'), pVideo=$('processingVideo'), pCanvas=$('processingCanvas');
-  const clipCount=$('clipCount'), clipLen=$('clipLen'), clipCountLabel=$('clipCountLabel'), clipLenLabel=$('clipLenLabel');
-  const randomDur=$('randomDur'), avoidCuts=$('avoidCuts'), exportFormat=$('exportFormat'), fps=$('fps');
-  const generateBtn=$('generateBtn'), clearBtn=$('clearBtn'), downloadAllBtn=$('downloadAllBtn'), clipsGrid=$('clipsGrid');
-  const progressWrap=$('progressWrap'), progressBar=$('progressBar'), progressText=$('progressText'), videoInfo=$('videoInfo');
+  // ---------- State
+  let srcBlob=null, srcURL='', clipList=[];
+  const procVideo = document.createElement('video'); procVideo.playsInline = true; procVideo.muted = true;
+  const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
 
-  let userFile=null, clips=[];
+  // ---------- UI helpers
+  function setProgress(text){ progress.textContent=text; }
+  function updateMeta(){
+    if(!procVideo.duration || !isFinite(procVideo.duration)){ meta.textContent='No video loaded.'; return; }
+    const dur = formatTime(procVideo.duration);
+    meta.innerHTML = `Duration: <strong>${dur}</strong> • Resolution: <strong>${procVideo.videoWidth}×${procVideo.videoHeight}</strong>`;
+  }
+  function formatTime(s){ if(!isFinite(s)) return '--:--'; const m=Math.floor(s/60).toString().padStart(2,'0'); const ss=Math.floor(s%60).toString().padStart(2,'0'); return `${m}:${ss}`; }
 
-  // UI binds
-  browseBtn.addEventListener('click',()=>videoFile.click());
-  clipCount.addEventListener('input',()=>clipCountLabel.textContent=clipCount.value);
-  clipLen.addEventListener('input',()=>clipLenLabel.textContent=clipLen.value);
+  clipCount.addEventListener('input',()=>countLabel.textContent=clipCount.value);
+  clipLen.addEventListener('input',()=>lenLabel.textContent=clipLen.value);
 
-  // upload
-  videoFile.addEventListener('change', e=>{
-    const f=e.target.files?.[0]; if(!f) return;
-    userFile=f; const url=URL.createObjectURL(f);
-    mainPreview.src=url; pVideo.src=url; mainPreview.load(); pVideo.load();
-    const setAspect=()=>{ const r = mainPreview.videoWidth / mainPreview.videoHeight; const wrap = document.querySelector('.player'); wrap.style.aspectRatio = (isFinite(r) && r>0) ? r : '16/9'; };
-    mainPreview.addEventListener('loadedmetadata', ()=>{ updateInfo(f); setAspect(); }, {once:true});
-  });
-  function updateInfo(f){
-    videoInfo.innerHTML = `Duration: <strong>${fmtTime(pVideo.duration)}</strong> • Resolution: <strong>${pVideo.videoWidth}×${pVideo.videoHeight}</strong> • Size: <strong>${(f.size/1024/1024).toFixed(2)} MB</strong>`;
+  // ---------- File handling (drag + browse)
+  browseBtn.addEventListener('click',()=>fileInput.click());
+  ['dragenter','dragover'].forEach(evt=>drop.addEventListener(evt,e=>{e.preventDefault();drop.classList.add('drag');}));
+  ;['dragleave','drop'].forEach(evt=>drop.addEventListener(evt,e=>{e.preventDefault();drop.classList.remove('drag');}));
+  drop.addEventListener('drop', e=>{ if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change',()=>{ if(fileInput.files[0]) loadFile(fileInput.files[0]); });
+
+  async function loadFile(f){
+    srcBlob = f; if(srcURL) URL.revokeObjectURL(srcURL);
+    srcURL = URL.createObjectURL(f);
+    preview.src = srcURL; preview.load();
+    procVideo.src = srcURL; procVideo.load();
+    await new Promise(r=>procVideo.addEventListener('loadedmetadata', r, {once:true}));
+    updateMeta();
+    clipsEl.innerHTML=''; clipList=[]; zipBtn.disabled=true;
+    setProgress('Ready.');
   }
 
   clearBtn.addEventListener('click', ()=>{
-    userFile=null; videoFile.value=''; mainPreview.removeAttribute('src'); pVideo.removeAttribute('src');
-    clips=[]; clipsGrid.innerHTML=''; videoInfo.textContent='No video loaded.';
+    if(srcURL) URL.revokeObjectURL(srcURL);
+    srcBlob=null; srcURL=''; preview.removeAttribute('src'); procVideo.removeAttribute('src');
+    fileInput.value=''; clipsEl.innerHTML=''; clipList=[]; zipBtn.disabled=true;
+    setProgress('Cleared.'); meta.textContent='No video loaded.';
   });
 
-  // scene-change heuristic
-  async function nudgeStarts(starts){
-    return new Promise(resolve=>{
-      const v=pVideo, ctx=pCanvas.getContext('2d');
-      const W=320, H=Math.max(1,Math.round((v.videoHeight/v.videoWidth)*W));
-      pCanvas.width=W; pCanvas.height=H;
-      const total=v.duration, samples=Math.min(60, Math.round(total)), times=[...Array(samples)].map((_,i)=>i*(total/samples));
-      const bright=[]; let idx=0;
-      function sampleNext(){
-        if(idx>=times.length){
-          const delta=bright.map((b,i)=>i?Math.abs(b-bright[i-1]):0);
-          const gMax=Math.max(...delta, 1);
-          for(const s of starts){
-            const pos=Math.floor((s.start/total)*delta.length);
-            const local=Math.max(...delta.slice(Math.max(0,pos-2), Math.min(delta.length,pos+3)));
-            if(local > gMax*0.65) s.start=Math.max(0, s.start- (0.8+Math.random()*0.6));
-          }
-          return resolve();
-        }
-        v.currentTime=Math.min(v.duration-0.01, times[idx]);
-        v.addEventListener('seeked', ()=>{
-          try{ ctx.drawImage(v,0,0,W,H);}catch(e){}
-          const d=ctx.getImageData(0,0,W,H).data; let sum=0;
-          for(let i=0;i<d.length;i+=4) sum += (d[i]+d[i+1]+d[i+2])/3;
-          bright.push(sum/(d.length/4)); idx++; setTimeout(sampleNext,40);
-        }, {once:true});
-      }
-      v.pause(); sampleNext();
-    });
+  // ---------- Core clip generation
+  genBtn.addEventListener('click', generateClips);
+  async function generateClips(){
+    if(!srcBlob){ alert('Upload a video first.'); return; }
+    const n = +clipCount.value, avg = +clipLen.value, useHeur = heur.checked;
+    const total = procVideo.duration;
+    if(!isFinite(total) || total<=0){ alert('Could not read duration.'); return; }
+
+    // random windows
+    const windows = [];
+    for(let i=0;i<n;i++){
+      let dur = avg;
+      if(vary.checked){ const delta = avg*0.5; dur = Math.max(0.5, avg + (Math.random()*2-1)*delta); }
+      const start = Math.max(0, Math.random()*Math.max(0,total-dur));
+      windows.push({start, dur});
+    }
+
+    if(useHeur){ setProgress('Scanning for scene changes...'); await nudgeAwayFromSceneChanges(windows); }
+
+    // ensure canvas size
+    const W = procVideo.videoWidth || 1280, H = procVideo.videoHeight || 720;
+    canvas.width = W; canvas.height = H;
+
+    clipsEl.innerHTML=''; clipList=[]; zipBtn.disabled=true;
+    for(let i=0;i<windows.length;i++){
+      const {start,dur} = windows[i];
+      setProgress(`Rendering clip ${i+1}/${windows.length}...`);
+      try{
+        const blob = await capture(start,dur,W,H);
+        const url = URL.createObjectURL(blob);
+        const label = (fmt.value==='mp4'?'mp4-labeled':'webm');
+        clipList.push({blob,url,label,idx:i+1,start,dur});
+        addClipCard(clipList.at(-1));
+      }catch(err){ console.error(err); }
+    }
+    setProgress(`Done — ${clipList.length} clip${clipList.length===1?'':'s'} ready.`);
+    zipBtn.disabled = clipList.length===0;
   }
 
-  // capture a segment via MediaRecorder on a canvas stream
-  function captureSegment(start,dur,w,h,fpsVal){
-    return new Promise((resolve,reject)=>{
-      const ctx=pCanvas.getContext('2d');
-      pCanvas.width=w; pCanvas.height=h;
+  function capture(start, dur, W, H){
+    return new Promise((resolve, reject)=>{
+      const stream = canvas.captureStream(parseInt(fps.value,10)||30);
+      let mime = 'video/webm;codecs=vp9';
+      if(fmt.value==='mp4') mime = 'video/webm;codecs=vp9'; // label only
 
-      const stream=pCanvas.captureStream(Math.max(10,Math.min(60,fpsVal||30)));
-      let mime='video/webm;codecs=vp9';
-      let rec;
-      try{ rec=new MediaRecorder(stream,{mimeType:mime}); }catch(e){ try{ rec=new MediaRecorder(stream); }catch(err){ return reject(new Error('MediaRecorder unsupported in this browser.')); } }
+      let mr;
+      try{ mr = new MediaRecorder(stream,{mimeType:mime}); }
+      catch(e){ try{ mr = new MediaRecorder(stream); }catch(err){ return reject(new Error('MediaRecorder not supported')); } }
 
       const chunks=[];
-      rec.ondataavailable = e=>{ if(e.data && e.data.size) chunks.push(e.data); };
-      rec.onstop = ()=> resolve(new Blob(chunks,{type:mime}));
+      mr.ondataavailable = e=>{ if(e.data && e.data.size) chunks.push(e.data); };
+      mr.onstop = ()=> resolve(new Blob(chunks,{type:mime}));
 
-      // seek then play & draw frames
-      pVideo.pause();
-      pVideo.currentTime=Math.max(0, Math.min(pVideo.duration-0.01, start));
-      const vidW=pVideo.videoWidth||1280, vidH=pVideo.videoHeight||720;
+      procVideo.pause();
+      procVideo.currentTime = Math.min(procVideo.duration-0.01, Math.max(0,start));
 
-      pVideo.addEventListener('seeked', ()=>{
-        const t0=performance.now(); rec.start(200);
-        pVideo.muted=true; pVideo.play().catch(err=>reject(new Error('Autoplay blocked — click the page then try again.')));
-        (function draw(){
-          // cover scaling
-          const scale=Math.max(w/vidW, h/vidH);
-          const sw=w/scale, sh=h/scale, sx=(vidW-sw)/2, sy=(vidH-sh)/2;
-          try{ ctx.drawImage(pVideo, sx, sy, sw, sh, 0, 0, w, h); }catch(e){}
-          const elapsed=(performance.now()-t0)/1000;
-          if(elapsed>=dur){ pVideo.pause(); rec.stop(); return; }
+      procVideo.addEventListener('seeked', ()=>{
+        mr.start(250);
+        procVideo.play().catch(()=>reject(new Error('Autoplay blocked')));
+        const startMs = performance.now();
+
+        const draw = ()=>{
+          // cover draw
+          const vw = procVideo.videoWidth, vh = procVideo.videoHeight;
+          const s = Math.max(W/vw, H/vh);
+          const sw = W/s, sh = H/s, sx = (vw-sw)/2, sy = (vh-sh)/2;
+          try{ ctx.drawImage(procVideo, sx, sy, sw, sh, 0, 0, W, H); }catch(e){}
+          if(((performance.now()-startMs)/1000) >= dur){
+            procVideo.pause(); mr.stop(); return;
+          }
           requestAnimationFrame(draw);
-        })();
+        };
+        requestAnimationFrame(draw);
       }, {once:true});
     });
   }
 
-  // generate
-  async function generate(){
-    if(!userFile) return alert('Upload a video first.');
-    const total=pVideo.duration; if(!isFinite(total)||total<=0) return alert('Unable to read video duration.');
-    const n=+clipCount.value, avg=+clipLen.value;
-
-    // compute starts
-    const starts=[];
-    for(let i=0;i<n;i++){
-      let d=avg; if(randomDur.checked){ const delta=avg*0.5; d=Math.max(0.5, avg - delta + Math.random()* (2*delta)); }
-      const s=Math.random()*Math.max(0,total-d);
-      starts.push({start:s, dur:d});
-    }
-    if(avoidCuts.checked){
-      progressWrap.classList.remove('hidden'); progressText.textContent='Scanning for scene changes…'; progressBar.style.width='10%';
-      await nudgeStarts(starts);
-    }
-
-    progressWrap.classList.remove('hidden'); progressText.textContent='Generating…'; progressBar.style.width='12%';
-    clips=[]; clipsGrid.innerHTML='';
-    const w=pVideo.videoWidth||1280, h=pVideo.videoHeight||720, f=Math.max(10,Math.min(60,+fps.value||30));
-
-    for(let i=0;i<starts.length;i++){
-      const {start,dur}=starts[i];
-      progressText.textContent=`Clip ${i+1} of ${starts.length}`;
-      progressBar.style.width = `${Math.round(((i)/starts.length)*88)+12}%`;
-      try{
-        const blob=await captureSegment(start,dur,w,h,f);
-        const url=URL.createObjectURL(blob);
-        const obj={blob,url,idx:i+1,start,dur};
-        clips.push(obj); addClipCard(obj);
-      }catch(e){ console.error(e); const p=document.createElement('div'); p.textContent=`Failed to create clip ${i+1}`; clipsGrid.appendChild(p); }
-    }
-    progressBar.style.width='100%'; progressText.textContent=`Done — ${clips.length} clips ready.`;
+  function addClipCard(clip){
+    const card = document.createElement('div');
+    card.className = 'clip-card';
+    card.innerHTML = `
+      <div class="clip-thumb"><video src="${clip.url}" controls playsinline style="width:100%;height:100%;object-fit:cover"></video></div>
+      <div class="kv">Clip ${clip.idx} • ${formatTime(clip.start)} • ${Math.round(clip.dur)}s</div>
+      <div class="toolbar right">
+        <a class="btn" download="clip-${clip.idx}.${clip.label==='webm'?'webm':'webm'}" href="${clip.url}">Download</a>
+      </div>`;
+    clipsEl.appendChild(card);
   }
 
-  function addClipCard(c){
-    const wrap=document.createElement('div'); wrap.className='card section clip-card';
-    wrap.innerHTML = `
-      <div class="checker" style="border-radius:10px;overflow:hidden;margin-bottom:8px"><video controls src="${c.url}"></video></div>
-      <div class="flex" style="justify-content:space-between;align-items:center">
-        <div class="tiny muted">Clip ${c.idx} • ${fmtTime(c.start)} • ${Math.round(c.dur)}s</div>
-        <div class="toolbar">
-          <a class="btn" download="clip-${c.idx}.${exportFormat.value==='mp4'?'mp4':'webm'}" href="${c.url}">Download</a>
-        </div>
-      </div>
-    `;
-    clipsGrid.appendChild(wrap);
+  // Simple scene‑change heuristic (brightness deltas)
+  async function nudgeAwayFromSceneChanges(windows){
+    const v = procVideo, W = 320, H = Math.round((v.videoHeight/v.videoWidth)*W)||180;
+    canvas.width=W; canvas.height=H;
+    const samples = Math.min(80, Math.round(v.duration));
+    const times = [...Array(samples)].map((_,i)=> (i*v.duration)/samples);
+    const br = [];
+
+    await new Promise((resolve)=>{
+      let i=0;
+      const snap=()=>{ try{ ctx.drawImage(v,0,0,W,H); }catch(e){} const d=ctx.getImageData(0,0,W,H).data; let s=0; for(let k=0;k<d.length;k+=4){ s+=(d[k]+d[k+1]+d[k+2])/3; } br.push(s/(d.length/4)); };
+      const next=()=>{ if(i>=times.length){ resolve(); return; }
+        v.currentTime=Math.min(v.duration-0.01,times[i]);
+        v.addEventListener('seeked',()=>{ snap(); i++; setTimeout(next,25); },{once:true});
+      }; next();
+    });
+
+    const deltas = br.map((b,i)=> i?Math.abs(b-br[i-1]):0);
+    const global = Math.max(...deltas)||1;
+    windows.forEach(w=>{
+      const idx = Math.floor((w.start/v.duration)*deltas.length);
+      const local = deltas.slice(Math.max(0,idx-2), Math.min(deltas.length,idx+3));
+      if(Math.max(...local) > global*0.65){ w.start = Math.max(0, w.start - (0.8+Math.random()*0.6)); }
+    });
   }
 
-  // zip all
-  downloadAllBtn.addEventListener('click', async ()=>{
-    if(!clips.length) return alert('No clips yet.');
-    const zip=new JSZip();
-    for(let i=0;i<clips.length;i++){
-      const arr=await clips[i].blob.arrayBuffer();
-      zip.file(`clip-${i+1}.${exportFormat.value==='mp4'?'mp4':'webm'}`, arr);
+  // ---------- ZIP all
+  zipBtn.addEventListener('click', async ()=>{
+    if(!clipList.length) return;
+    zipBtn.disabled = true; zipBtn.textContent = 'Zipping...';
+    const zip = new JSZip();
+    for(let i=0;i<clipList.length;i++){
+      const arr = await clipList[i].blob.arrayBuffer();
+      zip.file(`clip-${(i+1).toString().padStart(2,'0')}.webm`, arr);
     }
-    const content=await zip.generateAsync({type:'blob'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(content); a.download='clips.zip'; a.click();
+    const content = await zip.generateAsync({type:'blob'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(content);
+    a.download = 'clips.zip';
+    a.click();
+    zipBtn.textContent = 'Download All (ZIP)'; zipBtn.disabled=false;
   });
-
-  generateBtn.addEventListener('click', async ()=>{
-    generateBtn.disabled=true; generateBtn.textContent='Working…';
-    try{ await generate(); } finally { generateBtn.disabled=false; generateBtn.textContent='Generate clips'; }
-  });
-
-  // minimal DnD for video
-  const drop=$('drop');
-  ['dragenter','dragover'].forEach(evt=>drop.addEventListener(evt,e=>{e.preventDefault();drop.classList.add('drag');}));
-  ;['dragleave','drop'].forEach(evt=>drop.addEventListener(evt,e=>{e.preventDefault();drop.classList.remove('drag');}));
-  drop.addEventListener('drop', e=>{const f=e.dataTransfer.files?.[0]; if(f){ videoFile.files=e.dataTransfer.files; videoFile.dispatchEvent(new Event('change')); }});
 })();
 </script>
 </body>
