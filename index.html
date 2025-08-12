@@ -1,69 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meme Portal - Your One-Stop Meme Coin Launchpad</title>
-    <link rel="icon" href="images/logo.png">
-	<script src="js/profile-manager.js"></script>
-    <script src="js/main.js"></script>
-    <link rel="stylesheet" href="style.css">
-    </head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memeportal — Tools</title>
+<link rel="stylesheet" href="style.css" />
+</head>
 <body>
-    <div id="navbar-placeholder"></div>
+  <div id="site-header"></div>
+  <script>(async()=>{try{const r=await fetch('nav.html');document.getElementById('site-header').innerHTML=await r.text();}catch(e){console.warn('nav load failed',e);}})();</script>
 
-    <main>
-        <div class="container">
-            <h1 class="page-title">Welcome to Meme Portal 🚀</h1>
-            <p class="page-subtitle">
-                Your essential toolkit for launching the next legendary meme coin.
-                Generate websites, resize images, create stickers, build shill posts, explore raid services, and more coming soon!
-            </p>
+  <main class="wrap">
+    <section class="tiles">
+      <a class="tile" href="stickergenerator.html">
+        <h2>Sticker Generator</h2>
+        <p class="muted">Create Telegram‑ready 512×512 PNG stickers with presets, typography controls, BG remover, and ZIP export.</p>
+        <div class="actions"><span class="btn primary">Open</span></div>
+      </a>
 
-            <div class="tool-grid">
-                <div class="tool-card">
-                    <h2>Website Builder 🛠️</h2>
-                    <p>Generate a professional-looking, responsive website for your meme coin in minutes. Choose themes, colors, sections, and add your content.</p>
-                    <a href="builder.html" class="tool-button">Go to Builder</a>
-                </div>
+      <a class="tile" href="emojigenerator.html">
+        <h2>Emoji / Spinner (beta)</h2>
+        <p class="muted">Generate a spinning coin with your logo and export frames as PNG (ZIP). Animated WebP/APNG coming soon.</p>
+        <div class="actions"><span class="btn">Open</span></div>
+      </a>
 
-                <div class="tool-card">
-                    <h2>Image Resizer 📏</h2>
-                    <p>Quickly resize your logos, banners, and meme images to the perfect dimensions for Twitter, Telegram, websites, and more.</p>
-                    <a href="resizer.html" class="tool-button">Go to Resizer</a>
-                </div>
-
-                <div class="tool-card">
-                    <h2>Sticker Generator ✨</h2>
-                    <p>Create Telegram stickers by adding popular crypto phrases or custom text to your images. Ready to upload!</p>
-                    <a href="sticker-generator.html" class="tool-button">Go to Generator</a>
-                </div>
-
-                 <div class="tool-card">
-                    <h2>Shill Generator ✍️</h2>
-                    <p>Create reusable Twitter post templates. Quickly insert your coin's CA, Ticker, and Name to generate shill posts ready for copy-pasting.</p>
-                    <a href="shill-generator.html" class="tool-button">Go to Generator</a>
-                 </div>
-
-                 <div class="tool-card">
-                    <h2>Raid Teams Info ⚔️</h2>
-                    <p>Learn about professional Raid Teams that can amplify your project's visibility on X/Twitter through coordinated engagement.</p>
-                    <a href="raid-team.html" class="tool-button">Learn More</a>
-                 </div>
-
-                 <div class="tool-card">
-                    <h2>Volume Bot Service 📈</h2>
-                    <p>Boost your memecoin's visibility by increasing its trading volume with our automated bot service. Various tiers available.</p>
-                    <a href="volume-bot.html" class="tool-button">Learn More</a>
-                 </div>
-                 <div class="placeholder-card"> <h3>Community Tools</h3> <p>🤝</p> </div>
-                 </div>
-        </div>
-    </main>
-
-    <footer style="text-align: center; padding: 1rem; margin-top: 2rem; border-top: 1px solid #333; font-size: 0.9rem; color: #888;">
-        Meme Portal &copy; 2025 | Tools for Degens, by Degens
-    </footer>
-
-    </body>
+      <a class="tile" href="#">
+        <h2>Requests & Ideas</h2>
+        <p class="muted">What should we build next? Banner generator, chart meme maker, overlay templates?</p>
+        <div class="actions"><span class="btn ghost">Contact</span></div>
+      </a>
+    </section>
+  </main>
+</body>
 </html>

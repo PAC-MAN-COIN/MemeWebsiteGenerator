@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memeportal — Emoji Tools</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <div id="site-header"></div>
+  <script>(async()=>{try{const r=await fetch('nav.html');document.getElementById('site-header').innerHTML=await r.text();}catch(e){console.warn('nav load failed',e);}})();</script>
+
+  <div class="app" style="grid-template-columns:380px minmax(0,1fr)">
+    <aside>
+      <div class="card section">
+        <h2>Static Emoji (100×100)</h2>
+        <div class="grid">
+          <div class="drop" id="eDrop">
+            <input id="eFiles" type="file" accept="image/*" multiple>
+            <div><strong>Drag & drop</strong> PNG/WebP here or <button class="btn ghost" id="eBrowse">Browse</button></div>
+            <div class="tiny muted" style="margin-top:6px">Images are resized to <strong>100×100</strong> with transparency kept.</div>
+          </div>
+          <div class="toolbar right">
+            <button class="btn" id="eClear">Clear</button>
+            <button class="btn success" id="eZip">Export ZIP</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section">
+        <h2>Animated (Spinner) — TGS‑ready frames</h2>
+        <div class="grid">
+          <div>
+            <label>Logo (PNG/SVG)</label>
+            <input id="logoFile" type="file" accept="image/*,image/svg+xml">
+          </div>
+          <div class="two">
+            <div>
+              <label for="coinA">Coin color A</label>
+              <input id="coinA" type="color" value="#f59e0b"/>
+            </div>
+            <div>
+              <label for="coinB">Coin color B</label>
+              <input id="coinB" type="color" value="#fde68a"/>
+            </div>
+          </div>
+          <div class="two">
+            <div>
+              <label for="edge">Edge width</label>
+              <input id="edge" type="range" min="2" max="20" value="8">
+            </div>
+            <div>
+              <label for="speed">Spin speed</label>
+              <input id="speed" type="range" min="0.2" max="3" step="0.1" value="1.2">
+            </div>
+          </div>
+          <div class="two">
+            <div>
+              <label for="size">Size</label>
+              <select id="size">
+                <option>100</option>
+                <option selected>256</option>
+                <option>512</option>
+              </select>
+            </div>
+            <div class="flex">
+              <input id="shine" type="checkbox" checked>
+              <label for="shine" style="margin:0">Specular shine</label>
+            </div>
+          </div>
+          <div class="toolbar right">
+            <button class="btn" id="export24">Export 24f ZIP</button>
+            <button class="btn" id="export60">Export 60f ZIP</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section">
+        <h2>Telegram Animated Requirements</h2>
+        <ul class="tiny muted" style="margin:0 0 8px 18px;line-height:1.45">
+          <li>Canvas: <strong>512×512</strong>. Objects must stay inside.</li>
+          <li>Length ≤ <strong>3s</strong>, looped, <strong>60 FPS</strong>.</li>
+          <li>Final <strong>.TGS</strong> ≤ <strong>64 KB</strong> (Lottie‑based).</li>
+          <li>Export with <strong>Bodymovin‑TG</strong> from After Effects.</li>
+          <li>Unsupported AE features: masks, layer effects, images, solids, texts, 3D, merge paths, star shapes, gradient strokes, repeaters, time stretching/remapping, auto‑orient, auto‑bezier, expressions.</li>
+        </ul>
+        <div class="tiny">Workflow tip: Export frames here → assemble in After Effects → export with Bodymovin‑TG to <strong>.TGS</strong>. For video stickers/emoji, render <strong>.WEBM</strong> (VP9) up to 30 FPS, ≤256 KB.</div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="card section" style="display:grid;gap:12px">
+        <div class="kicker">Preview</div>
+        <canvas id="coinCanvas" width="256" height="256" class="checkerboard" style="width:100%;max-width:520px;border-radius:12px;justify-self:start"></canvas>
+        <div class="hr"></div>
+        <h2>Static Emoji Output</h2>
+        <div id="emojiGrid" class="preview-grid"></div>
+      </div>
+    </main>
+  </div>
+
+<script>
+(function(){
+  // --- Static Emoji (100×100) ---
+  const eDrop=document.getElementById('eDrop'), eFiles=document.getElementById('eFiles'), eBrowse=document.getElementById('eBrowse');
+  const eGrid=document.getElementById('emojiGrid');
+  const eZipBtn=document.getElementById('eZip'); const eClearBtn=document.getElementById('eClear');
+  const eState=[]; // {name, canvas}
+
+  ['dragenter','dragover'].forEach(evt=>eDrop.addEventListener(evt,e=>{e.preventDefault();eDrop.classList.add('drag')}));
+  ;['dragleave','drop'].forEach(evt=>eDrop.addEventListener(evt,e=>{e.preventDefault();eDrop.classList.remove('drag')}));
+  eDrop.addEventListener('drop', e=>handleEmojiFiles(e.dataTransfer.files));
+  eBrowse.addEventListener('click',()=>eFiles.click()); eFiles.addEventListener('change',()=>handleEmojiFiles(eFiles.files));
+
+  function handleEmojiFiles(files){
+    const list=[...files].filter(f=>/^image\//.test(f.type)); if(!list.length) return;
+    list.forEach(file=>{ const img=new Image(); img.onload=()=>{ const c=resizeTo100(img); addEmojiThumb(c, file.name.replace(/\.[^.]+$/, '')); }; img.src=URL.createObjectURL(file); });
+  }
+  function resizeTo100(img){ const c=document.createElement('canvas'); c.width=100; c.height=100; const ctx=c.getContext('2d'); ctx.clearRect(0,0,100,100); // fit & center
+    const s=Math.min(100/img.width, 100/img.height); const w=img.width*s, h=img.height*s; ctx.drawImage(img,(100-w)/2,(100-h)/2,w,h); return c; }
+  function addEmojiThumb(canvas, base){ const wrap=document.createElement('div'); wrap.className='thumb checkerboard'; const a=document.createElement('a'); a.className='btn'; a.textContent='PNG'; a.download=base+'.png'; a.href=canvas.toDataURL('image/png'); const actions=document.createElement('div'); actions.className='actions'; actions.appendChild(a); wrap.appendChild(canvas); wrap.appendChild(actions); eGrid.appendChild(wrap); eState.push({name:a.download, canvas}); }
+  eClearBtn.addEventListener('click',()=>{eGrid.innerHTML=''; eState.length=0;});
+  eZipBtn.addEventListener('click', async ()=>{ if(!eState.length) return alert('Add some images first.'); const zip=new JSZip(); for(const {canvas,name} of eState){ const blob=await new Promise(res=>canvas.toBlob(res,'image/png')); zip.file(name, blob); } const content=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(content); a.download='emoji_static_100.zip'; a.click(); });
+
+  // --- Animated Spinner (frames) ---
+  const canvas=document.getElementById('coinCanvas'); const ctx=canvas.getContext('2d');
+  const logoFile=document.getElementById('logoFile'); const coinA=document.getElementById('coinA'); const coinB=document.getElementById('coinB'); const edge=document.getElementById('edge'); const speed=document.getElementById('speed'); const sizeSel=document.getElementById('size'); const shine=document.getElementById('shine');
+  const export24=document.getElementById('export24'); const export60=document.getElementById('export60');
+  let logo=null, t=0, last=0; function resize(){ const s=parseInt(sizeSel.value,10); canvas.width=s; canvas.height=s;} sizeSel.addEventListener('change', resize); resize();
+  logoFile.addEventListener('change',()=>{ const f=logoFile.files[0]; if(!f) return; const img=new Image(); img.onload=()=>{logo=img}; img.src=URL.createObjectURL(f); });
+  function draw(){ const w=canvas.width, h=canvas.height; ctx.clearRect(0,0,w,h); const r=Math.min(w,h)*0.34; const cx=w/2, cy=h/2; const scx=Math.cos(t); const absX=Math.abs(scx); const edgeW=+edge.value; ctx.save(); ctx.translate(cx,cy); ctx.scale(scx,1); const grd=ctx.createRadialGradient(0,-r*0.4,r*0.2,0,0,r*1.2); grd.addColorStop(0,coinB.value); grd.addColorStop(1,coinA.value); ctx.fillStyle=grd; ctx.beginPath(); ctx.ellipse(0,0,r,r,0,0,Math.PI*2); ctx.fill(); ctx.lineWidth=edgeW; ctx.strokeStyle='#00000022'; ctx.stroke(); if(shine.checked){ const sg=ctx.createLinearGradient(-r,-r,r,r); sg.addColorStop(0,'rgba(255,255,255,0.25)'); sg.addColorStop(0.5,'rgba(255,255,255,0)'); sg.addColorStop(1,'rgba(0,0,0,0.15)'); ctx.globalCompositeOperation='lighter'; ctx.fillStyle=sg; ctx.beginPath(); ctx.ellipse(0,0,r,r,0,0,Math.PI*2); ctx.fill(); ctx.globalCompositeOperation='source-over'; } if(logo){ ctx.save(); const s=r*1.1; ctx.globalAlpha=absX; if(scx<0) ctx.scale(-1,1); const rr=Math.min(s, s*(logo.height/logo.width)); const wL=rr, hL=rr*(logo.height/logo.width); ctx.drawImage(logo,-wL/2,-hL/2,wL,hL); ctx.restore(); } ctx.restore(); }
+  function loop(now){ const dt=(now-last)||16; last=now; t+=dt/1000 * +speed.value; draw(); requestAnimationFrame(loop);} requestAnimationFrame(loop);
+  async function exportFrames(n){ const oldT=t; const zip=new JSZip(); for(let i=0;i<n;i++){ t=i*(Math.PI*2/n); draw(); const blob=await new Promise(res=>canvas.toBlob(res,'image/png')); zip.file(`frame_${String(i).padStart(2,'0')}.png`, blob);} t=oldT; const content=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(content); a.download=`spinner_${n}f.zip`; a.click(); }
+  export24.addEventListener('click',()=>exportFrames(24)); export60.addEventListener('click',()=>exportFrames(60));
+})();
+</script>
+</body>
+</html>

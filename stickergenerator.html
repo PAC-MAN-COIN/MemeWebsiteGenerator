@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memeportal — Sticker Generator</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <div id="site-header"></div>
+  <script>/* load shared nav */(async()=>{try{const r=await fetch('nav.html');document.getElementById('site-header').innerHTML=await r.text();}catch(e){console.warn('nav load failed',e);}})();</script>
+
+  <div class="app">
+    <aside>
+      <!-- no duplicate brand in sidebar -->
+      <div class="card section" id="uploadCard">
+        <h2>Images</h2>
+        <div id="drop" class="drop">
+          <input id="fileInput" type="file" accept="image/*" multiple>
+          <div><strong>Drag & drop</strong> PNGs/WebPs here (keeps transparency) or <button class="btn ghost" id="browseBtn">Browse</button></div>
+          <div class="muted tiny" style="margin-top:6px">Images auto‑fit into a 512×512 canvas (Telegram size).</div>
+        </div>
+        <div id="fileList" class="footer">No files yet.</div>
+      </div>
+
+      <div class="card section">
+        <h2>Text presets</h2>
+        <div class="grid">
+          <div class="two">
+            <div>
+              <label for="token">Token / Ticker</label>
+              <input id="token" type="text" placeholder="e.g. BEASTLAB, BG" />
+              <div class="tiny muted">Used in presets as <span class="badge">{TOKEN}</span></div>
+            </div>
+            <div>
+              <label for="style">Caption style</label>
+              <select id="style">
+                <option value="top">Top caption</option>
+                <option value="bottom">Bottom caption</option>
+                <option value="both" selected>Top & bottom</option>
+                <option value="none">No text</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="list" id="presetList"></div>
+          <details>
+            <summary class="small">Custom list (comma-separated)</summary>
+            <textarea id="customList" placeholder="Type phrases separated by commas…"></textarea>
+          </details>
+        </div>
+      </div>
+
+      <div class="card section">
+        <h2>Typography <span class="tiny muted">(live preview)</span></h2>
+        <div class="grid">
+          <div class="type-preview">
+            <canvas id="typeCanvas" width="512" height="220" class="checkerboard" style="width:100%;border-radius:10px"></canvas>
+            <div class="tiny muted" style="margin-top:6px">This preview mirrors your settings using the sample text below.</div>
+            <input id="typeSample" type="text" value="GM {TOKEN} Army" style="margin-top:8px"/>
+          </div>
+          <div class="two" style="margin-top:8px">
+            <div>
+              <label for="fontFamily">Font family</label>
+              <select id="fontFamily">
+                <option>Impact, Haettenschweiler, 'Arial Black', sans-serif</option>
+                <option>Arial Black, Arial, sans-serif</option>
+                <option>Segoe UI, Roboto, Helvetica, Arial</option>
+                <option>Inter, Segoe UI, Roboto, Arial</option>
+                <option>System UI, -apple-system, Segoe UI</option>
+              </select>
+            </div>
+            <div>
+              <label for="letterCase">Letter case</label>
+              <select id="letterCase">
+                <option value="upper" selected>UPPERCASE</option>
+                <option value="title">Title Case</option>
+                <option value="lower">lowercase</option>
+              </select>
+            </div>
+          </div>
+          <div class="two">
+            <div class="range-wrap">
+              <label for="fontSize">Font size</label>
+              <input id="fontSize" type="range" min="18" max="96" value="48"/>
+              <span id="fontSizeVal" class="tiny muted">48</span>
+            </div>
+            <div class="range-wrap">
+              <label for="stroke">Outline</label>
+              <input id="stroke" type="range" min="0" max="12" value="6"/>
+              <span id="strokeVal" class="tiny muted">6</span>
+            </div>
+          </div>
+          <div class="two">
+            <div class="range-wrap">
+              <label for="padding">Padding</label>
+              <input id="padding" type="range" min="0" max="60" value="24"/>
+              <span id="paddingVal" class="tiny muted">24</span>
+            </div>
+            <div class="range-wrap">
+              <label for="lineHeight">Line height</label>
+              <input id="lineHeight" type="range" min="1" max="1.6" step="0.05" value="1.1"/>
+              <span id="lineHeightVal" class="tiny muted">1.10</span>
+            </div>
+          </div>
+          <div class="two">
+            <div>
+              <label for="fill">Text color</label>
+              <input id="fill" type="color" value="#ff66ff"/>
+            </div>
+            <div>
+              <label for="outline">Outline color</label>
+              <input id="outline" type="color" value="#672bd9"/>
+            </div>
+          </div>
+          <div class="two">
+            <div class="flex">
+              <input id="shadow" type="checkbox" checked />
+              <label for="shadow" style="margin:0">Soft shadow</label>
+            </div>
+            <div class="flex">
+              <input id="watermark" type="checkbox" />
+              <label for="watermark" style="margin:0">Tiny watermark</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section">
+        <div class="toolbar right">
+          <button class="btn" id="clearBtn">Clear</button>
+          <button class="btn primary" id="renderBtn">Render Stickers</button>
+          <button class="btn" id="exportBtn">Export All</button>
+          <button class="btn success" id="zipBtn">Export ZIP</button>
+        </div>
+        <div class="footer">Exports as transparent <strong>PNG 512×512</strong> files. Telegram recommends &lt; 512KB per sticker.</div>
+      </div>
+
+      <div class="footer">Pro tip: Use transparent PNGs for characters; captions stay crisp on any background.</div>
+    </aside>
+
+    <main>
+      <div class="card section">
+        <div class="flex" style="justify-content:space-between;align-items:end">
+          <div>
+            <div class="kicker">Preview</div>
+            <h1 style="font-size:18px;margin-top:6px">Your Sticker Set</h1>
+          </div>
+          <div class="pill"><span id="count">0</span> generated</div>
+        </div>
+        <div class="hr"></div>
+        <div id="grid" class="preview-grid"></div>
+      </div>
+    </main>
+  </div>
+
+<script>
+(function(){
+  const MAX = 512; const state = { images: [], canvases: [] };
+  const drop = document.getElementById('drop');
+  const fileInput = document.getElementById('fileInput');
+  const browseBtn = document.getElementById('browseBtn');
+  const fileList = document.getElementById('fileList');
+  const presetList = document.getElementById('presetList');
+  const grid = document.getElementById('grid');
+  const count = document.getElementById('count');
+
+  const tokenEl = document.getElementById('token');
+  const styleEl = document.getElementById('style');
+  const fontFamilyEl = document.getElementById('fontFamily');
+  const letterCaseEl = document.getElementById('letterCase');
+  const fontSizeEl = document.getElementById('fontSize');
+  const strokeEl = document.getElementById('stroke');
+  const paddingEl = document.getElementById('padding');
+  const lineHeightEl = document.getElementById('lineHeight');
+  const fillEl = document.getElementById('fill');
+  const outlineEl = document.getElementById('outline');
+  const shadowEl = document.getElementById('shadow');
+  const watermarkEl = document.getElementById('watermark');
+  const customListEl = document.getElementById('customList');
+
+  const typeCanvas = document.getElementById('typeCanvas');
+  const typeSample = document.getElementById('typeSample');
+
+  const renderBtn = document.getElementById('renderBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const zipBtn = document.getElementById('zipBtn');
+
+  const PRESETS = ['WAGMI','Only Up','Send It','Ape In','No FUD','No Spam!','Welcome!','Lock In','Key Figures','Live from {TOKEN}','GM {TOKEN} Army','GN {TOKEN} Fam','When Moon?','New ATH','Buy the Dip','Diamond Hands','Just Chill','We Moon Soon','Aped!','Zero to Hero','Born to {TOKEN}','Walk between the drops','Good night Honey','Good morning Ser','No Rug',"Let's fucking go",'Print Green','Charts Only Up','Dev Update','Community Call','Hodl!!!'];
+
+  function buildPresets(){presetList.innerHTML=''; PRESETS.forEach((p,i)=>{const id='p_'+i; const row=document.createElement('label'); row.innerHTML=`<input type="checkbox" id="${id}" checked> <span>${escapeHtml(p)}</span>`; presetList.appendChild(row);});}
+  function escapeHtml(str){ return str.replace(/[&<>\"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s])); }
+
+  ['dragenter','dragover'].forEach(evt=>drop.addEventListener(evt,e=>{e.preventDefault();drop.classList.add('drag')}));
+  ;['dragleave','drop'].forEach(evt=>drop.addEventListener(evt,e=>{e.preventDefault();drop.classList.remove('drag')}));
+  drop.addEventListener('drop', e=>handleFiles(e.dataTransfer.files));
+  browseBtn.addEventListener('click',()=>fileInput.click());
+  fileInput.addEventListener('change',()=>handleFiles(fileInput.files));
+
+  function handleFiles(files){const list=Array.from(files).filter(f=>/^image\//.test(f.type)); if(!list.length) return; let loaded=0; list.forEach(file=>{ const img=new Image(); img.onload=()=>{state.images.push({name:file.name.replace(/\.[^.]+$/, ''), img}); loaded++; if(loaded===list.length) updateFileList();}; img.onerror=()=>console.warn('Failed',file.name); img.src=URL.createObjectURL(file); });}
+  function updateFileList(){ fileList.innerHTML = state.images.length? state.images.map((f,i)=>`<span class="badge">${i+1}</span> ${escapeHtml(f.name)}`).join('<br/>') : 'No files yet.' }
+
+  function normalizeCase(s){ const m=letterCaseEl.value; if(m==='upper') return s.toUpperCase(); if(m==='lower') return s.toLowerCase(); return s.replace(/\w\S*/g,w=>w[0].toUpperCase()+w.slice(1).toLowerCase()); }
+  function wrapLines(ctx,text,max){ const words=text.split(' '), lines=[]; let line=''; for(const w of words){ const test=line?line+' '+w:w; if(ctx.measureText(test).width>max&&line){lines.push(line); line=w;} else line=test;} if(line) lines.push(line); return lines; }
+
+  function drawBlock(ctx, text, x, y, maxWidth){
+    const size=+fontSizeEl.value, stroke=+strokeEl.value, lh=+lineHeightEl.value; ctx.font=`700 ${size}px ${fontFamilyEl.value}`; ctx.textAlign='center'; ctx.textBaseline='alphabetic'; const lines=wrapLines(ctx,text,maxWidth);
+    ctx.save(); ctx.lineJoin='round'; ctx.lineCap='round'; ctx.miterLimit=2; ctx.strokeStyle=outlineEl.value; ctx.lineWidth=Math.max(1, stroke*1.5); ctx.shadowColor='transparent'; for(const line of lines){ if(stroke>0) ctx.strokeText(line,x,y); y+=size*lh; } ctx.restore();
+    y -= lines.length*size*lh; ctx.save(); if(shadowEl.checked){ ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=Math.max(8,size/6); ctx.shadowOffsetY=Math.max(2,size/12);} ctx.fillStyle=fillEl.value; for(const line of lines){ ctx.fillText(line,x,y); y+=size*lh; } ctx.restore();
+  }
+
+  function renderTypePreview(){ const ctx=typeCanvas.getContext('2d'); ctx.clearRect(0,0,typeCanvas.width,typeCanvas.height); const token=tokenEl.value.trim()||'{TOKEN}'; const raw=typeSample.value.replaceAll('{TOKEN}',token); const text=normalizeCase(raw); const pad=+paddingEl.value; drawBlock(ctx,text,typeCanvas.width/2,50,typeCanvas.width-pad*2); drawGuide(ctx); }
+  function drawGuide(ctx){ ctx.save(); ctx.strokeStyle='rgba(124,58,237,.35)'; ctx.setLineDash([6,6]); const pad=+paddingEl.value; ctx.strokeRect(pad,10,typeCanvas.width-pad*2,typeCanvas.height-20); ctx.restore(); }
+
+  function compilePhrases(){ const token=tokenEl.value.trim()||'{TOKEN}'; const chosen=PRESETS.filter((_,i)=>document.getElementById('p_'+i).checked); const customs=(customListEl.value||'').split(',').map(s=>s.trim()).filter(Boolean); return [...chosen,...customs].map(s=>s.replaceAll('{TOKEN}',token)); }
+  function fitAndCenter(ctx,img){ const W=MAX,H=MAX; const scale=Math.min(W/img.width,H/img.height); const w=img.width*scale,h=img.height*scale; ctx.drawImage(img,(W-w)/2,(H-h)/2,w,h); }
+  function drawCaption(ctx,text,position){ if(!text) return; const pad=+paddingEl.value; const x=MAX/2; const size=+fontSizeEl.value, lh=+lineHeightEl.value; const lines=wrapLines(ctx,text,MAX-pad*2); const total=lines.length*size*lh; let y=(position==='top')? pad+size : MAX - pad - (total - size*0.2); ctx.font=`700 ${size}px ${fontFamilyEl.value}`; ctx.textAlign='center'; ctx.textBaseline='alphabetic'; drawBlock(ctx, lines.join('\n'), x, y, MAX-pad*2); }
+  function drawWatermark(ctx){ if(!watermarkEl.checked) return; ctx.save(); ctx.font=`600 12px ${fontFamilyEl.value}`; ctx.fillStyle='rgba(255,255,255,.65)'; ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineWidth=2; ctx.textAlign='right'; ctx.textBaseline='bottom'; const t='Memeportal'; ctx.strokeText(t,MAX-8,MAX-6); ctx.fillText(t,MAX-8,MAX-6); ctx.restore(); }
+
+  function makeCanvas(){ const c=document.createElement('canvas'); c.width=MAX; c.height=MAX; return c; }
+  function clearGrid(){ grid.innerHTML=''; state.canvases=[]; count.textContent='0'; }
+
+function render(){
+  if(!state.images.length){ alert('Upload at least one image first.'); return; }
+
+  clearGrid();
+
+  // Build the phrase list (or a single empty phrase if style = none)
+  const phrases = (styleEl.value === 'none') ? [''] : compilePhrases();
+
+  // Round‑robin assign each phrase to the next image so we don't duplicate
+  // the same phrase across all images. If phrases > images, some images get
+  // multiple phrases; if images > phrases, some images won't be used.
+  const imgs = state.images;
+  const total = Math.max(phrases.length, 1);
+
+  for (let i = 0; i < total; i++) {
+    const file = imgs[i % imgs.length];
+    const phrase = phrases[i] || '';
+
+    const top = (styleEl.value === 'top' || styleEl.value === 'both') ? normalizeCase(phrase) : '';
+    const bot  = (styleEl.value === 'bottom' || styleEl.value === 'both') ? normalizeCase(phrase) : '';
+
+    const c = makeCanvas();
+    const ctx = c.getContext('2d');
+
+    ctx.clearRect(0, 0, MAX, MAX);
+    fitAndCenter(ctx, file.img);
+    drawCaption(ctx, top, 'top');
+    drawCaption(ctx, bot, 'bottom');
+    drawWatermark(ctx);
+
+    addThumb(c, `${file.name}__${phrase || 'plain'}`, file);
+  }
+
+  count.textContent = state.canvases.length;
+}
+
+
+  function removeBackgroundFromImage(img,tol=38){ const temp=document.createElement('canvas'); temp.width=img.width; temp.height=img.height; const tctx=temp.getContext('2d'); tctx.drawImage(img,0,0); const id=tctx.getImageData(0,0,temp.width,temp.height); const d=id.data; function sample(x,y){const i=(y*id.width+x)*4; return [d[i],d[i+1],d[i+2]];} const s=[sample(0,0),sample(id.width-1,0),sample(0,id.height-1),sample(id.width-1,id.height-1)]; const bg=s.reduce((a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],[0,0,0]).map(v=>v/4); for(let i=0;i<d.length;i+=4){ const dr=d[i]-bg[0], dg=d[i+1]-bg[1], db=d[i+2]-bg[2]; const dist=Math.sqrt(dr*dr+dg*dg+db*db); if(dist<tol || d[i+3]<10) d[i+3]=0; } tctx.putImageData(id,0,0); const cleaned=new Image(); cleaned.src=temp.toDataURL(); return cleaned; }
+  function addHoverTools(container,file){ const tools=document.createElement('div'); tools.className='hover-tools'; const rm=document.createElement('button'); rm.className='btn'; rm.textContent='Remove BG'; rm.title='Quick background remover (solid bg)'; rm.addEventListener('click',()=>{ const newImg=removeBackgroundFromImage(file.img); newImg.onload=()=>{file.img=newImg; render();}; }); tools.appendChild(rm); container.appendChild(tools); }
+
+  function addThumb(canvas, baseName, file){ const wrap=document.createElement('div'); wrap.className='thumb checkerboard'; const actions=document.createElement('div'); actions.className='actions'; const a=document.createElement('a'); a.className='btn'; a.textContent='PNG'; a.download=sanitize(baseName)+'.png'; a.href=canvas.toDataURL('image/png'); actions.appendChild(a); const copyBtn=document.createElement('button'); copyBtn.className='btn'; copyBtn.textContent='Copy'; copyBtn.addEventListener('click',()=>{ canvas.toBlob(async (blob)=>{ try{ await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy',1200);}catch(e){ alert('Clipboard not supported: '+e);} }); }); actions.appendChild(copyBtn); wrap.appendChild(canvas); wrap.appendChild(actions); addHoverTools(wrap,file); grid.appendChild(wrap); state.canvases.push({canvas, name:a.download}); }
+  function sanitize(s){ return s.replace(/[^a-z0-9_\-]+/gi,'_').slice(0,80); }
+
+  async function exportAll(){ if(!state.canvases.length){alert('Nothing to export. Render stickers first.');return;} for(const {canvas,name} of state.canvases){ const url=canvas.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r=>setTimeout(r,150)); } }
+  async function exportZip(){ if(!state.canvases.length){alert('Nothing to export. Render stickers first.');return;} const zip=new JSZip(); for(const {canvas,name} of state.canvases){ const blob=await new Promise(res=>canvas.toBlob(res,'image/png')); zip.file(name, blob);} const content=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(content); a.download='stickers.zip'; document.body.appendChild(a); a.click(); a.remove(); }
+
+  function connectRange(id,out){ const el=document.getElementById(id), label=document.getElementById(out); const sync=()=>{ label.textContent=(id==='lineHeight'? parseFloat(el.value).toFixed(2): el.value); renderTypePreview(); }; el.addEventListener('input',sync); sync(); }
+  ;['input','change'].forEach(evt=>{ tokenEl.addEventListener(evt,renderTypePreview); fontFamilyEl.addEventListener(evt,renderTypePreview); letterCaseEl.addEventListener(evt,renderTypePreview); fillEl.addEventListener(evt,renderTypePreview); outlineEl.addEventListener(evt,renderTypePreview); shadowEl.addEventListener(evt,renderTypePreview); typeSample.addEventListener(evt,renderTypePreview); });
+  connectRange('fontSize','fontSizeVal'); connectRange('stroke','strokeVal'); connectRange('padding','paddingVal'); connectRange('lineHeight','lineHeightVal');
+
+  renderBtn.addEventListener('click',render); exportBtn.addEventListener('click',exportAll); clearBtn.addEventListener('click',()=>{state.images=[];updateFileList();grid.innerHTML='';state.canvases=[];count.textContent='0';}); zipBtn.addEventListener('click',exportZip);
+
+  buildPresets(); renderTypePreview();
+})();
+</script>
+</body>
+</html>

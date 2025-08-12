@@ -1,27 +1,17 @@
-<nav id="portal-nav">
-    <div class="portal-nav-container">
-        <a href="index.html" class="portal-brand">Meme Portal</a>
-        <ul id="portal-nav-links">
-            <li><a href="builder.html">Website Builder</a></li>
-            <li><a href="resizer.html">Image Resizer</a></li>
-            <li><a href="sticker-generator.html">Sticker Generator</a></li>
-            <li><a href="shill-generator.html">Shill Generator</a></li>
-            <li><a href="raid-team.html">Raid Teams</a></li>
-            <li><a href="volume-bot.html">Volume Bot</a></li>			
-        </ul>
-
-        <div class="profile-manager-nav" id="profileManagerNav">
-            <button class="profile-manager-button" id="profileDropdownButton" aria-haspopup="true" aria-expanded="false">
-                <span id="currentProfileDisplay">No Profile</span> <span class="dropdown-arrow">▼</span>
-            </button>
-            <div class="profile-manager-dropdown" id="profileDropdownContent">
-                <div id="profileListContainer">
-                   </div>
-                <hr>
-                <a href="#" id="createNewProfileBtn">Create New Profile</a>
-                <a href="#" id="manageProfilesBtn">Manage Profiles</a>
-            </div>
-        </div>
-        <button class="portal-nav-toggle" id="portal-nav-toggle-btn" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+<!-- Shared site header for Memeportal. Include this file into any page by inserting
+<div id="site-header"></div>
+and loading it via the small loader script in each page. -->
+<header class="header" role="banner" aria-label="Memeportal Navigation">
+  <div class="title">
+    <div class="logo" aria-hidden="true"></div>
+    <div>
+      <div class="logo-lockup"><div class="logo-text">Memeportal</div></div>
+      <div class="sub">Tools for viral communities</div>
     </div>
-</nav>
+  </div>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="index.html">Home</a>
+    <a href="stickergenerator.html">Sticker Generator</a>
+    <a href="emojigenerator.html">Emoji/Spinner</a>
+  </nav>
+</header>
