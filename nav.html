@@ -9,7 +9,7 @@
   </div>
 
   <!-- Desktop nav -->
-  <nav class="nav desktop-nav" role="navigation" aria-label="Primary">
+  <nav class="desktop-nav" role="navigation" aria-label="Primary">
     <a href="index.html">Home</a>
     <a href="stickergenerator.html">Sticker Generator</a>
     <a href="emojigenerator.html">Emoji/Spinner</a>
@@ -18,43 +18,14 @@
 
   <!-- Mobile toggle -->
   <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
-    <!-- icon -->
     <span class="bar"></span><span class="bar"></span><span class="bar"></span>
   </button>
 </header>
 
-<!-- Mobile dropdown (in-document so every page gets it) -->
+<!-- Mobile dropdown (lives with the header so each page gets it) -->
 <nav id="mobileMenu" class="mobile-nav" hidden>
   <a href="index.html">Home</a>
   <a href="stickergenerator.html">Sticker Generator</a>
   <a href="emojigenerator.html">Emoji/Spinner</a>
   <a href="websitegenerator.html">Website Generator</a>
 </nav>
-
-<script>
-  (function(){
-    const btn = document.querySelector('.menu-toggle');
-    const menu = document.getElementById('mobileMenu');
-    if(!btn || !menu) return;
-
-    const closeOnOutside = (e)=>{
-      if(!menu.contains(e.target) && !btn.contains(e.target)){
-        menu.hidden = true; btn.setAttribute('aria-expanded','false');
-        document.removeEventListener('click', closeOnOutside);
-      }
-    };
-
-    btn.addEventListener('click', ()=>{
-      const open = menu.hidden;
-      menu.hidden = !open;
-      btn.setAttribute('aria-expanded', String(open));
-      if(open) setTimeout(()=>document.addEventListener('click', closeOnOutside),0);
-    });
-
-    // Collapse on resize up to desktop
-    const mq = window.matchMedia('(min-width: 900px)');
-    mq.addEventListener?.('change', e=>{
-      if(e.matches){ menu.hidden = true; btn.setAttribute('aria-expanded','false'); }
-    });
-  })();
-</script>

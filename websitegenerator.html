@@ -9,12 +9,48 @@
 </head>
 <body>
   <div id="site-header"></div>
-  <script>
-    (async()=>{try{
-      const r=await fetch('nav.html');
-      document.getElementById('site-header').innerHTML=await r.text();
-    }catch(e){console.warn('nav load failed',e);}})();
-  </script>
+<script>
+  async function loadNav(){
+    try{
+      const host = document.getElementById('site-header');
+      host.innerHTML = await (await fetch('nav.html')).text();
+
+      // wire up after insertion
+      const btn  = host.querySelector('.menu-toggle');
+      const menu = host.querySelector('#mobileMenu');
+      if(!btn || !menu) return;
+
+      const close = ()=>{
+        menu.setAttribute('hidden','');
+        btn.setAttribute('aria-expanded','false');
+        document.removeEventListener('click', clickAway);
+      };
+      const open = ()=>{
+        menu.removeAttribute('hidden');
+        btn.setAttribute('aria-expanded','true');
+        // defer so the same click doesn't immediately close it
+        setTimeout(()=>document.addEventListener('click', clickAway),0);
+      };
+      const clickAway = (e)=>{
+        if(!menu.contains(e.target) && !btn.contains(e.target)) close();
+      };
+
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        if(menu.hasAttribute('hidden')) open(); else close();
+      });
+
+      // Auto-close when resizing up to desktop
+      const mq = window.matchMedia('(min-width: 900px)');
+      mq.addEventListener?.('change', e=>{ if(e.matches) close(); });
+
+      // make sure it's closed initially
+      close();
+    }catch(e){ console.warn('nav load failed', e); }
+  }
+  loadNav();
+</script>
+
 
   <div class="app" style="grid-template-columns:420px minmax(0,1fr)">
     <aside>
