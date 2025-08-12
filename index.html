@@ -8,7 +8,10 @@
 </head>
 <body>
   <div id="site-header"></div>
-  <script>(async()=>{try{const r=await fetch('nav.html');document.getElementById('site-header').innerHTML=await r.text();}catch(e){console.warn('nav load failed',e);}})();</script>
+  <script>(async()=>{try{
+    const r=await fetch('nav.html');
+    document.getElementById('site-header').innerHTML = await r.text();
+  }catch(e){ console.warn('nav load failed', e); }})();</script>
 
   <main class="wrap">
     <section class="tiles">
@@ -24,10 +27,10 @@
         <div class="actions"><span class="btn">Open</span></div>
       </a>
 
-      <a class="tile" href="#">
-        <h2>Requests & Ideas</h2>
-        <p class="muted">What should we build next? Banner generator, chart meme maker, overlay templates?</p>
-        <div class="actions"><span class="btn ghost">Contact</span></div>
+      <a class="tile" href="websitegenerator.html">
+        <h2>Website Generator</h2>
+        <p class="muted">Build a stunning token website with live preview. Upload logo/banner, set colors, roadmap, tokenomics, links — then export a ZIP.</p>
+        <div class="actions"><span class="btn">Open</span></div>
       </a>
     </section>
   </main>

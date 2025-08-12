@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memeportal — Website Generator</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <div id="site-header"></div>
+  <script>
+    (async()=>{ try{
+      const r=await fetch('nav.html');
+      document.getElementById('site-header').innerHTML = await r.text();
+    }catch(e){ console.warn('nav load failed', e); }})();
+  </script>
+
+  <div class="app" style="grid-template-columns:420px minmax(0,1fr)">
+    <aside>
+      <!-- Basics -->
+      <div class="card section">
+        <h2>Project Basics</h2>
+        <div class="grid">
+          <div>
+            <label>Project / Token name</label>
+            <input id="p_name" type="text" placeholder="e.g. BeastLab" value="BeastLab">
+          </div>
+          <div class="two">
+            <div>
+              <label>Ticker</label>
+              <input id="p_ticker" type="text" placeholder="e.g. BG" value="BG">
+            </div>
+            <div>
+              <label>Chain</label>
+              <select id="p_chain">
+                <option>Solana</option><option>Ethereum</option><option>BNB Chain</option><option>Base</option><option>Polygon</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label>Contract address (CA)</label>
+            <input id="p_ca" type="text" placeholder="Paste contract address">
+          </div>
+          <div>
+            <label>Tagline</label>
+            <input id="p_tag" type="text" placeholder="One-liner that sells the vibe" value="Meme tech from the jungle.">
+          </div>
+          <div class="two">
+            <div>
+              <label>Primary color</label>
+              <input id="c_accent" type="color" value="#7c3aed">
+            </div>
+            <div>
+              <label>Secondary color</label>
+              <input id="c_accent2" type="color" value="#22d3ee">
+            </div>
+          </div>
+          <div class="two">
+            <div>
+              <label>Background style</label>
+              <select id="c_bg">
+                <option value="memeportal" selected>Memeportal gradient</option>
+                <option value="dark">Dark solid</option>
+                <option value="radial">Radial glow</option>
+              </select>
+            </div>
+            <div>
+              <label>Card radius</label>
+              <input id="c_radius" type="range" min="8" max="28" value="18">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Media -->
+      <div class="card section">
+        <h2>Media</h2>
+        <div class="grid">
+          <div class="drop">
+            <input id="logoFile" type="file" accept="image/*">
+            <div><strong>Logo</strong> PNG/SVG — transparent preferred.</div>
+          </div>
+          <div class="drop">
+            <input id="bannerFile" type="file" accept="image/*">
+            <div><strong>Banner</strong> (wide) — PNG/JPG/WebP.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="card section">
+        <h2>Links</h2>
+        <div class="grid">
+          <div><label>Website</label><input id="l_site" type="text" placeholder="https://"></div>
+          <div class="two">
+            <div><label>Twitter/X</label><input id="l_x" type="text" placeholder="https://x.com/…"></div>
+            <div><label>Telegram</label><input id="l_tg" type="text" placeholder="https://t.me/…"></div>
+          </div>
+          <div class="two">
+            <div><label>DexScreener</label><input id="l_ds" type="text" placeholder="https://dexscreener.com/…"></div>
+            <div><label>Whitepaper</label><input id="l_wp" type="text" placeholder="https://…pdf"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sections -->
+      <div class="card section">
+        <h2>Sections</h2>
+        <div class="grid">
+          <div class="flex">
+            <input id="s_about_e" type="checkbox" checked><label for="s_about_e" style="margin:0">About / Info</label>
+          </div>
+          <textarea id="s_about" placeholder="Write a spicy intro…" rows="3">BeastLab is a memecoin with utility—clean branding, fair launch, and a community that ships.</textarea>
+
+          <div class="flex">
+            <input id="s_token_e" type="checkbox" checked><label for="s_token_e" style="margin:0">Tokenomics</label>
+          </div>
+          <div class="grid two">
+            <div><label>Supply</label><input id="tok_supply" type="text" value="1,000,000,000"></div>
+            <div><label>Decimals</label><input id="tok_dec" type="number" value="9"></div>
+            <div><label>Buy Tax %</label><input id="tok_buy" type="number" value="0"></div>
+            <div><label>Sell Tax %</label><input id="tok_sell" type="number" value="0"></div>
+          </div>
+          <details>
+            <summary class="small">Allocations (optional)</summary>
+            <textarea id="tok_alloc" class="tiny" rows="3" placeholder="Comma pairs: Team:5, Liquidity:70, Marketing:10">Liquidity:70, Community:20, Treasury:10</textarea>
+          </details>
+
+          <div class="flex" style="margin-top:6px">
+            <input id="s_road_e" type="checkbox" checked><label for="s_road_e" style="margin:0">Roadmap</label>
+          </div>
+          <textarea id="s_road" rows="3" placeholder="Each line = one milestone">Phase 1 — Launch, socials, CMC/CG listing
+Phase 2 — Partnerships, Meme contest, CEX listing
+Phase 3 — Utilities drop, DAO experiments</textarea>
+
+          <div class="flex">
+            <input id="s_team_e" type="checkbox"><label for="s_team_e" style="margin:0">Team (optional)</label>
+          </div>
+          <textarea id="s_team" rows="2" placeholder="Each line Name — Role"></textarea>
+
+          <div class="flex">
+            <input id="s_disclaimer_e" type="checkbox" checked><label for="s_disclaimer_e" style="margin:0">Disclaimer</label>
+          </div>
+          <textarea id="s_disclaimer" rows="2">This is not financial advice. Cryptocurrency involves risk. Do your own research.</textarea>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card section">
+        <div class="toolbar right">
+          <button class="btn primary" id="refreshBtn">Update Preview</button>
+          <button class="btn success" id="exportZip">Download ZIP</button>
+        </div>
+        <div class="footer">ZIP includes <strong>index.html</strong> and an <strong>assets/</strong> folder with your images.</div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="card section" style="height:100%;display:grid;grid-template-rows:auto 1fr">
+        <div class="kicker">Preview</div>
+        <div id="preview" style="overflow:auto;border-radius:14px;border:1px solid var(--border)"></div>
+      </div>
+    </main>
+  </div>
+
+<script>
+(function(){
+  // ---- STATE ----
+  const state = {
+    logo: null,           // File
+    banner: null,         // File
+    logoUrl: '',          // object URL for preview
+    bannerUrl: ''
+  };
+
+  // ---- ELEMENTS ----
+  const el = id => document.getElementById(id);
+  const inputs = [
+    'p_name','p_ticker','p_chain','p_ca','p_tag',
+    'c_accent','c_accent2','c_bg','c_radius',
+    'l_site','l_x','l_tg','l_ds','l_wp',
+    's_about_e','s_about','s_token_e','tok_supply','tok_dec','tok_buy','tok_sell','tok_alloc',
+    's_road_e','s_road','s_team_e','s_team',
+    's_disclaimer_e','s_disclaimer'
+  ].reduce((o,k)=> (o[k]=el(k), o), {});
+  const preview = el('preview');
+  const refreshBtn = el('refreshBtn');
+  const exportBtn = el('exportZip');
+  const logoFile = el('logoFile');
+  const bannerFile = el('bannerFile');
+
+  // ---- MEDIA UPLOADS ----
+  logoFile.addEventListener('change', ()=>{
+    state.logo = logoFile.files[0] || null;
+    state.logoUrl = state.logo ? URL.createObjectURL(state.logo) : '';
+    buildPreview();
+  });
+  bannerFile.addEventListener('change', ()=>{
+    state.banner = bannerFile.files[0] || null;
+    state.bannerUrl = state.banner ? URL.createObjectURL(state.banner) : '';
+    buildPreview();
+  });
+
+  // ---- TEMPLATE HTML/CSS ----
+  function siteCss(vars){
+    return `
+:root{
+  --accent:${vars.accent};--accent2:${vars.accent2};
+  --radius:${vars.radius}px;
+  --bg: ${vars.bg=='memeportal' ? '#0f1115' : vars.bg=='dark' ? '#0e1016' : '#0e1016'};
+  --panel:#151823;--muted:#8892a6;--text:#e6e9ef;--card:#10131c;--border:#22273a;
+}
+*{box-sizing:border-box} body{margin:0;color:var(--text);
+  background:${vars.bg=='memeportal'
+    ? 'radial-gradient(1200px 800px at 10% -10%,rgba(34,211,238,.08),transparent),radial-gradient(900px 700px at 120% 10%,rgba(124,58,237,.09),transparent),#0f1115'
+    : vars.bg=='radial'
+      ? 'radial-gradient(900px 700px at 120% 10%,rgba(124,58,237,.10),transparent),#0e1016'
+      : '#0e1016'};
+  font:15px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+.container{max-width:1140px;margin:0 auto;padding:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid #2b3352;background:#0f1424;color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:700}
+.btn:hover{border-color:#39436c}
+.hero{position:relative;overflow:hidden;border-radius:calc(var(--radius) + 6px)}
+.hero .inner{display:grid;grid-template-columns:420px 1fr;gap:24px;align-items:center;padding:28px}
+.hero .badge{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.hero h1{font-size:34px;margin:6px 0 4px}
+.hero p{color:var(--muted);margin:0 0 12px}
+.hero .cta{display:flex;gap:10px;flex-wrap:wrap}
+.hero .gfx{position:absolute;inset:auto -80px -80px auto;opacity:.6;filter:blur(40px); pointer-events:none}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.section{padding:16px}
+.h2{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#9aa6c6;margin:0 0 10px}
+.list{display:grid;gap:10px}
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi .item{padding:12px;border-radius:12px;border:1px solid var(--border);background:#0b0f17}
+.kpi .item .t{font-size:12px;color:#9aa6c6}
+.kpi .item .v{font-size:18px;font-weight:900;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tokenomics{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.tokenomics .card{padding:14px}
+.timeline{position:relative;padding-left:22px}
+.timeline::before{content:\"\";position:absolute;left:10px;top:0;bottom:0;width:2px;background:linear-gradient(var(--accent),var(--accent2))}
+.timeline .step{position:relative;margin:10px 0;padding:10px 12px;background:#0b0f17;border:1px solid var(--border);border-radius:12px}
+.timeline .step::before{content:\"\";position:absolute;left:-6px;top:12px;width:10px;height:10px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.footer{display:flex;justify-content:space-between;align-items:center;padding:14px 0;color:#9aa6c6}
+.logo{width:40px;height:40px;border-radius:12px;background:conic-gradient(from 210deg,var(--accent),var(--accent2))}
+img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--radius) + 6px);border:1px solid var(--border)}
+a{color:#c8d2ff}
+`;
+  }
+
+  function siteHtml(data){
+    const allocations = parseAllocations(data.tokAlloc)
+      .map(a=>`<div class="card"><div class="t">${esc(a.k)}</div><div class="v">${esc(a.v)}%</div></div>`).join('');
+    const roadmap = (data.road||'').split('\n').filter(Boolean)
+      .map(line=>`<div class="step">${esc(line)}</div>`).join('');
+    const team = (data.team||'').split('\n').filter(Boolean)
+      .map(line=>`<li>${esc(line)}</li>`).join('');
+
+    return `
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(data.name)} — ${esc(data.ticker)}</title>
+<style>${siteCss(data.vars)}</style>
+</head><body>
+  <div class="container">
+    <header class="section" style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="logo"></div>
+        <div>
+          <div class="h2" style="margin:0">${esc(data.ticker)} on ${esc(data.chain)}</div>
+          <div style="font-weight:900;font-size:18px">${esc(data.name)}</div>
+        </div>
+      </div>
+      <div class="kpi" style="grid-template-columns:repeat(2,auto);gap:8px">
+        <a class="btn" href="${esc(data.links.ds)}">DexScreener</a>
+        ${data.links.tg? `<a class="btn" href="${esc(data.links.tg)}">Telegram</a>`:''}
+      </div>
+    </header>
+
+    ${data.bannerSrc? `<img src="${esc(data.bannerSrc)}" class="banner" alt="Banner">`:''}
+
+    <section class="hero card section" style="margin-top:14px">
+      <div class="inner">
+        <div>
+          <div class="badge">${esc(data.ticker)} / ${esc(data.chain)}</div>
+          <h1>${esc(data.name)}</h1>
+          <p>${esc(data.tagline)}</p>
+          ${data.ca? `<div class="kpi" style="grid-template-columns:1fr"><div class="item"><div class="t">CA</div><div class="v" style="word-break:break-all">${esc(data.ca)}</div></div></div>`:''}
+          <div class="cta" style="margin-top:10px">
+            ${data.links.site? `<a class="btn" href="${esc(data.links.site)}">Website</a>`:''}
+            ${data.links.x? `<a class="btn" href="${esc(data.links.x)}">Twitter/X</a>`:''}
+            ${data.links.wp? `<a class="btn" href="${esc(data.links.wp)}">Whitepaper</a>`:''}
+          </div>
+        </div>
+        <div style="justify-self:end;align-self:center">
+          ${data.logoSrc? `<img src="${esc(data.logoSrc)}" alt="Logo" style="width:180px;height:180px;object-fit:contain;border-radius:18px;border:1px solid var(--border);background:#0b0f17;padding:12px">`:
+            `<div style="width:180px;height:180px;border-radius:18px;border:1px dashed var(--border);display:grid;place-items:center;color:#9aa6c6">Logo</div>`}
+        </div>
+      </div>
+      <svg class="gfx" width="420" height="420" viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="g1" x1="0" x2="1" y1="0" y2="1"><stop stop-color="${data.vars.accent}"/><stop offset="1" stop-color="${data.vars.accent2}"/></linearGradient></defs>
+        <path d="M320 10c40 40 80 120 80 170s-40 90-90 130-120 70-170 50-90-90-80-150S120 70 180 40s100-30 140-30z" fill="url(#g1)" opacity="0.25"/>
+      </svg>
+    </section>
+
+    <section class="split" style="margin-top:14px">
+      ${data.aboutEnabled? `
+      <div class="card section">
+        <div class="h2">About</div>
+        <div>${nl2br(esc(data.about))}</div>
+      </div>`:''}
+
+      ${data.tokenEnabled? `
+      <div class="card section">
+        <div class="h2">Tokenomics</div>
+        <div class="tokenomics">
+          <div class="card"><div class="t">Supply</div><div class="v">${esc(data.supply)}</div></div>
+          <div class="card"><div class="t">Decimals</div><div class="v">${esc(data.dec)}</div></div>
+          <div class="card"><div class="t">Buy Tax</div><div class="v">${esc(data.buy)}%</div></div>
+          <div class="card"><div class="t">Sell Tax</div><div class="v">${esc(data.sell)}%</div></div>
+          ${allocations}
+        </div>
+      </div>`:''}
+    </section>
+
+    ${data.roadEnabled? `
+    <section class="card section" style="margin-top:14px">
+      <div class="h2">Roadmap</div>
+      <div class="timeline">${roadmap}</div>
+    </section>`:''}
+
+    ${data.teamEnabled? `
+    <section class="card section" style="margin-top:14px">
+      <div class="h2">Team</div>
+      <ul class="list">${team.join('')}</ul>
+    </section>`:''}
+
+    ${data.disclaimerEnabled? `
+    <footer class="footer">
+      <div>© ${new Date().getFullYear()} ${esc(data.name)} — ${esc(data.ticker)}</div>
+      <div>${esc(data.disclaimer)}</div>
+    </footer>`:''}
+  </div>
+</body></html>`;
+  }
+
+  // ---- helpers ----
+  function parseAllocations(str){
+    return (str||'').split(',').map(s=>s.trim()).filter(Boolean).map(s=>{
+      const m = s.split(':'); return {k:(m[0]||'').trim(), v:(m[1]||'').trim()};
+    }).filter(x=>x.k && x.v);
+  }
+  const esc = s => String(s||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const nl2br = s => s.replace(/\n/g,'<br>');
+
+  function collect(){
+    return {
+      name: inputs.p_name.value.trim(),
+      ticker: inputs.p_ticker.value.trim(),
+      chain: inputs.p_chain.value,
+      ca: inputs.p_ca.value.trim(),
+      tagline: inputs.p_tag.value.trim(),
+      vars: {
+        accent: inputs.c_accent.value,
+        accent2: inputs.c_accent2.value,
+        bg: inputs.c_bg.value,
+        radius: +inputs.c_radius.value
+      },
+      links: {
+        site: inputs.l_site.value.trim(),
+        x: inputs.l_x.value.trim(),
+        tg: inputs.l_tg.value.trim(),
+        ds: inputs.l_ds.value.trim(),
+        wp: inputs.l_wp.value.trim()
+      },
+      aboutEnabled: inputs.s_about_e.checked,
+      about: inputs.s_about.value,
+      tokenEnabled: inputs.s_token_e.checked,
+      supply: inputs.tok_supply.value, dec: inputs.tok_dec.value,
+      buy: inputs.tok_buy.value, sell: inputs.tok_sell.value,
+      tokAlloc: inputs.tok_alloc.value,
+      roadEnabled: inputs.s_road_e.checked, road: inputs.s_road.value,
+      teamEnabled: inputs.s_team_e.checked, team: inputs.s_team.value,
+      disclaimerEnabled: inputs.s_disclaimer_e.checked, disclaimer: inputs.s_disclaimer.value,
+      logoSrc: state.logoUrl, bannerSrc: state.bannerUrl
+    };
+  }
+
+  // ---- PREVIEW ----
+  function buildPreview(){
+    const data = collect();
+    preview.innerHTML = siteHtml(data);
+  }
+
+  // Update preview on input
+  Object.values(inputs).forEach(i=>{
+    i.addEventListener('input', buildPreview);
+    i.addEventListener('change', buildPreview);
+  });
+  buildPreview();
+
+  // ---- EXPORT ZIP ----
+  exportBtn.addEventListener('click', async ()=>{
+    const data = collect();
+    const zip = new JSZip();
+
+    // assets/
+    const assets = zip.folder('assets');
+    let logoName='', bannerName='';
+    if(state.logo){ logoName = 'logo' + getExt(state.logo.name); assets.file(logoName, state.logo); }
+    if(state.banner){ bannerName = 'banner' + getExt(state.banner.name); assets.file(bannerName, state.banner); }
+
+    // rewrite srcs to assets paths
+    const htmlForZip = siteHtml({
+      ...data,
+      logoSrc: logoName ? 'assets/'+logoName : '',
+      bannerSrc: bannerName ? 'assets/'+bannerName : ''
+    });
+
+    zip.file('index.html', htmlForZip);
+
+    const content = await zip.generateAsync({type:'blob'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(content);
+    a.download = (data.ticker || 'site') + '_site.zip';
+    a.click();
+  });
+
+  function getExt(name){ const m=name.toLowerCase().match(/\.[a-z0-9]+$/); return m?m[0]:'.png'; }
+
+  refreshBtn.addEventListener('click', buildPreview);
+})();
+</script>
+</body>
+</html>
