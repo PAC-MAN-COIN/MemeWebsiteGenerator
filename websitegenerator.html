@@ -10,47 +10,23 @@
 <body>
   <div id="site-header"></div>
 <script>
-  async function loadNav(){
+  // loads nav.html and wires burger
+  (async function loadNav(){
     try{
       const host = document.getElementById('site-header');
       host.innerHTML = await (await fetch('nav.html')).text();
-
-      // wire up after insertion
       const btn  = host.querySelector('.menu-toggle');
       const menu = host.querySelector('#mobileMenu');
       if(!btn || !menu) return;
-
-      const close = ()=>{
-        menu.setAttribute('hidden','');
-        btn.setAttribute('aria-expanded','false');
-        document.removeEventListener('click', clickAway);
-      };
-      const open = ()=>{
-        menu.removeAttribute('hidden');
-        btn.setAttribute('aria-expanded','true');
-        // defer so the same click doesn't immediately close it
-        setTimeout(()=>document.addEventListener('click', clickAway),0);
-      };
-      const clickAway = (e)=>{
-        if(!menu.contains(e.target) && !btn.contains(e.target)) close();
-      };
-
-      btn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        if(menu.hasAttribute('hidden')) open(); else close();
-      });
-
-      // Auto-close when resizing up to desktop
-      const mq = window.matchMedia('(min-width: 900px)');
-      mq.addEventListener?.('change', e=>{ if(e.matches) close(); });
-
-      // make sure it's closed initially
+      const close=()=>{menu.setAttribute('hidden','');btn.setAttribute('aria-expanded','false');document.removeEventListener('click',away);};
+      const open =()=>{menu.removeAttribute('hidden');btn.setAttribute('aria-expanded','true');setTimeout(()=>document.addEventListener('click',away),0);};
+      const away = e => { if(!menu.contains(e.target)&&!btn.contains(e.target)) close(); };
+      btn.addEventListener('click',e=>{e.stopPropagation();menu.hasAttribute('hidden')?open():close();});
+      const mq=window.matchMedia('(min-width:900px)'); mq.addEventListener?.('change',e=>{if(e.matches) close();});
       close();
     }catch(e){ console.warn('nav load failed', e); }
-  }
-  loadNav();
+  })();
 </script>
-
 
   <div class="app" style="grid-template-columns:420px minmax(0,1fr)">
     <aside>
@@ -83,6 +59,21 @@
             <input id="p_tag" type="text" placeholder="One-liner that sells the vibe" value="Meme tech from the jungle.">
           </div>
 
+          <div class="three">
+            <div>
+              <label>Primary color</label>
+              <input id="c_accent" type="color" value="#7c3aed">
+            </div>
+            <div>
+              <label>Secondary color</label>
+              <input id="c_accent2" type="color" value="#22d3ee">
+            </div>
+            <div>
+              <label>Tertiary color</label>
+              <input id="c_accent3" type="color" value="#3b82f6">
+            </div>
+          </div>
+
           <div class="two">
             <div>
               <label>Style preset</label>
@@ -98,17 +89,6 @@
             <div>
               <label>Card radius</label>
               <input id="c_radius" type="range" min="6" max="28" value="18">
-            </div>
-          </div>
-
-          <div class="two">
-            <div>
-              <label>Primary color</label>
-              <input id="c_accent" type="color" value="#7c3aed">
-            </div>
-            <div>
-              <label>Secondary color</label>
-              <input id="c_accent2" type="color" value="#22d3ee">
             </div>
           </div>
 
@@ -133,7 +113,7 @@
           </div>
           <div class="drop" id="bannerDrop">
             <input id="bannerFile" type="file" accept="image/*">
-            <div><strong>Banner</strong> (wide) PNG/JPG/WebP. <button class="btn ghost" id="bannerBrowse">Browse</button></div>
+            <div><strong>Banner</strong> wide PNG/JPG/WebP (auto-fit). <button class="btn ghost" id="bannerBrowse">Browse</button></div>
           </div>
         </div>
       </div>
@@ -194,6 +174,13 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
           </div>
           <textarea id="s_disclaimer" rows="2">This is not financial advice. Cryptocurrency involves risk. Do your own research.</textarea>
         </div>
+      </div>
+
+      <!-- Order / layout -->
+      <div class="card section">
+        <h2>Order & layout</h2>
+        <div id="orderList" class="list" style="user-select:none"></div>
+        <div class="tiny muted" style="margin-top:6px">Use ↑ / ↓ to reorder the enabled sections.</div>
       </div>
 
       <!-- Advanced -->
@@ -291,13 +278,13 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
 
 <script>
 (function(){
-  const state = { logo:null, banner:null, logoUrl:'', bannerUrl:'' };
+  const state = { logo:null, banner:null, logoUrl:'', bannerUrl:'', order:['about','token','road','team'] };
   const el = id => document.getElementById(id);
 
   // controls
   const ids = [
     'p_name','p_ticker','p_chain','p_ca','p_tag',
-    'style_preset','c_accent','c_accent2','c_bg','c_radius',
+    'style_preset','c_accent','c_accent2','c_accent3','c_bg','c_radius',
     'l_site','l_x','l_tg','l_ds','l_wp',
     's_about_e','s_about','s_token_e','tok_supply','tok_dec','tok_buy','tok_sell','tok_alloc',
     's_road_e','s_road','s_team_e','s_team','s_disclaimer_e','s_disclaimer',
@@ -337,6 +324,7 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
     const base = {
       accent: vars.accent,
       accent2: vars.accent2,
+      accent3: vars.accent3,
       bg: vars.bg,
       radius: vars.radius,
       fontTitle: `800 36px '${inputs.adv_font_title.value}', system-ui`,
@@ -367,13 +355,17 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
       v.buttonShape==='pill' ? '999px' :
       v.buttonShape==='square' ? '8px' : '12px';
 
+    // background uses THREE colors (primary/secondary/tertiary)
     const bgBase =
       v.bg==='memeportal'
-        ? `radial-gradient(1200px 800px at 10% -10%, rgba(34,211,238, ${0.5*v.gradAmt}), transparent),
-           radial-gradient(900px 700px at 120% 10%, rgba(124,58,237, ${0.6*v.gradAmt}), transparent),
+        ? `radial-gradient(1200px 800px at 10% -10%, ${hex2rgba(v.accent2, 0.22*v.gradAmt)}, transparent),
+           radial-gradient(900px 700px at 120% 10%, ${hex2rgba(v.accent, 0.22*v.gradAmt)}, transparent),
+           radial-gradient(1200px 900px at 50% 120%, ${hex2rgba(v.accent3||'#3b82f6', 0.18+0.3*v.gradAmt)}, transparent),
            #0f1115`
         : v.bg==='radial'
-          ? `radial-gradient(900px 700px at 120% 10%, rgba(124,58,237, ${0.9*v.gradAmt}), transparent), #0e1016`
+          ? `radial-gradient(900px 700px at 120% 10%, ${hex2rgba(v.accent, 0.45*v.gradAmt)}, transparent),
+             radial-gradient(900px 700px at -20% 120%, ${hex2rgba(v.accent3||'#3b82f6', 0.35*v.gradAmt)}, transparent),
+             #0e1016`
           : `#0e1016`;
 
     const shadow = `0 ${8 + 16*v.shadowAmt}px ${20 + 40*v.shadowAmt}px rgba(0,0,0, ${0.25 + 0.35*v.shadowAmt})`;
@@ -384,7 +376,7 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
     ` : '';
 
     return `
-:root{--accent:${v.accent};--accent2:${v.accent2};--radius:${v.radius}px;--border:#22273a;--card:#10131c;--muted:#8892a6;--text:#e6e9ef}
+:root{--accent:${v.accent};--accent2:${v.accent2};--accent3:${v.accent3};--radius:${v.radius}px;--border:#22273a;--card:#10131c;--muted:#8892a6;--text:#e6e9ef}
 *{box-sizing:border-box}
 body{margin:0;color:var(--text);background:${bgBase};font:${v.fontBody}}
 ${noise}
@@ -406,12 +398,21 @@ ${noise}
 .timeline .step{position:relative;margin:10px 0;padding:10px 12px;background:#0b0f17;border:1px solid var(--border);border-radius:12px}
 .timeline .step::before{content:'';position:absolute;left:-6px;top:12px;width:10px;height:10px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
 .footer{display:flex;justify-content:space-between;align-items:center;padding:14px 0;color:#9aa6c6}
-.logo{width:40px;height:40px;border-radius:12px;background:conic-gradient(from 210deg,var(--accent),var(--accent2))}
+.header-logo{width:40px;height:40px;border-radius:10px;object-fit:contain;background:#0b0f17;border:1px solid var(--border);padding:4px}
+.logo-fallback{width:40px;height:40px;border-radius:12px;background:conic-gradient(from 210deg,var(--accent),var(--accent2))}
 a{color:#c8d2ff}
-@media (max-width:900px){.split{grid-template-columns:1fr}}
+@media (max-width:900px){
+  .split{grid-template-columns:1fr}
+  .container{padding:14px}
+  .kpi{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:600px){
+  .kpi{grid-template-columns:1fr}
+}
+img.banner{width:100%;height:clamp(220px,34vh,360px);object-fit:cover;display:block;border-radius:16px;border:1px solid var(--border)}
 `; }
 
-  /* Theme‑specific CSS */
+  /* Theme‑specific CSS (as before) */
   function themeCss(v){
     if(v.theme==='cartoony'){
       return `
@@ -427,14 +428,15 @@ body{background:#131525}
 .halftone{background-image: radial-gradient(#ffffff33 1px, transparent 1px);
   background-size:6px 6px;mix-blend-mode:overlay;position:absolute;inset:0;pointer-events:none}
 .split{display:grid;grid-template-columns:1.4fr .8fr;gap:16px}
+@media (max-width:900px){.split{grid-template-columns:1fr}}
 .zigzag{height:12px;background:
  linear-gradient(135deg,transparent 8px,#1a1846 0) left,
  linear-gradient(-135deg,transparent 8px,#1a1846 0) right;
  background-size:16px 100%; background-repeat:no-repeat}
-img.banner{width:100%;height:260px;object-fit:cover;border:5px solid #1a1846;border-radius:14px}
-.sticker{border:4px solid #111;box-shadow:6px 6px 0 #0007}
+img.banner{height:280px;border:5px solid #1a1846;border-radius:14px}
+.tokenomics .card{border:3px solid #111;background:#fff;color:#111;box-shadow:6px 6px 0 #0007}
+.timeline .step{border:3px solid #1a1846;background:#0e1130;color:#dbe0ff}
 `; }
-
     if(v.theme==='neon'){
       return `
 body{background:#05060c}
@@ -445,10 +447,12 @@ body{background:#05060c}
 .neon-title{font-weight:900;letter-spacing:.5px;text-shadow:0 0 10px ${v.accent}, 0 0 24px ${v.accent2}}
 .neon-chip{border:1px solid #2a3263;border-radius:999px;padding:6px 10px;background:#0c1227}
 .btn{box-shadow:0 0 12px ${v.accent}55 inset, 0 0 18px ${v.accent2}44}
-img.banner{filter:drop-shadow(0 0 14px ${v.accent2}55);border-radius:18px;border:1px solid #2a3263}
+img.banner{border-radius:18px;border:1px solid #2a3263}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.split{grid-template-columns:1fr}}
+.tokenomics .card{background:#0b0f1f;border:1px solid #2a3263;box-shadow:0 0 24px ${v.accent2}22 inset}
+.timeline .step{background:#0b0f1f;border:1px solid #2a3263}
 `; }
-
     if(v.theme==='glass'){
       return `
 body{background:
@@ -458,8 +462,10 @@ body{background:
 .glass-hero{position:relative;border-radius:20px;background:linear-gradient(180deg,#0b1020aa,#0c1022aa)}
 img.banner{border-radius:20px;filter:saturate(1.1) contrast(1.05)}
 .split{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+@media (max-width:900px){.split{grid-template-columns:1fr}}
+.tokenomics .card{background:rgba(12,16,28,.6);backdrop-filter:blur(6px);border:1px solid #2a314d}
+.timeline .step{background:rgba(12,16,28,.6);backdrop-filter:blur(4px);border:1px solid #2a314d}
 `; }
-
     if(v.theme==='retro'){
       return `
 body{color:#caffd7;background:#03130a}
@@ -467,12 +473,14 @@ body{color:#caffd7;background:#03130a}
 .card{background:#06180c;border:1px solid #123a23}
 .crt-scan::after{content:'';position:fixed;inset:0;pointer-events:none;background:
  repeating-linear-gradient(0deg, rgba(0,0,0,.14), rgba(0,0,0,.14) 1px, transparent 1px, transparent 3px)}
-.mono{font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+.mono{font-family:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
 .btn{border-color:#1f6a3c;background:#052313}
 img.banner{border:1px solid #1f6a3c;border-radius:10px}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.split{grid-template-columns:1fr}}
+.tokenomics .card{background:#03160a;border:1px solid #1f6a3c}
+.timeline .step{background:#03160a;border:1px solid #1f6a3c}
 `; }
-
     if(v.theme==='zine'){
       return `
 body{background:#0e0f14}
@@ -486,28 +494,38 @@ body{background:#0e0f14}
 .tape{position:absolute;width:110px;height:28px;background:#e9e9d9aa;top:-10px;left:16px;transform:rotate(-6deg)}
 img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast(1.05)}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.split{grid-template-columns:1fr}}
 .stamp{display:inline-block;border:3px dashed #fff3;padding:6px 10px;transform:rotate(-3deg)}
+.tokenomics .card{border:3px dashed #fff3;background:#0a0d16}
+.timeline .step{border:3px dashed #fff3;background:#0a0d16}
 `; }
-
-    // default (serious)
     return `
 .hero{position:relative;overflow:hidden;border-radius:calc(var(--radius) + 6px)}
 .hero .inner{display:grid;grid-template-columns:420px 1fr;gap:24px;align-items:center;padding:28px}
+@media (max-width:900px){.hero .inner{grid-template-columns:1fr;padding:20px}}
 .hero .badge{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
 .hero h1{font:${v.fontTitle};margin:6px 0 4px}
 .hero p{color:var(--muted);margin:0 0 12px}
 .hero .cta{display:flex;gap:10px;flex-wrap:wrap}
 .hero .gfx{position:absolute;inset:auto -80px -80px auto;opacity:.6;filter:blur(40px); pointer-events:none}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--radius) + 6px);border:1px solid var(--border)}
+@media (max-width:900px){.split{grid-template-columns:1fr}}
 `; }
 
-  /* CSS generator */
+  // tiny helper: hex -> rgba(a)
+  function hex2rgba(hex, a){
+    try{
+      const h = hex.replace('#','');
+      const b = parseInt(h.length===3? h.split('').map(c=>c+c).join('') : h, 16);
+      const r=(b>>16)&255, g=(b>>8)&255, bl=b&255;
+      return `rgba(${r},${g},${bl},${a})`;
+    }catch(e){ return `rgba(59,130,246,${a})`; }
+  }
+
   function siteCss(v){ return commonCss(v) + themeCss(v); }
 
-  /* THEME HTML BUILDERS */
-  function heroSerious(d,v){
-    return `
+  /* Hero builders (same as previous response)… */
+  function heroSerious(d,v){ /* ...same as before... */ return `
 <section class="hero card section" style="margin-top:14px">
   <div class="inner">
     <div>
@@ -530,11 +548,8 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
     <defs><linearGradient id="g1" x1="0" x2="1" y1="0" y2="1"><stop stop-color="${v.accent}"/><stop offset="1" stop-color="${v.accent2}"/></linearGradient></defs>
     <path d="M320 10c40 40 80 120 80 170s-40 90-90 130-120 70-170 50-90-90-80-150S120 70 180 40s100-30 140-30z" fill="url(#g1)" opacity="0.25"/>
   </svg>
-</section>`;
-  }
-
-  function heroCartoony(d,v){
-    return `
+</section>`;}
+  function heroCartoony(d,v){return `
 <section class="comic-hero card torn" style="margin-top:14px">
   <div class="comic-topper"></div>
   <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 360px':'360px 1fr'};gap:22px;align-items:center;padding:22px 22px 12px">
@@ -556,11 +571,8 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
   </div>
   <div class="halftone"></div>
   <div class="zigzag"></div>
-</section>`;
-  }
-
-  function heroNeon(d,v){
-    return `
+</section>`;}
+  function heroNeon(d,v){return `
 <section class="neon-hero card" style="margin-top:14px;position:relative;overflow:hidden">
   <div class="grid-bg"></div>
   <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 380px':'380px 1fr'};gap:24px;align-items:center;padding:26px;position:relative">
@@ -580,11 +592,8 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
       `<div style="width:220px;height:220px;border-radius:18px;border:1px dashed #2a3263;display:grid;place-items:center;color:#9aa6c6">Logo</div>`}
     </div>
   </div>
-</section>`;
-  }
-
-  function heroGlass(d,v){
-    return `
+</section>`;}
+  function heroGlass(d,v){return `
 <section class="glass-hero card" style="margin-top:14px">
   <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 360px':'360px 1fr'};gap:22px;align-items:center;padding:24px">
     <div style="${v.heroFlip?'order:2':''}">
@@ -603,11 +612,8 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
       `<div style="width:200px;height:200px;border-radius:22px;border:1px dashed #2a314d;display:grid;place-items:center;color:#9aa6c6">Logo</div>`}
     </div>
   </div>
-</section>`;
-  }
-
-  function heroRetro(d,v){
-    return `
+</section>`;}
+  function heroRetro(d,v){return `
 <section class="card mono crt-scan" style="margin-top:14px">
   <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 360px':'360px 1fr'};gap:20px;align-items:center;padding:18px 18px">
     <div style="${v.heroFlip?'order:2':''}">
@@ -626,11 +632,8 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
       `<div style="width:200px;height:200px;border-radius:10px;border:1px dashed #1f6a3c;display:grid;place-items:center;color:#86ffbd" class="mono">Logo</div>`}
     </div>
   </div>
-</section>`;
-  }
-
-  function heroZine(d,v){
-    return `
+</section>`;}
+  function heroZine(d,v){return `
 <section class="card torn" style="margin-top:14px;position:relative">
   <div class="tape"></div>
   <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 320px':'320px 1fr'};gap:18px;align-items:center;padding:18px">
@@ -650,8 +653,7 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
       `<div class="sticker" style="width:200px;height:200px;border-radius:8px;display:grid;place-items:center;background:#fff;color:#111">Logo</div>`}
     </div>
   </div>
-</section>`;
-  }
+</section>`;}
 
   function sectionsHtml(d,v){
     const about = d.aboutEnabled? `
@@ -689,7 +691,7 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
 
   function siteHtml(data){
     const v = data.vars;
-    const banner = data.bannerSrc? `<img src="${esc(data.bannerSrc)}" class="banner ${v.theme==='neon'?'glow':''}" alt="Banner">` : '';
+    const banner = data.bannerSrc? `<img src="${esc(data.bannerSrc)}" class="banner" alt="Banner">` : '';
     const head = `
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -697,14 +699,19 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
 <style>${siteCss(v)}</style>
 </head><body class="${v.decoration==='crt'?'crt':''}">`;
 
+    // header uses IMAGE logo if provided (fixes your issue)
+    const headerLogo = data.logoSrc
+      ? `<img src="${esc(data.logoSrc)}" alt="Logo" class="header-logo">`
+      : `<div class="logo-fallback" aria-hidden="true"></div>`;
+
     const header = `
   <div class="container">
-    <header class="section" style="display:flex;justify-content:space-between;align-items:center">
+    <header class="section" style="display:flex;justify-content:space-between;align-items:center;gap:10px">
       <div style="display:flex;align-items:center;gap:12px">
-        <div class="logo ${v.theme==='cartoony' || v.theme==='zine' ? 'sticker':''}"></div>
+        ${headerLogo}
         <div>
           <div class="h2" style="margin:0">${esc(data.ticker)} on ${esc(data.chain)}</div>
-          <div style="font-weight:900;font-size:18px" class="${v.theme==='cartoony' || v.theme==='zine' ? 'title-outline':''}">${esc(data.name)}</div>
+          <div style="font-weight:900;font-size:18px">${esc(data.name)}</div>
         </div>
       </div>
       <div class="kpi" style="grid-template-columns:repeat(2,auto);gap:8px">
@@ -724,12 +731,8 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
                              heroSerious(data,v);
 
     const {about, token, road, team} = sectionsHtml(data,v);
-
-    const split = `
-    <section class="split" style="margin-top:14px">
-      ${about}
-      ${token}
-    </section>`;
+    const sectionMap = { about, token, road, team };
+    const ordered = state.order.map(k=>sectionMap[k]).filter(Boolean).join('');
 
     const foot = data.disclaimerEnabled? `
     <footer class="footer">
@@ -737,7 +740,7 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
       <div>${esc(data.disclaimer)}</div>
     </footer>` : '';
 
-    return head + header + hero + split + road + team + foot + '\n  </div>\n</body></html>';
+    return head + header + hero + '\n' + ordered + foot + '\n  </div>\n</body></html>';
   }
 
   /* helpers */
@@ -753,6 +756,7 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
     const vars = presetVars(inputs.style_preset.value, {
       accent: inputs.c_accent.value,
       accent2: inputs.c_accent2.value,
+      accent3: inputs.c_accent3.value,
       bg: inputs.c_bg.value,
       radius: +inputs.c_radius.value
     });
@@ -785,6 +789,41 @@ img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--rad
   }
 
   function buildPreview(){ preview.innerHTML = siteHtml(collect()); }
+
+  // ORDER UI
+  const orderList = document.getElementById('orderList');
+  const SECTION_LABELS = {about:'About', token:'Tokenomics', road:'Roadmap', team:'Team'};
+  function renderOrderUI(){
+    orderList.innerHTML = '';
+    state.order.forEach((key, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'card section';
+      row.style.padding = '10px';
+      row.innerHTML = `
+        <div class="flex" style="justify-content:space-between">
+          <div class="flex" style="gap:8px">
+            <span class="badge">${idx+1}</span>
+            <strong>${SECTION_LABELS[key]}</strong>
+          </div>
+          <div class="flex">
+            <button class="btn" data-act="up" data-key="${key}">↑</button>
+            <button class="btn" data-act="down" data-key="${key}">↓</button>
+          </div>
+        </div>`;
+      orderList.appendChild(row);
+    });
+  }
+  orderList.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-act]');
+    if(!btn) return;
+    const key = btn.dataset.key, act = btn.dataset.act;
+    const i = state.order.indexOf(key);
+    if(i<0) return;
+    if(act==='up' && i>0){ [state.order[i-1], state.order[i]] = [state.order[i], state.order[i-1]]; }
+    if(act==='down' && i<state.order.length-1){ [state.order[i+1], state.order[i]] = [state.order[i], state.order[i+1]]; }
+    renderOrderUI(); buildPreview();
+  });
+  renderOrderUI();
 
   // live update
   Object.values(inputs).forEach(i=>{
