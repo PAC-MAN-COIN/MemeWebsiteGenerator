@@ -10,9 +10,8 @@
 <body>
   <div id="site-header"></div>
   <script>
-    (async()=>{ try{
-      const r=await fetch('nav.html');
-      document.getElementById('site-header').innerHTML = await r.text();
+    (async()=>{try{
+      const r=await fetch('nav.html'); document.getElementById('site-header').innerHTML=await r.text();
     }catch(e){ console.warn('nav load failed', e); }})();
   </script>
 
@@ -46,6 +45,23 @@
             <label>Tagline</label>
             <input id="p_tag" type="text" placeholder="One-liner that sells the vibe" value="Meme tech from the jungle.">
           </div>
+
+          <div class="two">
+            <div>
+              <label>Style preset</label>
+              <select id="style_preset">
+                <option value="serious" selected>Serious (clean)</option>
+                <option value="cartoony">Cartoony (bold)</option>
+                <option value="neon">Neon (glow)</option>
+                <option value="minimal">Minimal (flat)</option>
+              </select>
+            </div>
+            <div>
+              <label>Card radius</label>
+              <input id="c_radius" type="range" min="8" max="28" value="18">
+            </div>
+          </div>
+
           <div class="two">
             <div>
               <label>Primary color</label>
@@ -56,19 +72,14 @@
               <input id="c_accent2" type="color" value="#22d3ee">
             </div>
           </div>
-          <div class="two">
-            <div>
-              <label>Background style</label>
-              <select id="c_bg">
-                <option value="memeportal" selected>Memeportal gradient</option>
-                <option value="dark">Dark solid</option>
-                <option value="radial">Radial glow</option>
-              </select>
-            </div>
-            <div>
-              <label>Card radius</label>
-              <input id="c_radius" type="range" min="8" max="28" value="18">
-            </div>
+
+          <div>
+            <label>Background style</label>
+            <select id="c_bg">
+              <option value="memeportal" selected>Memeportal gradient</option>
+              <option value="dark">Dark solid</option>
+              <option value="radial">Radial glow</option>
+            </select>
           </div>
         </div>
       </div>
@@ -77,13 +88,13 @@
       <div class="card section">
         <h2>Media</h2>
         <div class="grid">
-          <div class="drop">
+          <div class="drop" id="logoDrop">
             <input id="logoFile" type="file" accept="image/*">
-            <div><strong>Logo</strong> PNG/SVG — transparent preferred.</div>
+            <div><strong>Logo</strong> PNG/SVG — transparent preferred. <button class="btn ghost" id="logoBrowse">Browse</button></div>
           </div>
-          <div class="drop">
+          <div class="drop" id="bannerDrop">
             <input id="bannerFile" type="file" accept="image/*">
-            <div><strong>Banner</strong> (wide) — PNG/JPG/WebP.</div>
+            <div><strong>Banner</strong> (wide) PNG/JPG/WebP. <button class="btn ghost" id="bannerBrowse">Browse</button></div>
           </div>
         </div>
       </div>
@@ -94,12 +105,12 @@
         <div class="grid">
           <div><label>Website</label><input id="l_site" type="text" placeholder="https://"></div>
           <div class="two">
-            <div><label>Twitter/X</label><input id="l_x" type="text" placeholder="https://x.com/…"></div>
-            <div><label>Telegram</label><input id="l_tg" type="text" placeholder="https://t.me/…"></div>
+            <div><label>Twitter/X</label><input id="l_x" type="text" placeholder="https://x.com/..."></div>
+            <div><label>Telegram</label><input id="l_tg" type="text" placeholder="https://t.me/..."></div>
           </div>
           <div class="two">
-            <div><label>DexScreener</label><input id="l_ds" type="text" placeholder="https://dexscreener.com/…"></div>
-            <div><label>Whitepaper</label><input id="l_wp" type="text" placeholder="https://…pdf"></div>
+            <div><label>DexScreener</label><input id="l_ds" type="text" placeholder="https://dexscreener.com/..."></div>
+            <div><label>Whitepaper</label><input id="l_wp" type="text" placeholder="https://...pdf"></div>
           </div>
         </div>
       </div>
@@ -111,7 +122,7 @@
           <div class="flex">
             <input id="s_about_e" type="checkbox" checked><label for="s_about_e" style="margin:0">About / Info</label>
           </div>
-          <textarea id="s_about" placeholder="Write a spicy intro…" rows="3">BeastLab is a memecoin with utility—clean branding, fair launch, and a community that ships.</textarea>
+          <textarea id="s_about" rows="3">BeastLab is a memecoin with utility—clean branding, fair launch, and a community that ships.</textarea>
 
           <div class="flex">
             <input id="s_token_e" type="checkbox" checked><label for="s_token_e" style="margin:0">Tokenomics</label>
@@ -124,13 +135,13 @@
           </div>
           <details>
             <summary class="small">Allocations (optional)</summary>
-            <textarea id="tok_alloc" class="tiny" rows="3" placeholder="Comma pairs: Team:5, Liquidity:70, Marketing:10">Liquidity:70, Community:20, Treasury:10</textarea>
+            <textarea id="tok_alloc" class="tiny" rows="3">Liquidity:70, Community:20, Treasury:10</textarea>
           </details>
 
           <div class="flex" style="margin-top:6px">
             <input id="s_road_e" type="checkbox" checked><label for="s_road_e" style="margin:0">Roadmap</label>
           </div>
-          <textarea id="s_road" rows="3" placeholder="Each line = one milestone">Phase 1 — Launch, socials, CMC/CG listing
+          <textarea id="s_road" rows="3">Phase 1 — Launch, socials, CMC/CG listing
 Phase 2 — Partnerships, Meme contest, CEX listing
 Phase 3 — Utilities drop, DAO experiments</textarea>
 
@@ -166,66 +177,91 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
 
 <script>
 (function(){
-  // ---- STATE ----
-  const state = {
-    logo: null,           // File
-    banner: null,         // File
-    logoUrl: '',          // object URL for preview
-    bannerUrl: ''
-  };
-
-  // ---- ELEMENTS ----
+  const state = { logo:null, banner:null, logoUrl:'', bannerUrl:'' };
   const el = id => document.getElementById(id);
-  const inputs = [
-    'p_name','p_ticker','p_chain','p_ca','p_tag',
-    'c_accent','c_accent2','c_bg','c_radius',
-    'l_site','l_x','l_tg','l_ds','l_wp',
-    's_about_e','s_about','s_token_e','tok_supply','tok_dec','tok_buy','tok_sell','tok_alloc',
-    's_road_e','s_road','s_team_e','s_team',
-    's_disclaimer_e','s_disclaimer'
-  ].reduce((o,k)=> (o[k]=el(k), o), {});
+
+  // controls
+  const ids = ['p_name','p_ticker','p_chain','p_ca','p_tag','style_preset','c_accent','c_accent2','c_bg','c_radius','l_site','l_x','l_tg','l_ds','l_wp','s_about_e','s_about','s_token_e','tok_supply','tok_dec','tok_buy','tok_sell','tok_alloc','s_road_e','s_road','s_team_e','s_team','s_disclaimer_e','s_disclaimer'];
+  const inputs = ids.reduce((o,k)=> (o[k]=el(k),o), {});
   const preview = el('preview');
   const refreshBtn = el('refreshBtn');
   const exportBtn = el('exportZip');
-  const logoFile = el('logoFile');
-  const bannerFile = el('bannerFile');
 
-  // ---- MEDIA UPLOADS ----
-  logoFile.addEventListener('change', ()=>{
-    state.logo = logoFile.files[0] || null;
-    state.logoUrl = state.logo ? URL.createObjectURL(state.logo) : '';
-    buildPreview();
-  });
-  bannerFile.addEventListener('change', ()=>{
-    state.banner = bannerFile.files[0] || null;
-    state.bannerUrl = state.banner ? URL.createObjectURL(state.banner) : '';
-    buildPreview();
-  });
+  // media
+  const logoFile = el('logoFile'), bannerFile = el('bannerFile');
+  const logoBrowse=el('logoBrowse'), bannerBrowse=el('bannerBrowse');
+  const logoDrop=el('logoDrop'), bannerDrop=el('bannerDrop');
 
-  // ---- TEMPLATE HTML/CSS ----
+  logoBrowse.addEventListener('click', ()=>logoFile.click());
+  bannerBrowse.addEventListener('click', ()=>bannerFile.click());
+
+  ['dragenter','dragover'].forEach(evt=>logoDrop.addEventListener(evt, e=>{e.preventDefault();logoDrop.classList.add('drag');}));
+  ;['dragleave','drop'].forEach(evt=>logoDrop.addEventListener(evt, e=>{e.preventDefault();logoDrop.classList.remove('drag');}));
+  logoDrop.addEventListener('drop', e=>{ const f=e.dataTransfer.files?.[0]; if(f){ setLogo(f); }});
+
+  ['dragenter','dragover'].forEach(evt=>bannerDrop.addEventListener(evt, e=>{e.preventDefault();bannerDrop.classList.add('drag');}));
+  ;['dragleave','drop'].forEach(evt=>bannerDrop.addEventListener(evt, e=>{e.preventDefault();bannerDrop.classList.remove('drag');}));
+  bannerDrop.addEventListener('drop', e=>{ const f=e.dataTransfer.files?.[0]; if(f){ setBanner(f); }});
+
+  logoFile.addEventListener('change', ()=>{ if(logoFile.files[0]) setLogo(logoFile.files[0]); });
+  bannerFile.addEventListener('change', ()=>{ if(bannerFile.files[0]) setBanner(bannerFile.files[0]); });
+
+  function setLogo(f){ state.logo=f; state.logoUrl=URL.createObjectURL(f); buildPreview(); }
+  function setBanner(f){ state.banner=f; state.bannerUrl=URL.createObjectURL(f); buildPreview(); }
+
+  // style presets -> affect CSS generator
+  function presetVars(type, vars){
+    const v = {...vars};
+    if(type==='serious'){
+      v.fontTitle = "600 34px 'Inter', system-ui";
+      v.fontBody  = "15px 'Inter', system-ui";
+      v.shadow = "0 10px 30px rgba(0,0,0,.35)";
+      v.decoration = 'none';
+    }else if(type==='cartoony'){
+      v.fontTitle = "900 38px 'Impact', Haettenschweiler, 'Arial Black', sans-serif";
+      v.fontBody  = "16px 'Inter', system-ui";
+      v.shadow = "0 14px 34px rgba(124,58,237,.35)";
+      v.decoration = 'cartoony';
+    }else if(type==='neon'){
+      v.fontTitle = "800 36px 'Inter', system-ui";
+      v.fontBody  = "15px 'Inter', system-ui";
+      v.shadow = "0 0 32px rgba(124,58,237,.35)";
+      v.decoration = 'neon';
+    }else{ // minimal
+      v.fontTitle = "700 30px 'Inter', system-ui";
+      v.fontBody  = "15px 'Inter', system-ui";
+      v.shadow = "0 6px 18px rgba(0,0,0,.25)";
+      v.decoration = 'minimal';
+    }
+    return v;
+  }
+
+  // CSS template
   function siteCss(vars){
+    const bgBase = vars.bg=='memeportal'
+      ? 'radial-gradient(1200px 800px at 10% -10%,rgba(34,211,238,.08),transparent),radial-gradient(900px 700px at 120% 10%,rgba(124,58,237,.09),transparent),#0f1115'
+      : vars.bg=='radial'
+        ? 'radial-gradient(900px 700px at 120% 10%,rgba(124,58,237,.10),transparent),#0e1016'
+        : '#0e1016';
+    const decoNeon = vars.decoration==='neon' ? `
+      .glow{box-shadow:0 0 24px ${vars.accent}66, inset 0 0 24px ${vars.accent2}44}
+    ` : '';
+    const decoCartoon = vars.decoration==='cartoony' ? `
+      .sticker{border:3px solid #00000088; box-shadow:4px 4px 0 #00000066}
+      .title-outline{-webkit-text-stroke:2px #341b7a;color:#fff}
+    ` : '';
     return `
-:root{
-  --accent:${vars.accent};--accent2:${vars.accent2};
-  --radius:${vars.radius}px;
-  --bg: ${vars.bg=='memeportal' ? '#0f1115' : vars.bg=='dark' ? '#0e1016' : '#0e1016'};
-  --panel:#151823;--muted:#8892a6;--text:#e6e9ef;--card:#10131c;--border:#22273a;
-}
-*{box-sizing:border-box} body{margin:0;color:var(--text);
-  background:${vars.bg=='memeportal'
-    ? 'radial-gradient(1200px 800px at 10% -10%,rgba(34,211,238,.08),transparent),radial-gradient(900px 700px at 120% 10%,rgba(124,58,237,.09),transparent),#0f1115'
-    : vars.bg=='radial'
-      ? 'radial-gradient(900px 700px at 120% 10%,rgba(124,58,237,.10),transparent),#0e1016'
-      : '#0e1016'};
-  font:15px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+:root{--accent:${vars.accent};--accent2:${vars.accent2};--radius:${vars.radius}px;--border:#22273a;--card:#10131c;--muted:#8892a6;--text:#e6e9ef}
+*{box-sizing:border-box}
+body{margin:0;color:var(--text);background:${bgBase};font:${vars.fontBody}}
 .container{max-width:1140px;margin:0 auto;padding:20px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:${vars.shadow}}
 .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid #2b3352;background:#0f1424;color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:700}
 .btn:hover{border-color:#39436c}
 .hero{position:relative;overflow:hidden;border-radius:calc(var(--radius) + 6px)}
 .hero .inner{display:grid;grid-template-columns:420px 1fr;gap:24px;align-items:center;padding:28px}
 .hero .badge{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
-.hero h1{font-size:34px;margin:6px 0 4px}
+.hero h1{font:${vars.fontTitle};margin:6px 0 4px}
 .hero p{color:var(--muted);margin:0 0 12px}
 .hero .cta{display:flex;gap:10px;flex-wrap:wrap}
 .hero .gfx{position:absolute;inset:auto -80px -80px auto;opacity:.6;filter:blur(40px); pointer-events:none}
@@ -247,19 +283,19 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
 .logo{width:40px;height:40px;border-radius:12px;background:conic-gradient(from 210deg,var(--accent),var(--accent2))}
 img.banner{width:100%;height:260px;object-fit:cover;border-radius:calc(var(--radius) + 6px);border:1px solid var(--border)}
 a{color:#c8d2ff}
-`;
-  }
+${decoNeon}${decoCartoon}
+@media (max-width:900px){.hero .inner{grid-template-columns:1fr}.split{grid-template-columns:1fr}}
+`; }
 
   function siteHtml(data){
     const allocations = parseAllocations(data.tokAlloc)
       .map(a=>`<div class="card"><div class="t">${esc(a.k)}</div><div class="v">${esc(a.v)}%</div></div>`).join('');
     const roadmap = (data.road||'').split('\n').filter(Boolean)
       .map(line=>`<div class="step">${esc(line)}</div>`).join('');
-    const team = (data.team||'').split('\n').filter(Boolean)
+    const teamList = (data.team||'').split('\n').filter(Boolean)
       .map(line=>`<li>${esc(line)}</li>`).join('');
 
-    return `
-<!DOCTYPE html><html lang="en"><head>
+    return `<!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(data.name)} — ${esc(data.ticker)}</title>
 <style>${siteCss(data.vars)}</style>
@@ -267,25 +303,25 @@ a{color:#c8d2ff}
   <div class="container">
     <header class="section" style="display:flex;justify-content:space-between;align-items:center">
       <div style="display:flex;align-items:center;gap:12px">
-        <div class="logo"></div>
+        <div class="logo ${data.vars.decoration==='cartoony'?'sticker':''}"></div>
         <div>
           <div class="h2" style="margin:0">${esc(data.ticker)} on ${esc(data.chain)}</div>
-          <div style="font-weight:900;font-size:18px">${esc(data.name)}</div>
+          <div style="font-weight:900;font-size:18px" class="${data.vars.decoration==='cartoony'?'title-outline':''}">${esc(data.name)}</div>
         </div>
       </div>
       <div class="kpi" style="grid-template-columns:repeat(2,auto);gap:8px">
-        <a class="btn" href="${esc(data.links.ds)}">DexScreener</a>
-        ${data.links.tg? `<a class="btn" href="${esc(data.links.tg)}">Telegram</a>`:''}
+        ${data.links.ds?`<a class="btn" href="${esc(data.links.ds)}">DexScreener</a>`:''}
+        ${data.links.tg?`<a class="btn" href="${esc(data.links.tg)}">Telegram</a>`:''}
       </div>
     </header>
 
-    ${data.bannerSrc? `<img src="${esc(data.bannerSrc)}" class="banner" alt="Banner">`:''}
+    ${data.bannerSrc? `<img src="${esc(data.bannerSrc)}" class="banner ${data.vars.decoration==='neon'?'glow':''}" alt="Banner">`:''}
 
     <section class="hero card section" style="margin-top:14px">
       <div class="inner">
         <div>
           <div class="badge">${esc(data.ticker)} / ${esc(data.chain)}</div>
-          <h1>${esc(data.name)}</h1>
+          <h1 class="${data.vars.decoration==='cartoony'?'title-outline':''}">${esc(data.name)}</h1>
           <p>${esc(data.tagline)}</p>
           ${data.ca? `<div class="kpi" style="grid-template-columns:1fr"><div class="item"><div class="t">CA</div><div class="v" style="word-break:break-all">${esc(data.ca)}</div></div></div>`:''}
           <div class="cta" style="margin-top:10px">
@@ -295,7 +331,7 @@ a{color:#c8d2ff}
           </div>
         </div>
         <div style="justify-self:end;align-self:center">
-          ${data.logoSrc? `<img src="${esc(data.logoSrc)}" alt="Logo" style="width:180px;height:180px;object-fit:contain;border-radius:18px;border:1px solid var(--border);background:#0b0f17;padding:12px">`:
+          ${data.logoSrc? `<img src="${esc(data.logoSrc)}" alt="Logo" style="width:180px;height:180px;object-fit:contain;border-radius:18px;border:1px solid var(--border);background:#0b0f17;padding:12px" class="${data.vars.decoration==='cartoony'?'sticker':''}">`:
             `<div style="width:180px;height:180px;border-radius:18px;border:1px dashed var(--border);display:grid;place-items:center;color:#9aa6c6">Logo</div>`}
         </div>
       </div>
@@ -334,7 +370,7 @@ a{color:#c8d2ff}
     ${data.teamEnabled? `
     <section class="card section" style="margin-top:14px">
       <div class="h2">Team</div>
-      <ul class="list">${team.join('')}</ul>
+      <ul class="list">${teamList}</ul>
     </section>`:''}
 
     ${data.disclaimerEnabled? `
@@ -346,28 +382,30 @@ a{color:#c8d2ff}
 </body></html>`;
   }
 
-  // ---- helpers ----
-  function parseAllocations(str){
-    return (str||'').split(',').map(s=>s.trim()).filter(Boolean).map(s=>{
-      const m = s.split(':'); return {k:(m[0]||'').trim(), v:(m[1]||'').trim()};
-    }).filter(x=>x.k && x.v);
-  }
+  // helpers
   const esc = s => String(s||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   const nl2br = s => s.replace(/\n/g,'<br>');
+  function parseAllocations(str){
+    return (str||'').split(',').map(s=>s.trim()).filter(Boolean).map(s=>{
+      const m=s.split(':'); return {k:(m[0]||'').trim(), v:(m[1]||'').trim()};
+    }).filter(x=>x.k && x.v);
+  }
 
   function collect(){
+    const vars = presetVars(inputs.style_preset.value, {
+      accent: inputs.c_accent.value,
+      accent2: inputs.c_accent2.value,
+      bg: inputs.c_bg.value,
+      radius: +inputs.c_radius.value
+    });
+
     return {
       name: inputs.p_name.value.trim(),
       ticker: inputs.p_ticker.value.trim(),
       chain: inputs.p_chain.value,
       ca: inputs.p_ca.value.trim(),
       tagline: inputs.p_tag.value.trim(),
-      vars: {
-        accent: inputs.c_accent.value,
-        accent2: inputs.c_accent2.value,
-        bg: inputs.c_bg.value,
-        radius: +inputs.c_radius.value
-      },
+      vars,
       links: {
         site: inputs.l_site.value.trim(),
         x: inputs.l_x.value.trim(),
@@ -388,49 +426,41 @@ a{color:#c8d2ff}
     };
   }
 
-  // ---- PREVIEW ----
-  function buildPreview(){
-    const data = collect();
-    preview.innerHTML = siteHtml(data);
-  }
+  function buildPreview(){ preview.innerHTML = siteHtml(collect()); }
 
-  // Update preview on input
+  // live update
   Object.values(inputs).forEach(i=>{
     i.addEventListener('input', buildPreview);
     i.addEventListener('change', buildPreview);
   });
   buildPreview();
 
-  // ---- EXPORT ZIP ----
+  // export
   exportBtn.addEventListener('click', async ()=>{
     const data = collect();
     const zip = new JSZip();
-
-    // assets/
     const assets = zip.folder('assets');
     let logoName='', bannerName='';
-    if(state.logo){ logoName = 'logo' + getExt(state.logo.name); assets.file(logoName, state.logo); }
-    if(state.banner){ bannerName = 'banner' + getExt(state.banner.name); assets.file(bannerName, state.banner); }
+    if(state.logo){ logoName = 'logo' + ext(state.logo.name); assets.file(logoName, state.logo); }
+    if(state.banner){ bannerName = 'banner' + ext(state.banner.name); assets.file(bannerName, state.banner); }
 
-    // rewrite srcs to assets paths
-    const htmlForZip = siteHtml({
+    const html = siteHtml({
       ...data,
       logoSrc: logoName ? 'assets/'+logoName : '',
       bannerSrc: bannerName ? 'assets/'+bannerName : ''
     });
-
-    zip.file('index.html', htmlForZip);
+    zip.file('index.html', html);
 
     const content = await zip.generateAsync({type:'blob'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(content);
-    a.download = (data.ticker || 'site') + '_site.zip';
+    a.download = (data.ticker||'site')+'_site.zip';
     a.click();
   });
+  const ext = n => (n.toLowerCase().match(/\.[a-z0-9]+$/)||['.png'])[0];
 
-  function getExt(name){ const m=name.toLowerCase().match(/\.[a-z0-9]+$/); return m?m[0]:'.png'; }
-
-  refreshBtn.addEventListener('click', buildPreview);
+  // manual refresh
+  el('refreshBtn').addEventListener('click', buildPreview);
 })();
 </script>
 </body>
