@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memeportal — Resizer</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  /* Page‑specific fixes */
+  .stage{
+    position:relative;background:#0b0f17;border:1px solid var(--border);
+    border-radius:14px;min-height:360px;display:grid;place-items:center
+  }
+  .checker{background:conic-gradient(#141824 25%, #0f1320 0 50%, #141824 0 75%, #0f1320 0) 0 0/20px 20px;border-radius:12px}
+  .stage canvas{max-width:100%;height:auto;max-height:70vh;border-radius:12px}
+  /* Compact, never-overflow sliders */
+  .adj-grid{display:grid;grid-template-columns:1fr;gap:8px}
+  .adj-row{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:10px}
+  .adj-row label{margin:0;font-weight:700}
+  .adj-row input[type=range]{width:100%}
+  /* Two columns on wider sidebars */
+  @media (min-width: 1200px){
+    .adj-grid{grid-template-columns:1fr 1fr}
+    .adj-row{grid-template-columns:110px 1fr}
+  }
+  /* Phone: ensure preview always visible and no overflow */
+  @media (max-width: 900px){
+    .stage{min-height:200px}
+    .stage canvas{max-height:40vh}
+  }
+</style>
+</head>
+<body>
+  <div id="site-header"></div>
+  <script>
+    // load shared nav + burger
+    (async()=>{try{
+      const host=document.getElementById('site-header');
+      host.innerHTML=await (await fetch('nav.html')).text();
+      const btn=host.querySelector('.menu-toggle'), menu=host.querySelector('#mobileMenu');
+      if(!btn||!menu) return;
+      const close=()=>{menu.setAttribute('hidden','');btn.setAttribute('aria-expanded','false');document.removeEventListener('click',away);};
+      const open =()=>{menu.removeAttribute('hidden');btn.setAttribute('aria-expanded','true');setTimeout(()=>document.addEventListener('click',away),0);};
+      const away=e=>{if(!menu.contains(e.target)&&!btn.contains(e.target)) close();};
+      btn.addEventListener('click',e=>{e.stopPropagation();menu.hasAttribute('hidden')?open():close();});
+      window.matchMedia('(min-width:900px)').addEventListener?.('change',e=>{if(e.matches) close();});
+      close();
+    }catch(e){console.warn('nav load failed',e)}})();
+  </script>
+
+  <div class="app" style="grid-template-columns:420px minmax(0,1fr)">
+    <aside>
+      <!-- Upload -->
+      <div class="card section" id="uploadCard">
+        <h2>Image</h2>
+        <div id="drop" class="drop">
+          <input id="fileInput" type="file" accept="image/*">
+          <div><strong>Drag & drop</strong> an image or <button class="btn ghost" id="browseBtn">Browse</button></div>
+          <div class="tiny muted" style="margin-top:6px">Works with PNG, JPG, WebP. Transparency kept where possible.</div>
+        </div>
+        <div id="fileMeta" class="footer">No image loaded.</div>
+      </div>
+
+      <!-- Canvas / Output -->
+      <div class="card section">
+        <h2>Output</h2>
+        <div class="grid">
+          <div class="two">
+            <div>
+              <label>Preset</label>
+              <select id="preset">
+                <option value="custom" selected>Custom size</option>
+                <option value="1080x1080">Instagram Post — 1080×1080</option>
+                <option value="1080x1920">Story/TikTok — 1080×1920</option>
+                <option value="1500x500">X Banner — 1500×500</option>
+                <option value="400x400">X Profile — 400×400</option>
+                <option value="1280x720">YouTube Thumb — 1280×720</option>
+                <option value="1200x630">Open Graph — 1200×630</option>
+                <option value="512x512">Telegram Sticker — 512×512</option>
+                <option value="128x128">Discord Emoji — 128×128</option>
+              </select>
+            </div>
+            <div class="flex" style="gap:10px">
+              <div style="flex:1">
+                <label>W</label>
+                <input id="outW" type="number" min="8" value="1080">
+              </div>
+              <div style="flex:1">
+                <label>H</label>
+                <input id="outH" type="number" min="8" value="1080">
+              </div>
+            </div>
+          </div>
+
+          <div class="two">
+            <div>
+              <label>Fit mode</label>
+              <select id="mode">
+                <option value="contain">Fit (contain)</option>
+                <option value="cover" selected>Fill (cover)</option>
+                <option value="stretch">Stretch</option>
+              </select>
+            </div>
+            <div>
+              <label>Background</label>
+              <div class="flex">
+                <input type="color" id="bgColor" value="#000000">
+                <label class="small" style="margin:0 0 0 10px"><input type="checkbox" id="transparent" checked> Transparent</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="two">
+            <div>
+              <label>Padding</label>
+              <input id="padding" type="range" min="0" max="200" value="0">
+            </div>
+            <div class="flex">
+              <div>
+                <label>Rotate</label>
+                <input id="rotate" type="range" min="-180" max="180" value="0">
+              </div>
+              <div style="margin-left:10px">
+                <label>&nbsp;</label>
+                <div class="flex">
+                  <label class="small"><input id="flipH" type="checkbox"> Flip H</label>
+                  <label class="small"><input id="flipV" type="checkbox" style="margin-left:10px"> Flip V</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shape / Mask -->
+      <div class="card section">
+        <h2>Shape & Mask</h2>
+        <div class="grid two">
+          <div>
+            <label>Shape</label>
+            <select id="shape">
+              <option value="none">None (rectangle)</option>
+              <option value="rounded" selected>Rounded</option>
+              <option value="circle">Circle</option>
+              <option value="squircle">Squircle</option>
+              <option value="hex">Hexagon</option>
+            </select>
+          </div>
+          <div>
+            <label>Corner radius</label>
+            <input id="radius" type="range" min="0" max="200" value="40">
+          </div>
+        </div>
+      </div>
+
+      <!-- Adjustments (reflow-safe) -->
+      <div class="card section">
+        <h2>Adjustments</h2>
+        <div class="adj-grid">
+          <div class="adj-row"><label for="adj_b">Brightness</label><input id="adj_b" type="range" min="0" max="2" step="0.01" value="1"></div>
+          <div class="adj-row"><label for="adj_c">Contrast</label><input id="adj_c" type="range" min="0" max="2" step="0.01" value="1"></div>
+          <div class="adj-row"><label for="adj_s">Saturation</label><input id="adj_s" type="range" min="0" max="2" step="0.01" value="1"></div>
+          <div class="adj-row"><label for="adj_h">Hue</label><input id="adj_h" type="range" min="0" max="360" step="1" value="0"></div>
+          <div class="adj-row"><label for="adj_blur">Blur</label><input id="adj_blur" type="range" min="0" max="10" step="0.1" value="0"></div>
+        </div>
+      </div>
+
+      <!-- BG Remover -->
+      <div class="card section">
+        <h2>Background</h2>
+        <div class="grid">
+          <div class="two">
+            <div>
+              <label>Solid‑BG Remover</label>
+              <input id="rm_tol" type="range" min="0" max="120" value="38">
+              <div class="tiny muted">Tolerance</div>
+            </div>
+            <div>
+              <label>Feather</label>
+              <input id="rm_feather" type="range" min="0" max="4" step="0.25" value="0.75">
+            </div>
+          </div>
+          <button class="btn" id="btnRemoveBg">Remove Background</button>
+          <div class="tiny muted">Tip: works best on solid backgrounds (white/green/etc.).</div>
+        </div>
+      </div>
+
+      <!-- Batch export -->
+      <div class="card section">
+        <h2>Batch export</h2>
+        <div class="list" id="presetList"></div>
+        <div class="tiny muted">Checked sizes will export to a ZIP.</div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card section">
+        <div class="toolbar right">
+          <button class="btn" id="resetBtn">Reset</button>
+          <button class="btn primary" id="renderBtn">Render</button>
+          <button class="btn" id="saveBtn">Download</button>
+          <button class="btn success" id="zipBtn">Export ZIP</button>
+        </div>
+        <div class="tiny muted">Choose format/quality below the preview.</div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="card section" style="height:100%;display:grid;grid-template-rows:auto 1fr auto auto">
+        <div class="flex" style="justify-content:space-between;align-items:end">
+          <div>
+            <div class="kicker">Preview</div>
+            <h1 style="font-size:18px;margin-top:6px">Live Output</h1>
+          </div>
+          <div class="pill"><span id="outSize">—</span></div>
+        </div>
+        <div class="hr"></div>
+
+        <div class="stage checker">
+          <canvas id="canvas" width="1080" height="1080"></canvas>
+        </div>
+
+        <div class="hr"></div>
+        <div class="grid two">
+          <div class="two">
+            <div>
+              <label>Format</label>
+              <select id="fmt">
+                <option value="image/png" selected>PNG (transparent)</option>
+                <option value="image/webp">WebP</option>
+                <option value="image/jpeg">JPG</option>
+              </select>
+            </div>
+            <div>
+              <label>Quality</label>
+              <input id="quality" type="range" min="0.5" max="1" step="0.01" value="0.95">
+            </div>
+          </div>
+          <div class="flex right">
+            <button class="btn" id="copyBtn">Copy</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+(function(){
+  const MAX_W = 4096, MAX_H = 4096;
+  const state = { img:null, srcW:0, srcH:0 };
+  const el=id=>document.getElementById(id);
+  const canvas=el('canvas'), ctx = canvas.getContext('2d');
+
+  // DPR‑aware drawing for crisp preview on phones
+  function setCanvasSizeCSS(w,h){
+    const dpr = Math.min(window.devicePixelRatio||1, 2); // cap for perf
+    canvas.width = Math.round(w*dpr);
+    canvas.height= Math.round(h*dpr);
+    canvas.style.width = w+'px';
+    canvas.style.height= h+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+
+  // controls
+  const drop=el('drop'), fileInput=el('fileInput'), browseBtn=el('browseBtn'), fileMeta=el('fileMeta');
+  const preset=el('preset'), outW=el('outW'), outH=el('outH'), mode=el('mode'), bgColor=el('bgColor'), transparent=el('transparent');
+  const padding=el('padding'), rotate=el('rotate'), flipH=el('flipH'), flipV=el('flipV');
+  const shape=el('shape'), radius=el('radius');
+  const adj_b=el('adj_b'), adj_c=el('adj_c'), adj_s=el('adj_s'), adj_h=el('adj_h'), adj_blur=el('adj_blur');
+  const rm_tol=el('rm_tol'), rm_feather=el('rm_feather'), btnRemoveBg=el('btnRemoveBg');
+  const renderBtn=el('renderBtn'), saveBtn=el('saveBtn'), copyBtn=el('copyBtn'), zipBtn=el('zipBtn'), resetBtn=el('resetBtn');
+  const fmt=el('fmt'), quality=el('quality'), outSize=el('outSize'), presetList=el('presetList');
+
+  // Presets for batch
+  const PRESETS = [
+    ['Instagram Post',1080,1080],
+    ['Story/TikTok',1080,1920],
+    ['X Banner',1500,500],
+    ['X Profile',400,400],
+    ['YouTube Thumb',1280,720],
+    ['Open Graph',1200,630],
+    ['Telegram Sticker',512,512],
+    ['Discord Emoji',128,128],
+  ];
+  function buildBatchPresets(){
+    presetList.innerHTML='';
+    PRESETS.forEach((p,i)=>{
+      const id='pz'+i; const row=document.createElement('label');
+      row.innerHTML=`<input type="checkbox" id="${id}" ${i<3?'checked':''}> <span>${p[0]} — ${p[1]}×${p[2]}</span>`;
+      presetList.appendChild(row);
+    });
+  }
+  buildBatchPresets();
+
+  // Upload
+  ['dragenter','dragover'].forEach(evt=>drop.addEventListener(evt,e=>{e.preventDefault();drop.classList.add('drag')}));
+  ;['dragleave','drop'].forEach(evt=>drop.addEventListener(evt,e=>{e.preventDefault();drop.classList.remove('drag')}));
+  drop.addEventListener('drop', e=>{const f=e.dataTransfer.files?.[0]; if(f) loadFile(f);});
+  browseBtn.addEventListener('click', ()=>fileInput.click());
+  fileInput.addEventListener('change', ()=>{if(fileInput.files[0]) loadFile(fileInput.files[0]);});
+  function loadFile(file){
+    const img=new Image(); img.onload=()=>{state.img=img; state.srcW=img.width; state.srcH=img.height; fileMeta.textContent=`${file.name} — ${img.width}×${img.height}`; render();};
+    img.onerror=()=>alert('Could not load image.');
+    img.src=URL.createObjectURL(file);
+  }
+
+  // Preset sync
+  preset.addEventListener('change', ()=>{
+    if(preset.value==='custom') return;
+    const [w,h]=preset.value.split('x').map(Number);
+    outW.value=w; outH.value=h; render();
+  });
+  [outW,outH,mode,bgColor,transparent,padding,rotate,flipH,flipV,shape,radius,fmt,quality].forEach(e=>{
+    e.addEventListener('input', render); e.addEventListener('change', render);
+  });
+  [adj_b,adj_c,adj_s,adj_h,adj_blur].forEach(e=> e.addEventListener('input', render));
+
+  // BG remover
+  btnRemoveBg.addEventListener('click', ()=>{
+    if(!state.img){ alert('Load an image first.'); return; }
+    const t=document.createElement('canvas'); t.width=state.srcW; t.height=state.srcH;
+    const tc=t.getContext('2d'); tc.drawImage(state.img,0,0);
+    const id=tc.getImageData(0,0,t.width,t.height), d=id.data;
+    function px(x,y){const i=(y*id.width+x)*4; return [d[i],d[i+1],d[i+2]];}
+    const s=[px(0,0),px(id.width-1,0),px(0,id.height-1),px(id.width-1,id.height-1)];
+    const bg=s.reduce((a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],[0,0,0]).map(v=>v/4);
+    const tol=+rm_tol.value, feather=+rm_feather.value;
+    for(let i=0;i<d.length;i+=4){
+      const dr=d[i]-bg[0],dg=d[i+1]-bg[1],db=d[i+2]-bg[2];
+      const dist=Math.sqrt(dr*dr+dg*dg+db*db);
+      if(dist<tol){ const f=Math.min(1, dist/(tol||1)); const a=(1-f)**feather; d[i+3]=d[i+3]*a; }
+    }
+    tc.putImageData(id,0,0);
+    const cleaned=new Image(); cleaned.onload=()=>{state.img=cleaned; state.srcW=cleaned.width; state.srcH=cleaned.height; render();};
+    cleaned.src=t.toDataURL();
+  });
+
+  // Rendering (with DPR + responsive canvas size)
+  function render(){
+    const W=Math.max(8, Math.min(4096, +outW.value||1080));
+    const H=Math.max(8, Math.min(4096, +outH.value||1080));
+    // Fit the CSS size of the canvas to the stage width while keeping aspect
+    const stage = document.querySelector('.stage');
+    const stageW = stage.clientWidth || W;
+    const cssH = Math.round(stageW * (H/W));
+    setCanvasSizeCSS(stageW, cssH);
+
+    // Draw background
+    if(!el('transparent').checked){ ctx.fillStyle=bgColor.value; ctx.fillRect(0,0,stageW,cssH); }
+    else { ctx.clearRect(0,0,stageW,cssH); }
+
+    if(!state.img){ outSize.textContent=`${W}×${H}`; return; }
+
+    const pad = +padding.value;
+    const bboxW = Math.max(1, stageW - pad*2);
+    const bboxH = Math.max(1, cssH - pad*2);
+
+    const srcW=state.srcW, srcH=state.srcH;
+    // compute target draw size
+    let dw=bboxW, dh=bboxH;
+    if(mode.value==='contain'){ const s=Math.min(bboxW/srcW,bboxH/srcH); dw=srcW*s; dh=srcH*s; }
+    else if(mode.value==='cover'){ const s=Math.max(bboxW/srcW,bboxH/srcH); dw=srcW*s; dh=srcH*s; }
+    const dx=(stageW-dw)/2, dy=(cssH-dh)/2;
+
+    // clip mask
+    ctx.save(); applyMask(ctx, stageW, cssH);
+
+    // transform+filters
+    ctx.translate(stageW/2, cssH/2);
+    ctx.scale(flipH.checked?-1:1, flipV.checked?-1:1);
+    ctx.rotate((+rotate.value||0)*Math.PI/180);
+    ctx.translate(-stageW/2, -cssH/2);
+
+    ctx.filter=`brightness(${adj_b.value}) contrast(${adj_c.value}) saturate(${adj_s.value}) hue-rotate(${adj_h.value}deg) blur(${adj_blur.value}px)`;
+    ctx.drawImage(state.img, dx, dy, dw, dh);
+
+    ctx.restore(); ctx.filter='none';
+    outSize.textContent=`${W}×${H}`;
+  }
+
+  function applyMask(ctx,W,H){
+    const r=Math.min(+radius.value, Math.min(W,H)/2);
+    const sh=shape.value;
+    ctx.beginPath();
+    if(sh==='none'){ ctx.rect(0,0,W,H); }
+    else if(sh==='rounded'){ roundRect(ctx,0,0,W,H,r); }
+    else if(sh==='circle'){ const m=Math.min(W,H); ctx.arc(W/2,H/2,m/2,0,Math.PI*2); }
+    else if(sh==='squircle'){
+      const p=4, rx=W/2, ry=H/2, cx=W/2, cy=H/2, steps=256; ctx.moveTo(cx+rx,cy);
+      for(let i=0;i<=steps;i++){ const t=i/steps*Math.PI*2;
+        const x=cx+Math.sign(Math.cos(t))*Math.pow(Math.abs(Math.cos(t)),2/p)*rx;
+        const y=cy+Math.sign(Math.sin(t))*Math.pow(Math.abs(Math.sin(t)),2/p)*ry;
+        ctx.lineTo(x,y);
+      }
+    }else if(sh==='hex'){
+      const s=6,R=Math.min(W,H)/2,cx=W/2,cy=H/2;
+      for(let i=0;i<s;i++){ const a=(Math.PI/3)*i+Math.PI/6, x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R; i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+      ctx.closePath();
+    }
+    ctx.clip();
+  }
+  function roundRect(ctx,x,y,w,h,r){
+    const rr=Math.min(r,w/2,h/2);
+    ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr);
+    ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath();
+  }
+
+  // Export
+  renderBtn.addEventListener('click', render);
+  saveBtn.addEventListener('click', ()=>{
+    // Re-render to exact output pixels for saving
+    const W=+outW.value||1080, H=+outH.value||1080;
+    const dpr=1; canvas.width=W; canvas.height=H; canvas.style.width=W+'px'; canvas.style.height=H+'px'; ctx.setTransform(1,0,0,1,0,0);
+    // background
+    el('transparent').checked? ctx.clearRect(0,0,W,H) : (ctx.fillStyle=bgColor.value, ctx.fillRect(0,0,W,H));
+    // draw using same logic at exact W×H
+    const pad=+padding.value; const bboxW=W-pad*2, bboxH=H-pad*2;
+    let dw=bboxW, dh=bboxH; const sw=state.srcW, sh=state.srcH;
+    if(mode.value==='contain'){ const s=Math.min(bboxW/sw,bboxH/sh); dw=sw*s; dh=sh*s; }
+    else if(mode.value==='cover'){ const s=Math.max(bboxW/sw,bboxH/sh); dw=sw*s; dh=sh*s; }
+    const dx=(W-dw)/2, dy=(H-dh)/2;
+    ctx.save(); applyMask(ctx,W,H);
+    ctx.translate(W/2,H/2); ctx.scale(flipH.checked?-1:1, flipV.checked?-1:1); ctx.rotate((+rotate.value||0)*Math.PI/180); ctx.translate(-W/2,-H/2);
+    ctx.filter=`brightness(${adj_b.value}) contrast(${adj_c.value}) saturate(${adj_s.value}) hue-rotate(${adj_h.value}deg) blur(${adj_blur.value}px)`;
+    ctx.drawImage(state.img, dx, dy, dw, dh);
+    ctx.restore(); ctx.filter='none';
+
+    const type=fmt.value, q=+quality.value||0.95;
+    canvas.toBlob(b=>{
+      const a=document.createElement('a');
+      const ext = type==='image/png'?'png':type==='image/webp'?'webp':'jpg';
+      a.href=URL.createObjectURL(b); a.download=`resized_${W}x${H}.${ext}`; a.click(); render(); // restore preview
+    }, type, q);
+  });
+
+  copyBtn.addEventListener('click', ()=>{
+    const type=fmt.value, q=+quality.value||0.95;
+    canvas.toBlob(async blob=>{
+      try{ await navigator.clipboard.write([new ClipboardItem({[type]:blob})]); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy',1200); }
+      catch(e){ alert('Clipboard not supported: '+e); }
+    }, type, q);
+  });
+
+  zipBtn.addEventListener('click', async ()=>{
+    if(!state.img){ alert('Load an image first.'); return; }
+    const checks=[...presetList.querySelectorAll('input[type=checkbox]')];
+    const selected=checks.map((ch,i)=>ch.checked?PRESETS[i]:null).filter(Boolean);
+    if(!selected.length){ alert('Pick at least one size.'); return; }
+    const zip=new JSZip();
+    for(const [label,W,H] of selected){
+      // render exact size for each asset
+      const t=document.createElement('canvas'), tctx=t.getContext('2d'); t.width=W; t.height=H;
+      el('transparent').checked? tctx.clearRect(0,0,W,H) : (tctx.fillStyle=bgColor.value, tctx.fillRect(0,0,W,H));
+      const pad=+padding.value; const bboxW=W-pad*2, bboxH=H-pad*2; let dw=bboxW, dh=bboxH;
+      if(mode.value==='contain'){ const s=Math.min(bboxW/state.srcW,bboxH/state.srcH); dw=state.srcW*s; dh=state.srcH*s; }
+      else if(mode.value==='cover'){ const s=Math.max(bboxW/state.srcW,bboxH/state.srcH); dw=state.srcW*s; dh=state.srcH*s; }
+      const dx=(W-dw)/2, dy=(H-dh)/2;
+      // simple rect mask for zip (keeps rounded if circle chosen)
+      if(shape.value!=='none'){ const p=tctx; p.save(); applyMask(p,W,H); tctx.filter=`brightness(${adj_b.value}) contrast(${adj_c.value}) saturate(${adj_s.value}) hue-rotate(${adj_h.value}deg) blur(${adj_blur.value}px)`; p.drawImage(state.img, dx, dy, dw, dh); p.restore(); }
+      else { tctx.filter=`brightness(${adj_b.value}) contrast(${adj_c.value}) saturate(${adj_s.value}) hue-rotate(${adj_h.value}deg) blur(${adj_blur.value}px)`; tctx.drawImage(state.img, dx, dy, dw, dh); }
+      const blob=await new Promise(res=>t.toBlob(res, fmt.value, +quality.value||0.95));
+      const ext=fmt.value==='image/png'?'png':fmt.value==='image/webp'?'webp':'jpg';
+      const safe=label.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+      zip.file(`${safe}_${W}x${H}.${ext}`, blob);
+    }
+    const content=await zip.generateAsync({type:'blob'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(content); a.download='resized_assets.zip'; a.click();
+  });
+
+  resetBtn.addEventListener('click', ()=>{
+    preset.value='custom'; outW.value=1080; outH.value=1080; mode.value='cover';
+    bgColor.value='#000000'; transparent.checked=true; padding.value=0;
+    rotate.value=0; flipH.checked=false; flipV.checked=false; shape.value='rounded'; radius.value=40;
+    adj_b.value=1; adj_c.value=1; adj_s.value=1; adj_h.value=0; adj_blur.value=0;
+    rm_tol.value=38; rm_feather.value=.75; render();
+  });
+
+  // first paint
+  render();
+  window.addEventListener('resize', render);
+})();
+</script>
+</body>
+</html>
