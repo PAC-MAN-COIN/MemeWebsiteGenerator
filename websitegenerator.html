@@ -28,7 +28,7 @@
   })();
 </script>
 
-  <div class="app" style="grid-template-columns:420px minmax(0,1fr)">
+  <div class="app app--wide">
     <aside>
       <!-- Basics -->
       <div class="card section">
@@ -268,12 +268,12 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
       </div>
     </aside>
 
-    <main>
-      <div class="card section" style="height:100%;display:grid;grid-template-rows:auto 1fr">
-        <div class="kicker">Preview</div>
-        <div id="preview" style="overflow:auto;border-radius:14px;border:1px solid var(--border)"></div>
-      </div>
-    </main>
+<main>
+  <div class="card section preview-pane">
+    <div class="kicker">Preview</div>
+    <div id="preview" class="preview-frame"></div>
+  </div>
+</main>
   </div>
 
 <script>
