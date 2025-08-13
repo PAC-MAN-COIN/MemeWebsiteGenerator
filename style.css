@@ -263,3 +263,59 @@ textarea{min-height:72px; resize:vertical}
 }
 .header .nav a:hover{ border-color:#334067; }
 
+
+/* ===================== */
+/* NAV STYLING (desktop & mobile) */
+/* ===================== */
+
+/* Desktop nav */
+.desktop-nav {
+  display: flex;
+  gap: 10px;
+}
+.desktop-nav a {
+  color: var(--text);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.desktop-nav a:hover {
+  border-color: var(--accent);
+  background-color: rgba(124, 58, 237, 0.1);
+}
+
+/* Mobile nav menu */
+.mobile-nav {
+  display: grid;
+  gap: 8px;
+}
+.mobile-nav a {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  text-decoration: none;
+  background: var(--card);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.mobile-nav a:hover {
+  border-color: var(--accent);
+  background-color: rgba(124, 58, 237, 0.1);
+}
+
+/* Hide desktop nav on small screens, show mobile */
+@media (max-width: 900px) {
+  .desktop-nav { display: none; }
+  .mobile-nav { display: grid; }
+}
+
+/* Show desktop nav on large screens, hide mobile */
+@media (min-width: 901px) {
+  .desktop-nav { display: flex; }
+  .mobile-nav { display: none; }
+}
+
+
