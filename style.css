@@ -175,3 +175,91 @@ textarea{min-height:72px; resize:vertical}
 
 /* Hide duplicate brand inside tool sidebars */
 .app aside .brand{display:none}
+
+
+/* ===================== */
+/* ADD-ON: Index tiles & small nav polish */
+/* (safe to append; doesn't touch your app/tool layouts) */
+/* ===================== */
+
+/* --- index tiles grid --- */
+.tiles{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:20px;
+  padding:20px;
+}
+
+.tile{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:12px;
+  text-decoration:none;
+  color:var(--text);
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.tile:hover{
+  transform:translateY(-4px);
+  border-color:var(--accent);
+  box-shadow:0 10px 34px rgba(0,0,0,.45);
+}
+
+.tile h2{
+  font-size:15px;
+  margin:0 0 6px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  color:var(--muted);
+}
+.tile p{
+  margin:0 0 12px;
+  font-size:13px;
+  color:var(--text);
+}
+
+.tile .actions{
+  display:flex;
+  gap:10px;
+}
+
+.tile .btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#101423;
+  color:var(--text);
+  font-weight:600;
+}
+.tile .btn:hover{ border-color:#334067; }
+
+/* --- mobile: stack tiles full‑width and tighten paddings --- */
+@media (max-width:900px){
+  .tiles{
+    grid-template-columns:1fr;
+    gap:14px;
+    padding:14px;
+  }
+  .tile{ padding:16px; }
+}
+
+/* --- tiny nav polish so links never collapse into plain text --- */
+.header .nav a{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  text-decoration:none;
+}
+.header .nav a:hover{ border-color:#334067; }
+
