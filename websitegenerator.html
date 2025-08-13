@@ -8,37 +8,47 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
+  <!-- Header (loaded from nav.html) -->
   <div id="site-header"></div>
-<script>
-  // loads nav.html and wires burger
-  (async function loadNav(){
-    try{
-      const host = document.getElementById('site-header');
-      host.innerHTML = await (await fetch('nav.html')).text();
-      const btn  = host.querySelector('.menu-toggle');
-      const menu = host.querySelector('#mobileMenu');
-      if(!btn || !menu) return;
-      const close=()=>{menu.setAttribute('hidden','');btn.setAttribute('aria-expanded','false');document.removeEventListener('click',away);};
-      const open =()=>{menu.removeAttribute('hidden');btn.setAttribute('aria-expanded','true');setTimeout(()=>document.addEventListener('click',away),0);};
-      const away = e => { if(!menu.contains(e.target)&&!btn.contains(e.target)) close(); };
-      btn.addEventListener('click',e=>{e.stopPropagation();menu.hasAttribute('hidden')?open():close();});
-      const mq=window.matchMedia('(min-width:900px)'); mq.addEventListener?.('change',e=>{if(e.matches) close();});
-      close();
-    }catch(e){ console.warn('nav load failed', e); }
-  })();
-</script>
+  <script>
+    // load nav + wire burger/dropdown safely
+    (async function(){
+      try{
+        const host = document.getElementById('site-header');
+        host.innerHTML = await (await fetch('nav.html')).text();
+
+        const btn  = host.querySelector('.menu-toggle');
+        const menu = host.querySelector('#mobileMenu');
+        if(!btn || !menu) return;
+
+        const close=()=>{menu.setAttribute('hidden','');btn.setAttribute('aria-expanded','false');document.removeEventListener('click',away);};
+        const open =()=>{menu.removeAttribute('hidden');btn.setAttribute('aria-expanded','true');setTimeout(()=>document.addEventListener('click',away),0);};
+        const away = e => { if(!menu.contains(e.target)&&!btn.contains(e.target)) close(); };
+
+        btn.addEventListener('click',e=>{e.stopPropagation();menu.hasAttribute('hidden')?open():close();});
+        window.matchMedia('(min-width:900px)').addEventListener?.('change',e=>{ if(e.matches) close(); });
+        close();
+      }catch(e){ console.warn('nav load failed', e); }
+    })();
+  </script>
 
   <div class="app app--wide">
     <aside>
-      <!-- Basics -->
-      <div class="card section">
+      <!-- Sticky quick nav (auto built) -->
+      <nav class="toc" id="wgToc">
+        <div class="title">Quick menu</div>
+        <div class="row" id="wgTocLinks"></div>
+      </nav>
+
+      <!-- BASICS -->
+      <div class="card section" id="sec-basics">
         <h2>Project Basics</h2>
         <div class="grid">
           <div>
             <label>Project / Token name</label>
             <input id="p_name" type="text" placeholder="e.g. BeastLab" value="BeastLab">
           </div>
-          <div class="two">
+          <div class="grid two">
             <div>
               <label>Ticker</label>
               <input id="p_ticker" type="text" placeholder="e.g. BG" value="BG">
@@ -59,7 +69,7 @@
             <input id="p_tag" type="text" placeholder="One-liner that sells the vibe" value="Meme tech from the jungle.">
           </div>
 
-          <div class="three">
+          <div class="grid three">
             <div>
               <label>Primary color</label>
               <input id="c_accent" type="color" value="#7c3aed">
@@ -74,7 +84,7 @@
             </div>
           </div>
 
-          <div class="two">
+          <div class="grid two">
             <div>
               <label>Style preset</label>
               <select id="style_preset">
@@ -103,8 +113,8 @@
         </div>
       </div>
 
-      <!-- Media -->
-      <div class="card section">
+      <!-- MEDIA -->
+      <div class="card section" id="sec-media">
         <h2>Media</h2>
         <div class="grid">
           <div class="drop" id="logoDrop">
@@ -113,29 +123,29 @@
           </div>
           <div class="drop" id="bannerDrop">
             <input id="bannerFile" type="file" accept="image/*">
-            <div><strong>Banner</strong> wide PNG/JPG/WebP (auto-fit). <button class="btn ghost" id="bannerBrowse">Browse</button></div>
+            <div><strong>Banner</strong> wide PNG/JPG/WebP (auto‑fit). <button class="btn ghost" id="bannerBrowse">Browse</button></div>
           </div>
         </div>
       </div>
 
-      <!-- Links -->
-      <div class="card section">
+      <!-- LINKS -->
+      <div class="card section" id="sec-links">
         <h2>Links</h2>
         <div class="grid">
           <div><label>Website</label><input id="l_site" type="text" placeholder="https://"></div>
-          <div class="two">
+          <div class="grid two">
             <div><label>Twitter/X</label><input id="l_x" type="text" placeholder="https://x.com/..."></div>
             <div><label>Telegram</label><input id="l_tg" type="text" placeholder="https://t.me/..."></div>
           </div>
-          <div class="two">
+          <div class="grid two">
             <div><label>DexScreener</label><input id="l_ds" type="text" placeholder="https://dexscreener.com/..."></div>
             <div><label>Whitepaper</label><input id="l_wp" type="text" placeholder="https://...pdf"></div>
           </div>
         </div>
       </div>
 
-      <!-- Sections -->
-      <div class="card section">
+      <!-- SECTIONS -->
+      <div class="card section" id="sec-sections">
         <h2>Sections</h2>
         <div class="grid">
           <div class="flex">
@@ -176,19 +186,20 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
         </div>
       </div>
 
-      <!-- Order / layout -->
-      <div class="card section">
+      <!-- ORDER / LAYOUT -->
+      <div class="card section" id="sec-order">
         <h2>Order & layout</h2>
         <div id="orderList" class="list" style="user-select:none"></div>
         <div class="tiny muted" style="margin-top:6px">Use ↑ / ↓ to reorder the enabled sections.</div>
       </div>
 
-      <!-- Advanced -->
-      <div class="card section">
-        <details>
-          <summary class="small"><strong>Advanced</strong> (open for more control)</summary>
+      <!-- ADVANCED -->
+      <div class="card section" id="sec-advanced">
+        <h2>Advanced</h2>
+        <details open>
+          <summary class="small">More control</summary>
           <div class="grid" style="margin-top:10px">
-            <div class="two">
+            <div class="grid two">
               <div>
                 <label>Heading font</label>
                 <select id="adv_font_title">
@@ -209,7 +220,7 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
               </div>
             </div>
 
-            <div class="two">
+            <div class="grid two">
               <div>
                 <label>Shadow strength</label>
                 <input id="adv_shadow" type="range" min="0" max="1" step="0.05" value="0.35">
@@ -220,7 +231,7 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
               </div>
             </div>
 
-            <div class="two">
+            <div class="grid two">
               <div class="flex">
                 <input id="adv_noise" type="checkbox">
                 <label for="adv_noise" style="margin:0">Subtle noise overlay</label>
@@ -231,7 +242,7 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
               </div>
             </div>
 
-            <div class="two">
+            <div class="grid two">
               <div>
                 <label>Border style</label>
                 <select id="adv_border">
@@ -258,8 +269,9 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
         </details>
       </div>
 
-      <!-- Actions -->
-      <div class="card section">
+      <!-- ACTIONS -->
+      <div class="card section" id="sec-actions">
+        <h2>Actions</h2>
         <div class="toolbar right">
           <button class="btn primary" id="refreshBtn">Update Preview</button>
           <button class="btn success" id="exportZip">Download ZIP</button>
@@ -268,18 +280,33 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
       </div>
     </aside>
 
-<main>
-  <div class="card section preview-pane">
-    <div class="kicker">Preview</div>
-    <div id="preview" class="preview-frame"></div>
-  </div>
-</main>
+    <main>
+      <div class="card section preview-pane">
+        <div class="kicker">Preview</div>
+        <div id="preview" class="preview-frame"></div>
+      </div>
+    </main>
   </div>
 
+<!-- ================== SCRIPT ================== -->
 <script>
 (function(){
   const state = { logo:null, banner:null, logoUrl:'', bannerUrl:'', order:['about','token','road','team'] };
   const el = id => document.getElementById(id);
+
+  // sticky quick-nav auto build
+  (function buildToc(){
+    const tocWrap = document.getElementById('wgTocLinks');
+    const secs = Array.from(document.querySelectorAll('aside .section[id]'));
+    tocWrap.innerHTML = secs.map(s=>`<a href="#${s.id}">${s.querySelector('h2')?.textContent || s.id}</a>`).join('');
+    const links = Array.from(tocWrap.querySelectorAll('a'));
+    const linkFor = id => links.find(a => a.getAttribute('href') === '#'+id);
+    const obs = new IntersectionObserver(entries=>{
+      const a = entries.filter(e=>e.isIntersecting).sort((x,y)=>x.boundingClientRect.top - y.boundingClientRect.top)[0];
+      if(!a) return; links.forEach(n=>n.classList.remove('active')); linkFor(a.target.id)?.classList.add('active');
+    },{root:document.querySelector('aside'),threshold:.2});
+    secs.forEach(s=>obs.observe(s));
+  })();
 
   // controls
   const ids = [
@@ -302,79 +329,63 @@ Phase 3 — Utilities drop, DAO experiments</textarea>
 
   logoBrowse.addEventListener('click', ()=>logoFile.click());
   bannerBrowse.addEventListener('click', ()=>bannerFile.click());
-
   ['dragenter','dragover'].forEach(evt=>logoDrop.addEventListener(evt, e=>{e.preventDefault();logoDrop.classList.add('drag');}));
   ;['dragleave','drop'].forEach(evt=>logoDrop.addEventListener(evt, e=>{e.preventDefault();logoDrop.classList.remove('drag');}));
   logoDrop.addEventListener('drop', e=>{ const f=e.dataTransfer.files?.[0]; if(f){ setLogo(f); }});
-
   ['dragenter','dragover'].forEach(evt=>bannerDrop.addEventListener(evt, e=>{e.preventDefault();bannerDrop.classList.add('drag');}));
   ;['dragleave','drop'].forEach(evt=>bannerDrop.addEventListener(evt, e=>{e.preventDefault();bannerDrop.classList.remove('drag');}));
   bannerDrop.addEventListener('drop', e=>{ const f=e.dataTransfer.files?.[0]; if(f){ setBanner(f); }});
-
   logoFile.addEventListener('change', ()=>{ if(logoFile.files[0]) setLogo(logoFile.files[0]); });
   bannerFile.addEventListener('change', ()=>{ if(bannerFile.files[0]) setBanner(bannerFile.files[0]); });
 
   function setLogo(f){ state.logo=f; state.logoUrl=URL.createObjectURL(f); buildPreview(); }
   function setBanner(f){ state.banner=f; state.bannerUrl=URL.createObjectURL(f); buildPreview(); }
 
-  /* ---------------------------
-     THEME PRESETS + CSS/HTML
-  ----------------------------*/
+  /* ===== THEME ===== */
   function presetVars(type, vars){
     const base = {
-      accent: vars.accent,
-      accent2: vars.accent2,
-      accent3: vars.accent3,
-      bg: vars.bg,
-      radius: vars.radius,
+      accent: vars.accent, accent2: vars.accent2, accent3: vars.accent3,
+      bg: vars.bg, radius: vars.radius,
       fontTitle: `800 36px '${inputs.adv_font_title.value}', system-ui`,
       fontBody: `15px '${inputs.adv_font_body.value}', system-ui`,
-      shadowAmt: +inputs.adv_shadow.value,
-      gradAmt: +inputs.adv_grad.value,
-      noise: inputs.adv_noise.checked,
-      heroFlip: inputs.adv_hero_flip.checked,
-      borderStyle: inputs.adv_border.value,
-      buttonShape: inputs.adv_button.value,
+      shadowAmt: +inputs.adv_shadow.value, gradAmt: +inputs.adv_grad.value,
+      noise: inputs.adv_noise.checked, heroFlip: inputs.adv_hero_flip.checked,
+      borderStyle: inputs.adv_border.value, buttonShape: inputs.adv_button.value,
       maxWidth: +inputs.adv_width.value
     };
+    if(type==='serious')  return {...base, theme:'serious', decoration:'none'};
+    if(type==='cartoony') return {...base, theme:'cartoony', decoration:'comic', fontTitle:`900 40px 'Impact', Haettenschweiler, 'Arial Black', sans-serif`};
+    if(type==='neon')     return {...base, theme:'neon', decoration:'neon'};
+    if(type==='glass')    return {...base, theme:'glass', decoration:'glass'};
+    if(type==='retro')    return {...base, theme:'retro', decoration:'crt', accent:'#2bff88', accent2:'#57ffa1', fontBody:`14px 'IBM Plex Mono', ui-monospace, SFMono-Regular`};
+    return {...base, theme:'zine', decoration:'zine', fontTitle:`900 36px 'Archivo Black', system-ui`};
+  }
 
-    if(type==='serious')  return { ...base, theme:'serious', decoration:'none' };
-    if(type==='cartoony') return { ...base, theme:'cartoony', decoration:'comic', fontTitle:`900 40px 'Impact', Haettenschweiler, 'Arial Black', sans-serif` };
-    if(type==='neon')     return { ...base, theme:'neon', decoration:'neon' };
-    if(type==='glass')    return { ...base, theme:'glass', decoration:'glass' };
-    if(type==='retro')    return { ...base, theme:'retro', decoration:'crt', accent:'#2bff88', accent2:'#57ffa1', fontBody:`14px 'IBM Plex Mono', ui-monospace, SFMono-Regular` };
-    return { ...base, theme:'zine', decoration:'zine', fontTitle:`900 36px 'Archivo Black', system-ui` }; // zine
+  function hex2rgba(hex,a){
+    try{const h=hex.replace('#','');const b=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);
+      const r=(b>>16)&255,g=(b>>8)&255,bl=b&255; return `rgba(${r},${g},${bl},${a})`;
+    }catch(e){return `rgba(59,130,246,${a})`;}
   }
 
   function commonCss(v){
-    const border =
-      v.borderStyle==='hard' ? '1px solid #3a4263' :
-      v.borderStyle==='dashed' ? '2px dashed #39405f' : '1px solid #22273a';
-
-    const btnRadius =
-      v.buttonShape==='pill' ? '999px' :
-      v.buttonShape==='square' ? '8px' : '12px';
-
-    // background uses THREE colors (primary/secondary/tertiary)
-    const bgBase =
-      v.bg==='memeportal'
-        ? `radial-gradient(1200px 800px at 10% -10%, ${hex2rgba(v.accent2, 0.22*v.gradAmt)}, transparent),
-           radial-gradient(900px 700px at 120% 10%, ${hex2rgba(v.accent, 0.22*v.gradAmt)}, transparent),
-           radial-gradient(1200px 900px at 50% 120%, ${hex2rgba(v.accent3||'#3b82f6', 0.18+0.3*v.gradAmt)}, transparent),
-           #0f1115`
-        : v.bg==='radial'
-          ? `radial-gradient(900px 700px at 120% 10%, ${hex2rgba(v.accent, 0.45*v.gradAmt)}, transparent),
-             radial-gradient(900px 700px at -20% 120%, ${hex2rgba(v.accent3||'#3b82f6', 0.35*v.gradAmt)}, transparent),
-             #0e1016`
-          : `#0e1016`;
-
-    const shadow = `0 ${8 + 16*v.shadowAmt}px ${20 + 40*v.shadowAmt}px rgba(0,0,0, ${0.25 + 0.35*v.shadowAmt})`;
-
+    const border = v.borderStyle==='hard' ? '1px solid #3a4263' :
+                   v.borderStyle==='dashed' ? '2px dashed #39405f' : '1px solid #22273a';
+    const btnRadius = v.buttonShape==='pill' ? '999px' : v.buttonShape==='square' ? '8px' : '12px';
+    const bgBase = v.bg==='memeportal'
+      ? `radial-gradient(1200px 800px at 10% -10%, ${hex2rgba(v.accent2,.22*v.gradAmt)}, transparent),
+         radial-gradient(900px 700px at 120% 10%, ${hex2rgba(v.accent,.22*v.gradAmt)}, transparent),
+         radial-gradient(1200px 900px at 50% 120%, ${hex2rgba(v.accent3||'#3b82f6', .18+.3*v.gradAmt)}, transparent),
+         #0f1115`
+      : v.bg==='radial'
+      ? `radial-gradient(900px 700px at 120% 10%, ${hex2rgba(v.accent,.45*v.gradAmt)}, transparent),
+         radial-gradient(900px 700px at -20% 120%, ${hex2rgba(v.accent3||'#3b82f6', .35*v.gradAmt)}, transparent),
+         #0e1016`
+      : `#0e1016`;
+    const shadow = `0 ${8+16*v.shadowAmt}px ${20+40*v.shadowAmt}px rgba(0,0,0, ${.25+.35*v.shadowAmt})`;
     const noise = v.noise ? `
       body::before{content:'';position:fixed;inset:0;pointer-events:none;background:
-        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity=".025"/></svg>') repeat}
+       url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity=".025"/></svg>') repeat}
     ` : '';
-
     return `
 :root{--accent:${v.accent};--accent2:${v.accent2};--accent3:${v.accent3};--radius:${v.radius}px;--border:#22273a;--card:#10131c;--muted:#8892a6;--text:#e6e9ef}
 *{box-sizing:border-box}
@@ -406,27 +417,21 @@ a{color:#c8d2ff}
   .container{padding:14px}
   .kpi{grid-template-columns:repeat(2,1fr)}
 }
-@media (max-width:600px){
-  .kpi{grid-template-columns:1fr}
-}
+@media (max-width:600px){ .kpi{grid-template-columns:1fr} }
 img.banner{width:100%;height:clamp(220px,34vh,360px);object-fit:cover;display:block;border-radius:16px;border:1px solid var(--border)}
 `; }
 
-  /* Theme‑specific CSS (as before) */
   function themeCss(v){
-    if(v.theme==='cartoony'){
-      return `
+    if(v.theme==='cartoony'){ return `
 body{background:#131525}
 .card{border:4px solid #1a1846}
 .comic-hero{position:relative;overflow:hidden;border-radius:18px;background:
   radial-gradient(80% 100% at 20% -10%, ${v.accent}22 0, transparent 60%),
   radial-gradient(80% 100% at 120% 10%, ${v.accent2}22 0, transparent 60%), #0f1022}
-.comic-topper{height:12px;background:
-  repeating-linear-gradient(45deg,#0000 0 4px,#341b7a 4px 8px,#0000 8px 12px)}
+.comic-topper{height:12px;background:repeating-linear-gradient(45deg,#0000 0 4px,#341b7a 4px 8px,#0000 8px 12px)}
 .comic-title{-webkit-text-stroke:3px #341b7a;color:#fff;letter-spacing:.5px}
 .speech{background:#fff;color:#111;border-radius:16px 16px 16px 2px;padding:10px 14px;border:3px solid #111;box-shadow:6px 6px 0 #0007}
-.halftone{background-image: radial-gradient(#ffffff33 1px, transparent 1px);
-  background-size:6px 6px;mix-blend-mode:overlay;position:absolute;inset:0;pointer-events:none}
+.halftone{background-image:radial-gradient(#ffffff33 1px, transparent 1px);background-size:6px 6px;mix-blend-mode:overlay;position:absolute;inset:0;pointer-events:none}
 .split{display:grid;grid-template-columns:1.4fr .8fr;gap:16px}
 @media (max-width:900px){.split{grid-template-columns:1fr}}
 .zigzag{height:12px;background:
@@ -437,12 +442,11 @@ img.banner{height:280px;border:5px solid #1a1846;border-radius:14px}
 .tokenomics .card{border:3px solid #111;background:#fff;color:#111;box-shadow:6px 6px 0 #0007}
 .timeline .step{border:3px solid #1a1846;background:#0e1130;color:#dbe0ff}
 `; }
-    if(v.theme==='neon'){
-      return `
+    if(v.theme==='neon'){ return `
 body{background:#05060c}
 .grid-bg{position:absolute;inset:0;background:
   linear-gradient(transparent 0 60%, ${v.accent}11 60% 61%,transparent 61%),
-  linear-gradient(90deg,transparent 0 60%, ${v.accent2}11 60% 61%,transparent 61%);background-size:40px 40px;filter:blur(0.3px)}
+  linear-gradient(90deg,transparent 0 60%, ${v.accent2}11 60% 61%,transparent 61%);background-size:40px 40px;filter:blur(.3px)}
 .neon-hero{position:relative;border-radius:20px;background:#0a0b18;border:1px solid #20254a;box-shadow:0 0 40px ${v.accent}33 inset, 0 0 60px ${v.accent2}22}
 .neon-title{font-weight:900;letter-spacing:.5px;text-shadow:0 0 10px ${v.accent}, 0 0 24px ${v.accent2}}
 .neon-chip{border:1px solid #2a3263;border-radius:999px;padding:6px 10px;background:#0c1227}
@@ -453,11 +457,8 @@ img.banner{border-radius:18px;border:1px solid #2a3263}
 .tokenomics .card{background:#0b0f1f;border:1px solid #2a3263;box-shadow:0 0 24px ${v.accent2}22 inset}
 .timeline .step{background:#0b0f1f;border:1px solid #2a3263}
 `; }
-    if(v.theme==='glass'){
-      return `
-body{background:
-  radial-gradient(1200px 800px at 10% -10%, ${v.accent2}11, transparent),
-  radial-gradient(1200px 800px at 120% 10%, ${v.accent}11, transparent), #0a0c12}
+    if(v.theme==='glass'){ return `
+body{background:radial-gradient(1200px 800px at 10% -10%, ${v.accent2}11, transparent),radial-gradient(1200px 800px at 120% 10%, ${v.accent}11, transparent), #0a0c12}
 .card{background:rgba(16,19,28,.55);backdrop-filter:saturate(1.2) blur(12px);border:1px solid #2a314d}
 .glass-hero{position:relative;border-radius:20px;background:linear-gradient(180deg,#0b1020aa,#0c1022aa)}
 img.banner{border-radius:20px;filter:saturate(1.1) contrast(1.05)}
@@ -466,13 +467,11 @@ img.banner{border-radius:20px;filter:saturate(1.1) contrast(1.05)}
 .tokenomics .card{background:rgba(12,16,28,.6);backdrop-filter:blur(6px);border:1px solid #2a314d}
 .timeline .step{background:rgba(12,16,28,.6);backdrop-filter:blur(4px);border:1px solid #2a314d}
 `; }
-    if(v.theme==='retro'){
-      return `
+    if(v.theme==='retro'){ return `
 body{color:#caffd7;background:#03130a}
 .container{filter:contrast(1.1)}
 .card{background:#06180c;border:1px solid #123a23}
-.crt-scan::after{content:'';position:fixed;inset:0;pointer-events:none;background:
- repeating-linear-gradient(0deg, rgba(0,0,0,.14), rgba(0,0,0,.14) 1px, transparent 1px, transparent 3px)}
+.crt-scan::after{content:'';position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg, rgba(0,0,0,.14), rgba(0,0,0,.14) 1px, transparent 1px, transparent 3px)}
 .mono{font-family:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
 .btn{border-color:#1f6a3c;background:#052313}
 img.banner{border:1px solid #1f6a3c;border-radius:10px}
@@ -481,15 +480,13 @@ img.banner{border:1px solid #1f6a3c;border-radius:10px}
 .tokenomics .card{background:#03160a;border:1px solid #1f6a3c}
 .timeline .step{background:#03160a;border:1px solid #1f6a3c}
 `; }
-    if(v.theme==='zine'){
-      return `
+    if(v.theme==='zine'){ return `
 body{background:#0e0f14}
 .card{background:#0c0f17;border:2px solid #0a0c14;box-shadow:8px 8px 0 #00000055}
 .torn{position:relative}
 .torn:before{content:'';position:absolute;inset:-14px -14px auto -14px;height:28px;
-  background:
-  linear-gradient(-45deg, #fff 12px, transparent 12px) 0 0/28px 28px,
-  linear-gradient(45deg,  #fff 12px, transparent 12px) 0 0/28px 28px;
+  background:linear-gradient(-45deg, #fff 12px, transparent 12px) 0 0/28px 28px,
+             linear-gradient(45deg,  #fff 12px, transparent 12px) 0 0/28px 28px;
   mix-blend-mode:overlay;opacity:.06}
 .tape{position:absolute;width:110px;height:28px;background:#e9e9d9aa;top:-10px;left:16px;transform:rotate(-6deg)}
 img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast(1.05)}
@@ -507,25 +504,15 @@ img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast
 .hero h1{font:${v.fontTitle};margin:6px 0 4px}
 .hero p{color:var(--muted);margin:0 0 12px}
 .hero .cta{display:flex;gap:10px;flex-wrap:wrap}
-.hero .gfx{position:absolute;inset:auto -80px -80px auto;opacity:.6;filter:blur(40px); pointer-events:none}
+.hero .gfx{position:absolute;inset:auto -80px -80px auto;opacity:.6;filter:blur(40px);pointer-events:none}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:900px){.split{grid-template-columns:1fr}}
 `; }
 
-  // tiny helper: hex -> rgba(a)
-  function hex2rgba(hex, a){
-    try{
-      const h = hex.replace('#','');
-      const b = parseInt(h.length===3? h.split('').map(c=>c+c).join('') : h, 16);
-      const r=(b>>16)&255, g=(b>>8)&255, bl=b&255;
-      return `rgba(${r},${g},${bl},${a})`;
-    }catch(e){ return `rgba(59,130,246,${a})`; }
-  }
-
   function siteCss(v){ return commonCss(v) + themeCss(v); }
 
-  /* Hero builders (same as previous response)… */
-  function heroSerious(d,v){ /* ...same as before... */ return `
+  /* HERO builders (same as previous messages) */
+  function heroSerious(d,v){return `
 <section class="hero card section" style="margin-top:14px">
   <div class="inner">
     <div>
@@ -544,10 +531,6 @@ img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast
         `<div style="width:180px;height:180px;border-radius:18px;border:1px dashed var(--border);display:grid;place-items:center;color:#9aa6c6">Logo</div>`}
     </div>
   </div>
-  <svg class="gfx" width="420" height="420" viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs><linearGradient id="g1" x1="0" x2="1" y1="0" y2="1"><stop stop-color="${v.accent}"/><stop offset="1" stop-color="${v.accent2}"/></linearGradient></defs>
-    <path d="M320 10c40 40 80 120 80 170s-40 90-90 130-120 70-170 50-90-90-80-150S120 70 180 40s100-30 140-30z" fill="url(#g1)" opacity="0.25"/>
-  </svg>
 </section>`;}
   function heroCartoony(d,v){return `
 <section class="comic-hero card torn" style="margin-top:14px">
@@ -615,7 +598,7 @@ img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast
 </section>`;}
   function heroRetro(d,v){return `
 <section class="card mono crt-scan" style="margin-top:14px">
-  <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 360px':'360px 1fr'};gap:20px;align-items:center;padding:18px 18px">
+  <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 360px':'360px 1fr'};gap:20px;align-items:center;padding:18px">
     <div style="${v.heroFlip?'order:2':''}">
       <div class="h2 mono" style="margin:0">:: ${esc(d.ticker)} @ ${esc(d.chain)}</div>
       <h1 class="mono" style="font-weight:900;margin:6px 0 4px">${esc(d.name)}</h1>
@@ -661,7 +644,6 @@ img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast
         <div class="h2">${v.theme==='retro'?'ABOUT::':'About'}</div>
         <div>${nl2br(esc(d.about))}</div>
       </div>`:'';
-
     const token = d.tokenEnabled? `
       <div class="${v.theme==='zine'?'card torn':'card'} section">
         <div class="h2">${v.theme==='retro'?'TOKENOMICS::':'Tokenomics'}</div>
@@ -673,19 +655,16 @@ img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast
           ${parseAllocations(d.tokAlloc).map(a=>`<div class="card"><div class="t">${esc(a.k)}</div><div class="v">${esc(a.v)}%</div></div>`).join('')}
         </div>
       </div>`:'';
-
     const road = d.roadEnabled? `
     <section class="${v.theme==='zine'?'card torn':'card'} section" style="margin-top:14px">
       <div class="h2">${v.theme==='retro'?'ROADMAP::':'Roadmap'}</div>
       <div class="timeline">${(d.road||'').split('\n').filter(Boolean).map(l=>`<div class="step">${esc(l)}</div>`).join('')}</div>
     </section>`:'';
-
     const team = d.teamEnabled? `
     <section class="${v.theme==='zine'?'card torn':'card'} section" style="margin-top:14px">
       <div class="h2">${v.theme==='retro'?'TEAM::':'Team'}</div>
       <ul class="list">${(d.team||'').split('\n').filter(Boolean).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
     </section>`:'';
-
     return {about, token, road, team};
   }
 
@@ -699,7 +678,6 @@ img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast
 <style>${siteCss(v)}</style>
 </head><body class="${v.decoration==='crt'?'crt':''}">`;
 
-    // header uses IMAGE logo if provided (fixes your issue)
     const headerLogo = data.logoSrc
       ? `<img src="${esc(data.logoSrc)}" alt="Logo" class="header-logo">`
       : `<div class="logo-fallback" aria-hidden="true"></div>`;
@@ -722,16 +700,15 @@ img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast
     ${banner}
 `;
 
-    const hero =
-      v.theme==='cartoony' ? heroCartoony(data,v) :
-      v.theme==='neon'     ? heroNeon(data,v)     :
-      v.theme==='glass'    ? heroGlass(data,v)    :
-      v.theme==='retro'    ? heroRetro(data,v)    :
-      v.theme==='zine'     ? heroZine(data,v)     :
-                             heroSerious(data,v);
+    const hero = v.theme==='cartoony' ? heroCartoony(data,v)
+               : v.theme==='neon'     ? heroNeon(data,v)
+               : v.theme==='glass'    ? heroGlass(data,v)
+               : v.theme==='retro'    ? heroRetro(data,v)
+               : v.theme==='zine'     ? heroZine(data,v)
+               : heroSerious(data,v);
 
     const {about, token, road, team} = sectionsHtml(data,v);
-    const sectionMap = { about, token, road, team };
+    const sectionMap = {about, token, road, team};
     const ordered = state.order.map(k=>sectionMap[k]).filter(Boolean).join('');
 
     const foot = data.disclaimerEnabled? `
@@ -841,11 +818,7 @@ img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast
     if(state.logo){ logoName = 'logo' + ext(state.logo.name); assets.file(logoName, state.logo); }
     if(state.banner){ bannerName = 'banner' + ext(state.banner.name); assets.file(bannerName, state.banner); }
 
-    const html = siteHtml({
-      ...data,
-      logoSrc: logoName ? 'assets/'+logoName : '',
-      bannerSrc: bannerName ? 'assets/'+bannerName : ''
-    });
+    const html = siteHtml({...data, logoSrc: logoName ? 'assets/'+logoName : '', bannerSrc: bannerName ? 'assets/'+bannerName : ''});
     zip.file('index.html', html);
 
     const content = await zip.generateAsync({type:'blob'});
