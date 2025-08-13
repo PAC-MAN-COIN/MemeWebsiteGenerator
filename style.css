@@ -87,6 +87,37 @@ main{ padding:20px; height:100%; overflow:auto; } /* desktop: own scroll */
 }
 .menu-toggle:focus{outline:2px solid var(--accent)}
 
+/* Burger icon lines */
+.menu-toggle {
+  position: relative;
+}
+
+.menu-toggle::before,
+.menu-toggle::after,
+.menu-toggle span {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background-color: var(--text);
+  border-radius: 1px;
+  transition: transform 0.2s ease;
+}
+
+.menu-toggle span {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.menu-toggle::before {
+  top: 10px;
+}
+
+.menu-toggle::after {
+  bottom: 10px;
+}
+
 /* mobile dropdown menu */
 #mobileMenu[hidden]{display:none !important}
 #mobileMenu{
