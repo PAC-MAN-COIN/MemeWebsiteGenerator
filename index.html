@@ -3,18 +3,87 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Memeportal — Tools</title>
+<title>Memeportal — The Memecoin Toolkit</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  
   <div id="site-header"></div>
+
+  <header class="hero-wrap fade-in">
+    <div class="hero-badge">Beta v1.0</div>
+    <h1 class="hero-title">Everything you need to<br>launch the next gem.</h1>
+    <p class="hero-desc">
+      Memeportal is the all-in-one workstation for community builders. Create professional stickers, animated emojis, and hype websites in seconds.
+    </p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+        <a href="#tools" class="btn primary">Start Building</a>
+        <a href="https://t.me/" target="_blank" class="btn">Join Community</a>
+    </div>
+  </header>
+
+  <main class="wrap" id="tools">
+    <section class="tiles fade-in delay-1">
+      
+      <a class="tile" href="stickergenerator.html">
+        <div>
+          <h2>Sticker Generator</h2>
+          <p>Create Telegram‑ready 512×512 PNG stickers. Includes background remover, stroke effects, text layers, and auto-zipping.</p>
+        </div>
+        <div class="actions"><span class="btn primary">Launch</span></div>
+      </a>
+
+      <a class="tile" href="emojigenerator.html">
+        <div>
+          <h2>3D Coin Spinner</h2>
+          <p>Turn your logo into a spinning 3D coin. Export as a high-res WebM sticker or a 100px premium emoji for Telegram.</p>
+        </div>
+        <div class="actions"><span class="btn">Launch</span></div>
+      </a>
+
+      <a class="tile" href="websitegenerator.html">
+        <div>
+          <h2>Website Builder</h2>
+          <p>Generate a professional token website in minutes. Features roadmap, tokenomics, gallery, and multiple "degen" themes.</p>
+        </div>
+        <div class="actions"><span class="btn">Launch</span></div>
+      </a>
+
+      <a class="tile" href="resizer.html">
+        <div>
+          <h2>Image Resizer</h2>
+          <p>The swiss army knife for images. Resize, crop, and optimize assets for X (Twitter), Telegram, and DexScreener.</p>
+        </div>
+        <div class="actions"><span class="btn">Launch</span></div>
+      </a>
+
+      <a class="tile" href="clipper.html">
+        <div>
+          <h2>Video Clipper</h2>
+          <p>Trim and format viral video clips perfectly for TikTok, Reels, and Twitter raids.</p>
+        </div>
+        <div class="actions"><span class="btn">Launch</span></div>
+      </a>
+
+      <a class="tile" href="buyanimation.html">
+        <div>
+          <h2>Buy Bot GIF</h2>
+          <p>Create those hype "New Buy!" animations you see in Telegram groups. Customize the character and confetti.</p>
+        </div>
+        <div class="actions"><span class="btn">Launch</span></div>
+      </a>
+
+    </section>
+  </main>
+
 <script>
+  // Dynamic Nav Loader
   async function loadNav(){
     try{
       const host = document.getElementById('site-header');
       host.innerHTML = await (await fetch('nav.html')).text();
 
-      // wire up after insertion
+      // Mobile Menu Logic
       const btn  = host.querySelector('.menu-toggle');
       const menu = host.querySelector('#mobileMenu');
       if(!btn || !menu) return;
@@ -27,7 +96,6 @@
       const open = ()=>{
         menu.removeAttribute('hidden');
         btn.setAttribute('aria-expanded','true');
-        // defer so the same click doesn't immediately close it
         setTimeout(()=>document.addEventListener('click', clickAway),0);
       };
       const clickAway = (e)=>{
@@ -39,55 +107,33 @@
         if(menu.hasAttribute('hidden')) open(); else close();
       });
 
-      // Auto-close when resizing up to desktop
+      // Auto-close on resize
       const mq = window.matchMedia('(min-width: 900px)');
       mq.addEventListener?.('change', e=>{ if(e.matches) close(); });
 
-      // make sure it's closed initially
+      // Highlight active link
+      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+      const links = host.querySelectorAll('nav a');
+      links.forEach(l => {
+        if(l.getAttribute('href') === currentPath) l.classList.add('active');
+      });
+
       close();
     }catch(e){ console.warn('nav load failed', e); }
   }
   loadNav();
+
+  // Mouse move effect for tiles
+  document.querySelectorAll('.tile').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    });
+  });
 </script>
 
-
-  <main class="wrap">
-    <section class="tiles">
-      <a class="tile" href="stickergenerator.html">
-        <h2>Sticker Generator</h2>
-        <p class="muted">Create Telegram‑ready 512×512 PNG stickers with presets, typography controls, BG remover, and ZIP export.</p>
-        <div class="actions"><span class="btn primary">Open</span></div>
-      </a>
-
-      <a class="tile" href="emojigenerator.html">
-        <h2>Emoji / Spinner (beta)</h2>
-        <p class="muted">Generate a spinning coin with your log</p>
-        <div class="actions"><span class="btn">Open</span></div>
-      </a>
-
-      <a class="tile" href="websitegenerator.html">
-        <h2>Website Generator</h2>
-        <p class="muted">Build a stunning token website with live preview. Upload logo/banner, set colors, roadmap, tokenomics, links — then export a ZIP.</p>
-        <div class="actions"><span class="btn">Open</span></div>
-      </a>
-
-      <a class="tile" href="resizer.html">
-        <h2>Image Resizer</h2>
-        <p class="muted">Resize, reshape, and remove backgrounds from any image.</p>
-        <div class="actions"><span class="btn">Open</span></div>
-      </a>
-
-      <a class="tile" href="clipper.html">
-        <h2>Clipping Tool</h2>
-        <p class="muted">Create Clips from videos, to use for socials</p>
-        <div class="actions"><span class="btn">Open</span></div>
-      </a>
-      <a class="tile" href="buyanimation.html">
-        <h2>Buy Animation Tool</h2>
-        <p class="muted">Create a buy animation telegram buy bot</p>
-        <div class="actions"><span class="btn">Open</span></div>
-      </a>
-    </section>
-  </main>
 </body>
 </html>
