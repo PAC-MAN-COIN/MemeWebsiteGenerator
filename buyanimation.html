@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Memeportal — Buy Animation Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<link rel="icon" href="images/logo.png" type="image/png" />
+<link rel="stylesheet" href="style.css" />
+
+<style>
+    /* --- CSS STYLING --- */
+    #previewContainer {
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    .ratio-16-9 { aspect-ratio: 16 / 9; }
+    .ratio-1-1 { aspect-ratio: 1 / 1; }
+    .ratio-9-16 { aspect-ratio: 9 / 16; }
+
+    #previewContainer canvas { display: block; width: 100% !important; height: 100% !important; }
+    
+    .group-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin: 15px 0 5px; font-weight: 700; }
+    .range-group { margin-bottom: 8px; }
+    .range-group label { display:flex; justify-content:space-between; font-size:0.85rem; opacity:0.8; margin-bottom:4px; }
+    
+    .input-row { display: flex; gap: 10px; align-items: center; }
+    .input-row input[type=range] { flex: 1; }
+    .input-row input[type=number] { width: 60px; padding: 4px; border-radius: 4px; border: 1px solid #444; background: #222; color: white; text-align: center; }
+
+    /* File Drop styling */
+    .drop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .drop { border: 1px dashed var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+    .drop:hover { background: rgba(255,255,255,0.05); border-color: var(--accent); }
+    .drop-preview { width: 30px; height: 30px; border-radius: 50%; background: #333; background-size: cover; background-position: center; margin: 0 auto 5px; }
+    
+    /* Flip Checkbox */
+    .flip-option { display: block; font-size: 0.7rem; color: #888; margin-top: 5px; }
+    .flip-option input { margin-right: 4px; vertical-align: middle; }
+</style>
+</head>
+<body>
+  <div id="site-header"></div>
+<script>
+  async function loadNav(){
+    try{
+      const host = document.getElementById('site-header');
+      host.innerHTML = await (await fetch('nav.html')).text();
+      const btn = host.querySelector('.menu-toggle'); const menu = host.querySelector('#mobileMenu');
+      if(btn && menu){
+         const close = ()=>{ menu.setAttribute('hidden',''); btn.setAttribute('aria-expanded','false'); document.removeEventListener('click', clickAway); };
+         const open = ()=>{ menu.removeAttribute('hidden'); btn.setAttribute('aria-expanded','true'); setTimeout(()=>document.addEventListener('click', clickAway),0); };
+         const clickAway = (e)=>{ if(!menu.contains(e.target) && !btn.contains(e.target)) close(); };
+         btn.addEventListener('click', (e)=>{ e.stopPropagation(); if(menu.hasAttribute('hidden')) open(); else close(); });
+         close();
+      }
+    }catch(e){}
+  }
+  loadNav();
+</script>
+
+  <div class="app" style="grid-template-columns:380px minmax(0,1fr)">
+    <aside>
+      <div class="card section">
+        <h2>Buy Animation Studio</h2>
+        <div class="grid">
+          
+          <div class="group-label" style="margin-top:0;">Hero Coin Images</div>
+          <div class="drop-grid">
+              <div class="drop" id="dropFront">
+                 <input id="inputFront" type="file" accept="image/*" hidden />
+                 <div id="prevFront" class="drop-preview"></div>
+                 <div class="tiny">Front ( & BG Coins)</div>
+              </div>
+              <div class="drop" id="dropBack">
+                 <input id="inputBack" type="file" accept="image/*" hidden />
+                 <div id="prevBack" class="drop-preview"></div>
+                 <div class="tiny">Back</div>
+                 <label class="flip-option" onclick="event.stopPropagation()">
+                    <input type="checkbox" id="flipBackCheck"> Flip Vertical
+                 </label>
+              </div>
+          </div>
+
+          <div class="range-group">
+            <label><span>Logo Angle</span></label>
+            <div class="input-row">
+                <input type="range" id="logoRotate" min="0" max="360" step="1" value="0">
+                <input type="number" id="logoRotateNum" min="0" max="360" value="0">
+            </div>
+          </div>
+
+          <div class="group-label">Hero Customization</div>
+          <div class="range-group">
+            <label><span>Hero Size</span></label>
+            <input type="range" id="heroSize" min="0.5" max="2.0" step="0.1" value="1.0">
+          </div>
+          <div class="range-group">
+            <label><span>Animation Speed</span></label>
+            <input type="range" id="heroSpeed" min="0.5" max="3.0" step="0.1" value="1.0">
+          </div>
+
+          <div class="group-label">Scene & Colors</div>
+          <div>
+            <label>Title Text</label>
+            <input type="text" id="mainText" value="NEW BUY!" style="font-weight:900; text-transform:uppercase;">
+          </div>
+          <div class="grid two">
+            <div><label>Text Color</label><input type="color" id="textColor" value="#ffffff"></div>
+            <div><label>Metal Tint</label><input type="color" id="metalColor" value="#ffd700"></div>
+          </div>
+          <div class="grid two">
+            <div><label>BG Center</label><input type="color" id="bgCol1" value="#a855f7"></div> 
+            <div><label>BG Edge</label><input type="color" id="bgCol2" value="#3b82f6"></div>  
+          </div>
+          <div class="range-group" style="margin-top:10px;">
+             <label><span>Background Blur (Focus)</span></label>
+             <input type="range" id="bgBlur" min="0" max="100" step="10" value="0">
+          </div>
+
+          <div class="group-label">Background Coins</div>
+          <div class="grid two">
+             <div>
+               <label>Shape</label>
+               <select id="coinShape">
+                 <option value="6">Hexagon</option>
+                 <option value="32" selected>Round</option>
+                 <option value="4">Square</option>
+                 <option value="8">Octagon</option>
+               </select>
+             </div>
+             <div>
+               <label>Count</label>
+               <input type="number" id="coinCount" value="40" min="10" max="150">
+             </div>
+          </div>
+          <div class="range-group">
+            <label><span>Fall Speed</span></label>
+            <input type="range" id="bgSpeed" min="0.5" max="5" step="0.1" value="2.0">
+          </div>
+
+          <div class="group-label">Render Settings</div>
+          <div class="grid two">
+             <div>
+                <label>Aspect</label>
+                <select id="aspectRatio">
+                    <option value="16/9" selected>16:9</option>
+                    <option value="1/1">1:1</option>
+                    <option value="9/16">9:16</option>
+                </select>
+             </div>
+             <div>
+                <label>Loop Length (s)</label>
+                <input type="number" id="loopDuration" value="4" min="3" max="10">
+             </div>
+          </div>
+
+          <div class="toolbar right" style="margin-top:15px;">
+            <button class="btn ghost" id="toggleAnimBtn">Pause</button>
+            <button class="btn primary" id="exportBtn">Render 1 Loop</button>
+          </div>
+          <div class="tiny muted" style="text-align:right;">Auto-stops after 1 cycle</div>
+
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="card section" style="display:grid; gap:12px; height:100%; align-content:start;">
+        <div class="flex" style="justify-content:space-between">
+            <div class="kicker">3D Preview</div>
+            <div class="badge">WebGL 2.0</div>
+        </div>
+        
+        <div id="previewContainer" class="ratio-16-9"></div>
+        
+        <div class="tiny muted" style="max-width:600px;">
+            <strong>Controls:</strong> Upload Front/Back images. If the back image is upside down, toggle the <strong>"Flip Vertical"</strong> checkbox.
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+window.addEventListener('load', function(){
+
+    // --- DOM ---
+    const get = (id) => document.getElementById(id);
+    const dropFront = get('dropFront'); const inputFront = get('inputFront'); const prevFront = get('prevFront');
+    const dropBack  = get('dropBack');  const inputBack  = get('inputBack');  const prevBack  = get('prevBack');
+    const flipBackCheck = get('flipBackCheck');
+    const rotSlider = get('logoRotate'); const rotNum = get('logoRotateNum');
+    
+    const heroSizeIn  = get('heroSize');
+    const heroSpeedIn = get('heroSpeed');
+    
+    const mainTextIn  = get('mainText');
+    const textColorIn = get('textColor');
+    const metalColIn  = get('metalColor');
+    const bgCol1In    = get('bgCol1');
+    const bgCol2In    = get('bgCol2');
+    const bgBlurIn    = get('bgBlur');
+
+    const shapeIn     = get('coinShape');
+    const countIn     = get('coinCount');
+    const bgSpeedIn   = get('bgSpeed');
+
+    const aspectIn    = get('aspectRatio');
+    const loopDurIn   = get('loopDuration');
+    const toggleBtn   = get('toggleAnimBtn');
+    const exportBtn   = get('exportBtn');
+    const container   = get('previewContainer');
+
+    // --- THREE.JS SETUP ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 16/9, 0.1, 100);
+    camera.position.set(0, 0, 18);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // --- LIGHTS ---
+    const ambLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambLight);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    mainLight.position.set(5, 10, 10);
+    mainLight.castShadow = true; mainLight.shadow.mapSize.width = 1024; mainLight.shadow.mapSize.height = 1024;
+    scene.add(mainLight);
+    const rimLight = new THREE.SpotLight(0xffffff, 2.0);
+    rimLight.position.set(-10, 0, 5); scene.add(rimLight);
+    const bottomLight = new THREE.PointLight(0xffffff, 1.0);
+    bottomLight.position.set(0, -10, 5); scene.add(bottomLight);
+
+    // --- ENVIRONMENT ---
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+    
+    function updateEnvironment() {
+        const c1 = bgCol1In.value;
+        const c2 = bgCol2In.value;
+        const blurAmt = parseInt(bgBlurIn.value);
+
+        // 1. Bg Canvas
+        const cvsBg = document.createElement('canvas');
+        cvsBg.width = 512; cvsBg.height = 512;
+        const ctxBg = cvsBg.getContext('2d');
+        if(blurAmt > 0) ctxBg.filter = `blur(${blurAmt * 0.2}px)`; 
+        const gradBg = ctxBg.createRadialGradient(256, 256, 0, 256, 256, 360);
+        gradBg.addColorStop(0, c1); gradBg.addColorStop(1, c2);
+        ctxBg.fillStyle = gradBg; ctxBg.fillRect(0,0,512,512);
+        scene.background = new THREE.CanvasTexture(cvsBg);
+
+        // 2. Reflections
+        const cvsEnv = document.createElement('canvas');
+        cvsEnv.width = 512; cvsEnv.height = 256;
+        const ctxEnv = cvsEnv.getContext('2d');
+        const gradEnv = ctxEnv.createLinearGradient(0,0,0,256);
+        gradEnv.addColorStop(0, c1); gradEnv.addColorStop(1, '#000000');
+        ctxEnv.fillStyle = gradEnv; ctxEnv.fillRect(0,0,512,256);
+        ctxEnv.fillStyle = '#fff'; ctxEnv.filter = 'blur(15px)';
+        ctxEnv.fillRect(50, 50, 100, 100); ctxEnv.fillRect(350, 80, 80, 80);
+        const texEnv = new THREE.CanvasTexture(cvsEnv);
+        scene.environment = pmremGenerator.fromEquirectangular(texEnv).texture;
+        texEnv.dispose();
+
+        // 3. Lights & BG Coin Transparency
+        rimLight.color.set(c1); bottomLight.color.set(c2);
+        
+        const bgOpacity = 1.0 - (blurAmt / 120); 
+        bgMetalMat.opacity = bgOpacity; bgFaceMat.opacity = bgOpacity;
+        const isTrans = blurAmt > 0;
+        bgMetalMat.transparent = isTrans; bgFaceMat.transparent = isTrans;
+    }
+
+    // --- MATERIALS ---
+    const metalMat = new THREE.MeshPhysicalMaterial({ color: 0xffd700, metalness: 1.0, roughness: 0.2, clearcoat: 1.0 });
+    const frontMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
+    const backMat  = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
+    
+    // BG Coin Materials
+    const bgMetalMat = new THREE.MeshPhysicalMaterial({ color: 0xffd700, metalness: 0.8, roughness: 0.5 });
+    const bgFaceMat  = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
+
+    // --- OBJECTS ---
+    let textMesh = null;
+    let bgCoins = [];
+    let heroCoinMesh = null;
+
+    function updateText() {
+        if(textMesh) scene.remove(textMesh);
+        const cvs = document.createElement('canvas'); cvs.width = 1024; cvs.height = 256;
+        const ctx = cvs.getContext('2d');
+        ctx.font = "900 130px 'Inter', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 15; ctx.shadowOffsetY = 8;
+        ctx.fillStyle = textColorIn.value; ctx.fillText(mainTextIn.value || "NEW BUY!", 512, 128);
+        const tex = new THREE.CanvasTexture(cvs); tex.minFilter = THREE.LinearFilter;
+        const geo = new THREE.PlaneGeometry(14, 3.5);
+        const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 1 });
+        textMesh = new THREE.Mesh(geo, mat); textMesh.position.z = 2; scene.add(textMesh);
+    }
+    updateText();
+
+    function spawnScene() {
+        bgCoins.forEach(c => scene.remove(c.mesh)); bgCoins = [];
+        if(heroCoinMesh) { scene.remove(heroCoinMesh); heroCoinMesh = null; }
+
+        const count = parseInt(countIn.value);
+        const segments = parseInt(shapeIn.value);
+        const scale = parseFloat(heroSizeIn.value);
+        
+        metalMat.color.set(metalColIn.value);
+        bgMetalMat.color.set(metalColIn.value);
+
+        const bgGeo = new THREE.CylinderGeometry(0.7, 0.7, 0.15, segments);
+        bgGeo.rotateX(Math.PI / 2);
+        if(segments < 10) bgGeo.computeVertexNormals();
+
+        const heroGeo = new THREE.CylinderGeometry(3.5*scale, 3.5*scale, 0.4*scale, segments);
+        heroGeo.rotateX(Math.PI / 2);
+
+        // Spawn BG Coins
+        const bgMaterials = [bgMetalMat, bgFaceMat, bgFaceMat];
+        for(let i=0; i<count; i++) {
+            const mesh = new THREE.Mesh(bgGeo, bgMaterials);
+            mesh.position.x = (Math.random() - 0.5) * 22;
+            mesh.position.y = (Math.random() * 20) - 5;
+            const isFront = Math.random() > 0.8; 
+            mesh.position.z = isFront ? 3 : (Math.random() * 6 - 8);
+            mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+            mesh.castShadow = true; mesh.receiveShadow = true;
+            scene.add(mesh);
+            bgCoins.push({
+                mesh, speed: (Math.random() * 0.1 + 0.05), rotX: (Math.random() - 0.5) * 0.08, rotZ: (Math.random() - 0.5) * 0.08
+            });
+        }
+
+        // Spawn Hero Coin
+        const heroMaterials = [metalMat, frontMat, backMat];
+        heroCoinMesh = new THREE.Mesh(heroGeo, heroMaterials);
+        heroCoinMesh.position.set(0, -20, 5); 
+        heroCoinMesh.castShadow = true; heroCoinMesh.receiveShadow = true;
+        scene.add(heroCoinMesh);
+    }
+    spawnScene();
+
+    // --- ANIMATION ---
+    let isPaused = false;
+    let loopStartTime = Date.now(); // Global Start Time Reference
+    
+    function easeOutBack(x) { const c1 = 1.70158; const c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); }
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        if(isPaused) return;
+
+        const bgSpeedVal = parseFloat(bgSpeedIn.value);
+        const heroSpeedVal = parseFloat(heroSpeedIn.value);
+        const loopDuration = parseFloat(loopDurIn.value) * 1000;
+        const now = Date.now();
+
+        // 1. BG Coins: Continuous flow (not reset by render)
+        bgCoins.forEach(c => {
+            c.mesh.position.y -= c.speed * bgSpeedVal;
+            c.mesh.rotation.x += c.rotX; c.mesh.rotation.z += c.rotZ;
+            if(c.mesh.position.y < -12) {
+                c.mesh.position.y = 12 + Math.random() * 5;
+                c.mesh.position.x = (Math.random() - 0.5) * 22;
+            }
+        });
+
+        // 2. Hero Coin: Loop dependent on loopStartTime
+        if(heroCoinMesh) {
+            // Calculate time elapsed since the last "Reset/Start"
+            const t = (now - loopStartTime) % loopDuration;
+            
+            heroCoinMesh.rotation.y += 0.02 * heroSpeedVal; 
+            
+            const pct = t / loopDuration;
+            let targetY = -20;
+            if (pct < 0.20) targetY = -20;
+            else if (pct < 0.75) {
+                if(pct < 0.35) {
+                    const prog = (pct - 0.20) / 0.15;
+                    targetY = -20 + (20 * easeOutBack(prog));
+                } else targetY = Math.sin(now * 0.003) * 0.2; 
+            } else {
+                const prog = (pct - 0.75) / 0.25; 
+                targetY = -0.5 * 100 * (prog * prog);
+            }
+            heroCoinMesh.position.y = targetY;
+        }
+
+        if(textMesh) textMesh.position.y = Math.sin(now * 0.002) * 0.2;
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // --- HANDLERS ---
+    
+    // Rotation & Texture Sync
+    function updateTextures() {
+        const rad = rotSlider.value * (Math.PI / 180);
+        const doFlip = flipBackCheck.checked;
+        
+        if(frontMat.map) {
+            frontMat.map.center.set(0.5, 0.5);
+            frontMat.map.rotation = rad;
+        }
+        if(bgFaceMat.map) {
+            bgFaceMat.map.center.set(0.5, 0.5);
+            bgFaceMat.map.rotation = rad;
+        }
+        if(backMat.map) {
+            backMat.map.center.set(0.5, 0.5);
+            backMat.map.repeat.set(-1, doFlip ? -1 : 1); 
+            backMat.map.rotation = -rad; 
+        }
+    }
+
+    // Image Uploads
+    function loadImg(file, mat, previewEl) {
+        if(!file) return;
+        const url = URL.createObjectURL(file);
+        previewEl.style.backgroundImage = `url(${url})`;
+        new THREE.TextureLoader().load(url, (tex) => {
+            tex.encoding = THREE.sRGBEncoding;
+            mat.map = tex; 
+            mat.needsUpdate = true; 
+            mat.color.setHex(0xffffff);
+            updateTextures(); 
+        });
+    }
+
+    dropFront.onclick = () => inputFront.click();
+    inputFront.onchange = (e) => {
+        loadImg(e.target.files[0], frontMat, prevFront);
+        if(e.target.files[0]) loadImg(e.target.files[0], bgFaceMat, prevFront);
+    };
+
+    dropBack.onclick = () => inputBack.click();
+    inputBack.onchange = (e) => loadImg(e.target.files[0], backMat, prevBack);
+
+    function updateRotationInput(val) {
+        let v = Math.max(0, Math.min(360, val));
+        rotSlider.value = v; rotNum.value = v;
+        updateTextures();
+    }
+    rotSlider.oninput = (e) => updateRotationInput(e.target.value);
+    rotNum.oninput = (e) => updateRotationInput(e.target.value);
+    flipBackCheck.onchange = updateTextures; 
+
+    [mainTextIn, textColorIn].forEach(el => el.addEventListener('input', updateText));
+    [bgCol1In, bgCol2In, bgBlurIn].forEach(el => el.addEventListener('input', updateEnvironment));
+    metalColIn.addEventListener('input', () => {
+        metalMat.color.set(metalColIn.value);
+        bgMetalMat.color.set(metalColIn.value);
+    });
+    [countIn, shapeIn, heroSizeIn].forEach(el => el.addEventListener('change', spawnScene));
+    toggleBtn.onclick = () => { isPaused = !isPaused; toggleBtn.textContent = isPaused ? "Play" : "Pause"; };
+
+    // Resize
+    function handleResize() {
+        const aspectVal = aspectIn.value; container.className = ""; 
+        let ar = 16/9;
+        if(aspectVal === "1/1") { ar = 1; container.classList.add('ratio-1-1'); }
+        else if(aspectVal === "9/16") { ar = 9/16; container.classList.add('ratio-9-16'); }
+        else { container.classList.add('ratio-16-9'); }
+        const w = container.clientWidth; const h = container.clientHeight; 
+        camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', handleResize);
+    aspectIn.addEventListener('change', handleResize);
+    setTimeout(handleResize, 100);
+
+    // Export Logic: Resets animation to start perfectly
+    exportBtn.onclick = () => {
+        const loopMs = parseInt(loopDurIn.value) * 1000;
+        
+        // 1. Reset Animation Timer
+        loopStartTime = Date.now();
+        
+        // 2. Start Recording
+        const stream = renderer.domElement.captureStream(30);
+        const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 });
+        const chunks = [];
+        recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `buy-alert-${mainTextIn.value}.webm`; a.click();
+            exportBtn.textContent = "Render 1 Loop"; exportBtn.disabled = false;
+        };
+        exportBtn.textContent = "Rendering..."; exportBtn.disabled = true;
+        recorder.start(); 
+        
+        // 3. Stop exactly after loop duration
+        setTimeout(() => recorder.stop(), loopMs);
+    };
+
+    updateEnvironment();
+});
+</script>
+</body>
+</html>
