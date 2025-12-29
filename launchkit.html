@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memeportal — Launch Asset Batcher</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  /* Tool-specific overrides */
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  .asset-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .asset-label {
+    font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;
+    display: flex; justify-content: space-between;
+  }
+  .asset-canvas-wrap {
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+    display: flex; align-items: center; justify-content: center;
+    /* Checkerboard pattern for transparency */
+    background-image: linear-gradient(45deg, #111 25%, transparent 25%), linear-gradient(-45deg, #111 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #111 75%), linear-gradient(-45deg, transparent 75%, #111 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  }
+  canvas {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+</style>
+</head>
+<body>
+  <div id="site-header"></div>
+  <script>
+    async function loadNav(){
+      try{
+        const h=document.getElementById('site-header');
+        h.innerHTML=await(await fetch('nav.html')).text();
+        // (Nav script logic same as index.html)
+        const btn=h.querySelector('.menu-toggle'), menu=h.querySelector('#mobileMenu');
+        if(btn&&menu){
+          const close=()=>{menu.setAttribute('hidden','');btn.setAttribute('aria-expanded','false');document.removeEventListener('click',clickAway);}
+          const open=()=>{menu.removeAttribute('hidden');btn.setAttribute('aria-expanded','true');setTimeout(()=>document.addEventListener('click',clickAway),0);}
+          const clickAway=e=>{if(!menu.contains(e.target)&&!btn.contains(e.target))close();}
+          btn.addEventListener('click',e=>{e.stopPropagation();if(menu.hasAttribute('hidden'))open();else close();});
+        }
+      }catch(e){}
+    }
+    loadNav();
+  </script>
+
+  <div class="app">
+    <aside>
+      <div class="card section">
+        <h2>1. Upload Logo</h2>
+        <div class="drop" id="logoDrop">
+          <input id="logoInput" type="file" accept="image/*">
+          <strong>Drag & Drop Logo</strong>
+          <div class="tiny muted">Supports PNG, JPG, SVG</div>
+        </div>
+      </div>
+
+      <div class="card section">
+        <h2>2. Background Settings</h2>
+        <label>Background Style</label>
+        <div class="grid two" style="margin-bottom:10px;">
+           <button class="btn primary active" id="modeSolid">Solid Color</button>
+           <button class="btn" id="modeBlur">Auto Blur</button>
+        </div>
+        
+        <div id="colorControls">
+            <label>Background Color</label>
+            <input type="color" id="bgColor" value="#000000" style="width:100%">
+        </div>
+      </div>
+
+      <div class="card section">
+        <h2>3. Scaling</h2>
+        <label>Logo Size (%)</label>
+        <input type="range" id="scaleRange" min="10" max="100" value="60">
+      </div>
+
+      <div class="card section" style="margin-top:auto">
+        <button class="btn success" id="downloadAll" style="width:100%; height:50px; font-size:16px;">Download All (.ZIP)</button>
+      </div>
+    </aside>
+
+    <main>
+        <div class="wrap">
+            <div style="margin-bottom: 20px;">
+                <a href="index.html" style="color: #64748b; font-size: 13px; display:flex; gap:6px; align-items:center;">&larr; Back to Tools</a>
+                <h1 style="font-size: 32px; margin-top: 10px;">Launch Asset Batcher</h1>
+                <p style="color: #94a3b8;">Generate all your social media headers and avatars in one click.</p>
+            </div>
+
+            <div class="preview-grid" id="canvasGrid">
+                </div>
+        </div>
+    </main>
+  </div>
+
+<script>
+window.addEventListener('load', () => {
+    const logoInput = document.getElementById('logoInput');
+    const logoDrop = document.getElementById('logoDrop');
+    const bgColorInput = document.getElementById('bgColor');
+    const scaleRange = document.getElementById('scaleRange');
+    const downloadBtn = document.getElementById('downloadAll');
+    const grid = document.getElementById('canvasGrid');
+    
+    let loadedImg = null;
+    let bgMode = 'solid'; // 'solid' or 'blur'
+
+    // Define the formats developers need
+    const formats = [
+        { name: "Twitter Banner", w: 1500, h: 500 },
+        { name: "Telegram Avatar", w: 640, h: 640 },
+        { name: "DexScreener Header", w: 1600, h: 900 }, // Standard 16:9
+        { name: "Website Favicon", w: 128, h: 128 }
+    ];
+
+    // Initialize Canvases
+    const canvases = {};
+    formats.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'asset-card fade-in';
+        
+        div.innerHTML = `
+            <div class="asset-label"><span>${f.name}</span> <span>${f.w}×${f.h}</span></div>
+            <div class="asset-canvas-wrap">
+                <canvas width="${f.w}" height="${f.h}"></canvas>
+            </div>
+        `;
+        grid.appendChild(div);
+        canvases[f.name] = div.querySelector('canvas');
+    });
+
+    // Inputs
+    logoDrop.addEventListener('click', () => logoInput.click());
+    logoInput.addEventListener('change', e => handleFile(e.target.files[0]));
+    
+    // Drag & Drop
+    logoDrop.addEventListener('dragover', e => { e.preventDefault(); logoDrop.style.borderColor = 'var(--primary)'; });
+    logoDrop.addEventListener('dragleave', e => { e.preventDefault(); logoDrop.style.borderColor = ''; });
+    logoDrop.addEventListener('drop', e => {
+        e.preventDefault();
+        logoDrop.style.borderColor = '';
+        if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFile(file) {
+        if(!file) return;
+        const img = new Image();
+        img.onload = () => {
+            loadedImg = img;
+            logoDrop.classList.add('filled');
+            logoDrop.querySelector('strong').textContent = file.name;
+            drawAll();
+        };
+        img.src = URL.createObjectURL(file);
+    }
+
+    // Settings Listeners
+    bgColorInput.addEventListener('input', drawAll);
+    scaleRange.addEventListener('input', drawAll);
+    
+    document.getElementById('modeSolid').addEventListener('click', (e) => {
+        bgMode = 'solid';
+        e.target.classList.add('active');
+        document.getElementById('modeBlur').classList.remove('active'); // Fixed ID
+        document.getElementById('colorControls').style.display = 'block';
+        drawAll();
+    });
+
+    document.getElementById('modeBlur').addEventListener('click', (e) => {
+        bgMode = 'blur';
+        e.target.classList.add('active');
+        document.getElementById('modeSolid').classList.remove('active');
+        document.getElementById('colorControls').style.display = 'none';
+        drawAll();
+    });
+
+    function drawAll() {
+        if(!loadedImg) return;
+        
+        formats.forEach(f => {
+            const cvs = canvases[f.name];
+            const ctx = cvs.getContext('2d');
+            
+            // 1. Draw Background
+            if(bgMode === 'solid') {
+                ctx.fillStyle = bgColorInput.value;
+                ctx.fillRect(0, 0, f.w, f.h);
+            } else {
+                // Auto blur background
+                ctx.save();
+                // Draw extremely zoomed in version of logo to simulate blur gradient
+                ctx.filter = 'blur(40px) brightness(0.6)';
+                ctx.drawImage(loadedImg, -f.w/2, -f.h/2, f.w*2, f.h*2);
+                ctx.restore();
+            }
+
+            // 2. Draw Logo
+            // Calc scale
+            const scalePct = parseInt(scaleRange.value) / 100;
+            
+            // Determine "Contain" dimensions
+            // We want the logo to fit within the box with padding
+            const availW = f.w * scalePct;
+            const availH = f.h * scalePct;
+            
+            const scale = Math.min(availW / loadedImg.width, availH / loadedImg.height);
+            const drawW = loadedImg.width * scale;
+            const drawH = loadedImg.height * scale;
+            
+            const x = (f.w - drawW) / 2;
+            const y = (f.h - drawH) / 2;
+
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(loadedImg, x, y, drawW, drawH);
+        });
+    }
+
+    // Export Logic
+    downloadBtn.addEventListener('click', async () => {
+        if(!loadedImg) return alert("Please upload a logo first.");
+        
+        const zip = new JSZip();
+        
+        // Loop through canvases and add to zip
+        for(const f of formats) {
+            const cvs = canvases[f.name];
+            // Convert to blob
+            const blob = await new Promise(resolve => cvs.toBlob(resolve, 'image/png'));
+            // Clean filename
+            const filename = f.name.toLowerCase().replace(/\s+/g, '_') + '.png';
+            zip.file(filename, blob);
+        }
+
+        // Generate Zip
+        const content = await zip.generateAsync({type:"blob"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(content);
+        a.download = "social_assets.zip";
+        a.click();
+    });
+});
+</script>
+</body>
+</html>
