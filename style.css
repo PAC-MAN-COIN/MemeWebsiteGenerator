@@ -27,7 +27,7 @@ body {
     radial-gradient(900px 700px at 120% 10%, rgba(124,58,237,.09), transparent),
     var(--bg);
   font: 14px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial;
-  overflow-x: hidden; /* Prevent body scroll */
+  overflow-x: hidden; /* Critical for mobile: stops side-scroll */
 }
 
 h1 { font-size: 22px; margin: 0; }
@@ -44,6 +44,7 @@ h1 { font-size: 22px; margin: 0; }
   grid-template-columns: 360px minmax(0, 1fr);
   height: calc(100vh - var(--header-h));
   overflow: hidden;
+  width: 100%;
 }
 .app.app--wide { grid-template-columns: 420px minmax(0, 1fr); }
 
@@ -72,15 +73,15 @@ main { padding: 20px; height: 100%; overflow: auto; }
 .logo-text { font-weight: 800; font-size: 18px; color: #fff; letter-spacing: -0.02em; }
 .sub { color: var(--muted); font-size: 12px; margin-left: 8px; font-weight: 400; }
 
-/* --- Desktop Nav --- */
-.nav { display: flex; gap: 8px; }
-.nav a {
+/* --- Desktop Nav (FIXED CLASS NAME) --- */
+.desktop-nav { display: flex; gap: 8px; }
+.desktop-nav a {
   color: var(--muted); text-decoration: none; font-weight: 500; font-size: 13px;
   padding: 8px 16px; border-radius: 99px; transition: .2s;
   border: 1px solid transparent;
 }
-.nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
-.nav a.active { color: #fff; background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.3); }
+.desktop-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.desktop-nav a.active { color: #fff; background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.3); }
 
 /* --- Mobile Burger Button --- */
 .menu-toggle {
@@ -100,6 +101,7 @@ main { padding: 20px; height: 100%; overflow: auto; }
 .menu-toggle::before { top: 13px; }
 .menu-toggle::after { bottom: 13px; }
 
+/* Burger Animation State */
 .menu-toggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
 .menu-toggle[aria-expanded="true"] span { opacity: 0; }
 .menu-toggle[aria-expanded="true"]::before { top: 19px; transform: rotate(45deg); }
@@ -107,7 +109,7 @@ main { padding: 20px; height: 100%; overflow: auto; }
 
 /* --- Mobile Dropdown --- */
 #mobileMenu {
-  display: none;
+  display: none; /* JS toggles via removing 'hidden' */
   position: absolute;
   top: calc(var(--header-h) + 10px);
   left: 10px; right: 10px;
@@ -122,11 +124,14 @@ main { padding: 20px; height: 100%; overflow: auto; }
   animation: menuSlide 0.2s ease-out forwards;
   z-index: 999;
 }
+
 #mobileMenu:not([hidden]) { display: flex; }
+
 @keyframes menuSlide {
   from { opacity: 0; transform: scale(0.95) translateY(-10px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
+
 #mobileMenu a {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 16px;
@@ -136,12 +141,15 @@ main { padding: 20px; height: 100%; overflow: auto; }
   border: 1px solid transparent;
 }
 #mobileMenu a:hover {
-  background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.2); color: #fff; padding-left: 20px;
+  background: rgba(124,58,237,0.1);
+  border-color: rgba(124,58,237,0.2);
+  color: #fff;
+  padding-left: 20px; /* Slide effect */
 }
 
-/* Toggle Desktop/Mobile Nav */
+/* Toggle Desktop/Mobile Nav (FIXED CLASS NAME) */
 @media (max-width: 900px) {
-  .nav { display: none; }
+  .desktop-nav { display: none; }
   .menu-toggle { display: flex; }
 }
 
@@ -156,21 +164,15 @@ main { padding: 20px; height: 100%; overflow: auto; }
 
 label { display: block; font-weight: 600; margin-bottom: 6px; }
 
-/* Force inputs to never overflow */
+/* FIX: Ensure inputs never exceed screen width */
 input[type="text"], input[type="number"], select, textarea {
-  width: 100%; max-width: 100%;
+  width: 100%; 
+  max-width: 100%;
+  min-width: 0; /* Allows shrinking in flex containers */
   background: #0b0e15; border: 1px solid var(--border); color: var(--text);
   padding: 10px 12px; border-radius: 12px; outline: none; font-family: inherit;
 }
 textarea { min-height: 72px; resize: vertical; }
-
-/* Range Slider Fix */
-input[type="range"] {
-  width: 100%; max-width: 100%;
-  margin: 0; box-sizing: border-box;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
 
 .muted { color: var(--muted); }
 .small { font-size: 12px; }
@@ -184,7 +186,6 @@ input[type="range"] {
   appearance: none; border: 1px solid var(--border); background: #101423; color: var(--text);
   padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 600;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  max-width: 100%; /* Prevent button overflow */
 }
 .btn:hover { border-color: #334067; }
 .btn.primary { background: linear-gradient(180deg, rgba(124,58,237,.25), rgba(124,58,237,.15)); border-color: #3a2d7c; }
@@ -223,7 +224,6 @@ input[type="range"] {
 .toc a:hover { border-color: #334067; }
 .toc a.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
-/* Hide duplicate brand inside tool sidebars */
 .app aside .brand { display: none; }
 
 /* =============== INDEX TILES =============== */
@@ -246,28 +246,27 @@ input[type="range"] {
 /* =============== MOBILE RESPONSIVENESS FIXES =============== */
 
 @media (max-width: 900px) {
-  /* Fix Layout Stacking */
+  /* Fix Layout Stacking & Horizontal Scroll */
   .app { 
     display: flex; 
     flex-direction: column; 
     height: auto; 
     width: 100%;
-    max-width: 100vw; /* Critical: Stop horizontal overflow */
-    overflow-x: hidden;
+    max-width: 100vw; 
+    overflow-x: hidden; 
   }
   
   /* Reset Sidebar/Main Scrolling for mobile */
   aside, main { 
-    width: 100%;
+    width: 100%; 
     min-width: 0; /* Flex item shrink fix */
     height: auto; 
     max-height: none; 
     overflow: visible; 
   }
-  
   aside { border-right: none; border-bottom: 1px solid var(--border); }
   
-  /* Grids */
+  /* Grids - force single column on mobile */
   .grid.two, .grid.three { grid-template-columns: 1fr; }
   
   /* Tiles */
@@ -285,20 +284,18 @@ input[type="range"] {
   }
 }
 
-/* Small Phone Adjustments */
+/* Small Phone Adjustments (< 600px) */
 @media (max-width: 600px) {
   .header { padding: 0 16px; }
+  
+  /* Fix buttons extending too far */
+  .toolbar .btn {
+    flex: 1; /* Buttons share space */
+    min-width: 45%; /* Wrap if needed */
+    text-align: center;
+  }
+  
   input[type="color"] { height: 44px; }
-  .btn { width: 100%; justify-content: center; }
   input[type="text"], select, textarea { font-size: 16px; padding: 12px; }
   #mobileMenu { left: 14px; right: 14px; }
-  
-  /* Ensure buttons wrap if they are too wide */
-  .toolbar {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  .toolbar .btn {
-    flex: 1 1 auto; /* Grow to fill space, shrink if needed */
-  }
 }
