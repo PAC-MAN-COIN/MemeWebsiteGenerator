@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <title>Memeportal — Buy Animation Generator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
 <link rel="icon" href="images/logo.png" type="image/png" />
 <link rel="stylesheet" href="style.css" />
 
@@ -39,9 +39,30 @@
     .drop:hover { background: rgba(255,255,255,0.05); border-color: var(--accent); }
     .drop-preview { width: 30px; height: 30px; border-radius: 50%; background: #333; background-size: cover; background-position: center; margin: 0 auto 5px; }
     
-    /* Flip Checkbox */
-    .flip-option { display: block; font-size: 0.7rem; color: #888; margin-top: 5px; }
-    .flip-option input { margin-right: 4px; vertical-align: middle; }
+    /* Flip Button Styling */
+    .flip-option {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 4px 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid #444;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        color: #ccc;
+        cursor: pointer;
+        transition: 0.2s;
+        user-select: none;
+    }
+    .flip-option:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: #777;
+        color: #fff;
+    }
+    .flip-option input { 
+        margin-right: 6px; 
+        vertical-align: middle;
+        cursor: pointer;
+    }
 </style>
 </head>
 <body>
@@ -180,7 +201,7 @@
         <div id="previewContainer" class="ratio-16-9"></div>
         
         <div class="tiny muted" style="max-width:600px;">
-            <strong>Controls:</strong> Upload Front/Back images. If the back image is upside down, toggle the <strong>"Flip Vertical"</strong> checkbox.
+            <strong>Controls:</strong> Upload Front/Back images. If the back image is upside down, click the <strong>"Flip Vertical"</strong> button.
         </div>
       </div>
     </main>
@@ -348,7 +369,7 @@ window.addEventListener('load', function(){
         // Spawn Hero Coin
         const heroMaterials = [metalMat, frontMat, backMat];
         heroCoinMesh = new THREE.Mesh(heroGeo, heroMaterials);
-        heroCoinMesh.position.set(0, -20, 5); 
+        heroCoinMesh.position.set(0, -25, 5); // Start lower for pop
         heroCoinMesh.castShadow = true; heroCoinMesh.receiveShadow = true;
         scene.add(heroCoinMesh);
     }
@@ -356,9 +377,13 @@ window.addEventListener('load', function(){
 
     // --- ANIMATION ---
     let isPaused = false;
-    let loopStartTime = Date.now(); // Global Start Time Reference
+    let loopStartTime = Date.now();
     
-    function easeOutBack(x) { const c1 = 1.70158; const c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); }
+    // UPDATED: Smoother Easing Functions for premium feel
+    // Smoother overshoot (lower coefficient than standard BackOut)
+    function easeOutBackSmooth(x) { const c1 = 1.5; const c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); }
+    // Smooth accelerating drop (Quartic ease in)
+    function easeInQuart(x) { return x * x * x * x; }
     
     function animate() {
         requestAnimationFrame(animate);
@@ -369,7 +394,7 @@ window.addEventListener('load', function(){
         const loopDuration = parseFloat(loopDurIn.value) * 1000;
         const now = Date.now();
 
-        // 1. BG Coins: Continuous flow (not reset by render)
+        // 1. BG Coins
         bgCoins.forEach(c => {
             c.mesh.position.y -= c.speed * bgSpeedVal;
             c.mesh.rotation.x += c.rotX; c.mesh.rotation.z += c.rotZ;
@@ -379,24 +404,31 @@ window.addEventListener('load', function(){
             }
         });
 
-        // 2. Hero Coin: Loop dependent on loopStartTime
+        // 2. Hero Coin: Smoother Loop
         if(heroCoinMesh) {
-            // Calculate time elapsed since the last "Reset/Start"
             const t = (now - loopStartTime) % loopDuration;
             
-            heroCoinMesh.rotation.y += 0.02 * heroSpeedVal; 
+            // Slower, heavier rotation feel
+            heroCoinMesh.rotation.y += (0.015 * heroSpeedVal); 
             
             const pct = t / loopDuration;
-            let targetY = -20;
-            if (pct < 0.20) targetY = -20;
-            else if (pct < 0.75) {
-                if(pct < 0.35) {
-                    const prog = (pct - 0.20) / 0.15;
-                    targetY = -20 + (20 * easeOutBack(prog));
-                } else targetY = Math.sin(now * 0.003) * 0.2; 
+            let targetY = -25;
+            
+            if (pct < 0.20) {
+                 // Wait
+                 targetY = -25;
+            } else if (pct < 0.35) {
+                // POP UP (Smoother Back Ease)
+                const prog = (pct - 0.20) / 0.15;
+                targetY = -25 + (25 * easeOutBackSmooth(prog));
+            } else if (pct < 0.75) {
+                // HOVER (Gentle sine wave)
+                targetY = Math.sin(now * 0.0025) * 0.25; 
             } else {
+                // FALL (Smooth Accelerating Quartic Ease)
                 const prog = (pct - 0.75) / 0.25; 
-                targetY = -0.5 * 100 * (prog * prog);
+                // Fall from 0 down to -30
+                targetY = 0 - (30 * easeInQuart(prog));
             }
             heroCoinMesh.position.y = targetY;
         }
@@ -483,7 +515,7 @@ window.addEventListener('load', function(){
     aspectIn.addEventListener('change', handleResize);
     setTimeout(handleResize, 100);
 
-    // Export Logic: Resets animation to start perfectly
+    // Export Logic
     exportBtn.onclick = () => {
         const loopMs = parseInt(loopDurIn.value) * 1000;
         
