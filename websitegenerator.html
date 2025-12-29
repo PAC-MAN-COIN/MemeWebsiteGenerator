@@ -3,28 +3,31 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Memeportal — Website Generator</title>
+<title>Memeportal — NextGen Site Generator</title>
 <link rel="stylesheet" href="style.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  /* Generator Tool Specific Styles */
+  :root { --p-bg: #050505; --p-card: #0e0e0e; --p-border: #222; --p-accent: #3b82f6; }
+  .preview-pane { position: sticky; top: 20px; height: calc(100vh - 40px); overflow: hidden; display: flex; flex-direction: column; }
+  #preview { flex: 1; border: 0; width: 100%; height: 100%; background: #fff; border-radius: 8px; overflow-y: auto; }
+  /* Simulating the iframe sandbox environment */
+  .preview-frame { isolation: isolate; }
+</style>
 </head>
 <body>
-  <!-- Header (loaded from nav.html) -->
   <div id="site-header"></div>
   <script>
-    // load nav + wire burger/dropdown safely
     (async function(){
       try{
         const host = document.getElementById('site-header');
         host.innerHTML = await (await fetch('nav.html')).text();
-
-        const btn  = host.querySelector('.menu-toggle');
+        const btn = host.querySelector('.menu-toggle');
         const menu = host.querySelector('#mobileMenu');
         if(!btn || !menu) return;
-
         const close=()=>{menu.setAttribute('hidden','');btn.setAttribute('aria-expanded','false');document.removeEventListener('click',away);};
         const open =()=>{menu.removeAttribute('hidden');btn.setAttribute('aria-expanded','true');setTimeout(()=>document.addEventListener('click',away),0);};
         const away = e => { if(!menu.contains(e.target)&&!btn.contains(e.target)) close(); };
-
         btn.addEventListener('click',e=>{e.stopPropagation();menu.hasAttribute('hidden')?open():close();});
         window.matchMedia('(min-width:900px)').addEventListener?.('change',e=>{ if(e.matches) close(); });
         close();
@@ -34,802 +37,480 @@
 
   <div class="app app--wide">
     <aside>
-      <!-- Sticky quick nav (auto built) -->
-      <nav class="toc" id="wgToc">
-        <div class="title">Quick menu</div>
-        <div class="row" id="wgTocLinks"></div>
-      </nav>
+      <nav class="toc" id="wgToc"><div class="title">Quick menu</div><div class="row" id="wgTocLinks"></div></nav>
 
-      <!-- BASICS -->
       <div class="card section" id="sec-basics">
-        <h2>Project Basics</h2>
+        <h2>Brand Identity</h2>
         <div class="grid">
-          <div>
-            <label>Project / Token name</label>
-            <input id="p_name" type="text" placeholder="e.g. MemePortal" value="MemePortal">
-          </div>
+          <div><label>Project Name</label><input id="p_name" type="text" value="MoonBeast"></div>
           <div class="grid two">
-            <div>
-              <label>Ticker</label>
-              <input id="p_ticker" type="text" placeholder="e.g. MEMEPORTAL" value="MEMEPORTAL">
-            </div>
-            <div>
-              <label>Chain</label>
-              <select id="p_chain">
-                <option>Solana</option><option>Ethereum</option><option>BNB Chain</option><option>Base</option><option>Polygon</option>
-              </select>s
-            </div>
+            <div><label>Ticker</label><input id="p_ticker" type="text" value="$BEAST"></div>
+            <div><label>Chain</label><select id="p_chain"><option>Solana</option><option>Ethereum</option><option>Base</option><option>Sui</option></select></div>
           </div>
-          <div>
-            <label>Contract address (CA)</label>
-            <input id="p_ca" type="text" placeholder="Paste contract address">
-          </div>
-          <div>
-            <label>Tagline</label>
-            <input id="p_tag" type="text" placeholder="One-liner that sells the vibe" value="Meme tech from the jungle.">
-          </div>
+          <div><label>Tagline</label><input id="p_tag" type="text" value="The only beast that feeds on jeets."></div>
+          <div><label>Contract Address (CA)</label><input id="p_ca" type="text" placeholder="Paste CA here"></div>
+        </div>
+      </div>
 
+      <div class="card section" id="sec-design">
+        <h2>Visual Style</h2>
+        <div class="grid">
           <div class="grid three">
-            <div>
-              <label>Primary color</label>
-              <input id="c_accent" type="color" value="#7c3aed">
-            </div>
-            <div>
-              <label>Secondary color</label>
-              <input id="c_accent2" type="color" value="#22d3ee">
-            </div>
-            <div>
-              <label>Tertiary color</label>
-              <input id="c_accent3" type="color" value="#3b82f6">
-            </div>
+            <div><label>Primary</label><input id="c_accent" type="color" value="#8b5cf6"></div>
+            <div><label>Secondary</label><input id="c_accent2" type="color" value="#06b6d4"></div>
+            <div><label>Background</label><input id="c_bg" type="color" value="#050505"></div>
           </div>
-
           <div class="grid two">
             <div>
-              <label>Style preset</label>
+              <label>Theme Preset</label>
               <select id="style_preset">
-                <option value="serious" selected>Serious — clean</option>
-                <option value="cartoony">Cartoony — comic / halftone</option>
-                <option value="neon">Neon — synthwave glow</option>
-                <option value="glass">Glass — frosted panels</option>
-                <option value="retro">Retro Terminal — CRT</option>
-                <option value="zine">Paper Zine — torn cutout</option>
+                <option value="modern" selected>Modern Dark (Glass)</option>
+                <option value="brutal">Neo-Brutalist (Bold)</option>
+                <option value="retro">Retro Terminal (Matrix)</option>
+                <option value="clean">Clean / Corporate</option>
               </select>
             </div>
             <div>
-              <label>Card radius</label>
-              <input id="c_radius" type="range" min="6" max="28" value="18">
+              <label>Font Pair</label>
+              <select id="font_preset">
+                <option value="sans">Inter + Manrope (Clean)</option>
+                <option value="impact">Impact + Inter (Meme)</option>
+                <option value="mono">Space Mono (Tech)</option>
+                <option value="display">Clash Display (Trendy)</option>
+              </select>
             </div>
           </div>
-
-          <div>
-            <label>Background style</label>
-            <select id="c_bg">
-              <option value="memeportal" selected>Memeportal gradient</option>
-              <option value="dark">Dark solid</option>
-              <option value="radial">Radial glow</option>
-            </select>
+          <div class="flex">
+            <input id="opt_noise" type="checkbox" checked><label for="opt_noise">Add Grain/Noise Texture</label>
+          </div>
+          <div class="flex">
+            <input id="opt_marquee" type="checkbox" checked><label for="opt_marquee">Show Infinity Marquee</label>
           </div>
         </div>
       </div>
 
-      <!-- MEDIA -->
       <div class="card section" id="sec-media">
-        <h2>Media</h2>
+        <h2>Assets</h2>
         <div class="grid">
           <div class="drop" id="logoDrop">
             <input id="logoFile" type="file" accept="image/*">
-            <div><strong>Logo</strong> PNG/SVG — transparent preferred. <button class="btn ghost" id="logoBrowse">Browse</button></div>
+            <div><strong>Logo</strong> (PNG/SVG transparent)<button class="btn ghost" id="logoBrowse">Browse</button></div>
           </div>
           <div class="drop" id="bannerDrop">
             <input id="bannerFile" type="file" accept="image/*">
-            <div><strong>Banner</strong> wide PNG/JPG/WebP (auto‑fit). <button class="btn ghost" id="bannerBrowse">Browse</button></div>
+            <div><strong>Hero Banner</strong> (Optional wide img)<button class="btn ghost" id="bannerBrowse">Browse</button></div>
           </div>
         </div>
       </div>
 
-      <!-- LINKS -->
-      <div class="card section" id="sec-links">
-        <h2>Links</h2>
+      <div class="card section" id="sec-content">
+        <h2>Content Sections</h2>
         <div class="grid">
-          <div><label>Website</label><input id="l_site" type="text" placeholder="https://"></div>
-          <div class="grid two">
-            <div><label>Twitter/X</label><input id="l_x" type="text" placeholder="https://x.com/..."></div>
-            <div><label>Telegram</label><input id="l_tg" type="text" placeholder="https://t.me/..."></div>
-          </div>
-          <div class="grid two">
-            <div><label>DexScreener</label><input id="l_ds" type="text" placeholder="https://dexscreener.com/..."></div>
-            <div><label>Whitepaper</label><input id="l_wp" type="text" placeholder="https://...pdf"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECTIONS -->
-      <div class="card section" id="sec-sections">
-        <h2>Sections</h2>
-        <div class="grid">
-          <div class="flex">
-            <input id="s_about_e" type="checkbox" checked><label for="s_about_e" style="margin:0">About / Info</label>
-          </div>
-          <textarea id="s_about" rows="3">BeastLab is a memecoin with utility—clean branding, fair launch, and a community that ships.</textarea>
-
-          <div class="flex">
-            <input id="s_token_e" type="checkbox" checked><label for="s_token_e" style="margin:0">Tokenomics</label>
-          </div>
+          <textarea id="s_about" rows="3" placeholder="About text...">MoonBeast is not just a coin, it's a lifestyle. Born on the chain, raised by the community.</textarea>
+          
+          <label>Tokenomics</label>
           <div class="grid two">
             <div><label>Supply</label><input id="tok_supply" type="text" value="1,000,000,000"></div>
-            <div><label>Decimals</label><input id="tok_dec" type="number" value="9"></div>
-            <div><label>Buy Tax %</label><input id="tok_buy" type="number" value="0"></div>
-            <div><label>Sell Tax %</label><input id="tok_sell" type="number" value="0"></div>
+            <div><label>Tax</label><input id="tok_tax" type="text" value="0/0"></div>
+            <div><label>Liquidity</label><input id="tok_liq" type="text" value="Burned"></div>
+            <div><label>Mint</label><input id="tok_mint" type="text" value="Revoked"></div>
           </div>
-          <details>
-            <summary class="small">Allocations (optional)</summary>
-            <textarea id="tok_alloc" class="tiny" rows="3">Liquidity:70, Community:20, Treasury:10</textarea>
-          </details>
 
-          <div class="flex" style="margin-top:6px">
-            <input id="s_road_e" type="checkbox" checked><label for="s_road_e" style="margin:0">Roadmap</label>
+          <label>Social Links</label>
+          <div class="grid two">
+            <input id="l_tg" type="text" placeholder="Telegram URL">
+            <input id="l_x" type="text" placeholder="X / Twitter URL">
+            <input id="l_ds" type="text" placeholder="DexScreener URL">
+            <input id="l_buy" type="text" placeholder="Buy Link (Pump/Raydium)">
           </div>
-          <textarea id="s_road" rows="3">Phase 1 — Launch, socials, CMC/CG listing
-Phase 2 — Partnerships, Meme contest, CEX listing
-Phase 3 — Utilities drop, DAO experiments</textarea>
 
-          <div class="flex">
-            <input id="s_team_e" type="checkbox"><label for="s_team_e" style="margin:0">Team (optional)</label>
-          </div>
-          <textarea id="s_team" rows="2" placeholder="Each line Name — Role"></textarea>
-
-          <div class="flex">
-            <input id="s_disclaimer_e" type="checkbox" checked><label for="s_disclaimer_e" style="margin:0">Disclaimer</label>
-          </div>
-          <textarea id="s_disclaimer" rows="2">This is not financial advice. Cryptocurrency involves risk. Do your own research.</textarea>
+          <label>Roadmap (One item per line)</label>
+          <textarea id="s_road" rows="3">Phase 1: Launch & Vibe
+Phase 2: 1000 Holders
+Phase 3: Utility Drop</textarea>
         </div>
       </div>
 
-      <!-- ORDER / LAYOUT -->
-      <div class="card section" id="sec-order">
-        <h2>Order & layout</h2>
-        <div id="orderList" class="list" style="user-select:none"></div>
-        <div class="tiny muted" style="margin-top:6px">Use ↑ / ↓ to reorder the enabled sections.</div>
-      </div>
-
-      <!-- ADVANCED -->
-      <div class="card section" id="sec-advanced">
-        <h2>Advanced</h2>
-        <details open>
-          <summary class="small">More control</summary>
-          <div class="grid" style="margin-top:10px">
-            <div class="grid two">
-              <div>
-                <label>Heading font</label>
-                <select id="adv_font_title">
-                  <option value="Inter">Inter</option>
-                  <option value="Impact">Impact</option>
-                  <option value="Archivo Black">Archivo Black</option>
-                  <option value="Space Grotesk">Space Grotesk</option>
-                </select>
-              </div>
-              <div>
-                <label>Body font</label>
-                <select id="adv_font_body">
-                  <option value="Inter" selected>Inter</option>
-                  <option value="Space Grotesk">Space Grotesk</option>
-                  <option value="IBM Plex Sans">IBM Plex Sans</option>
-                  <option value="Atkinson Hyperlegible">Atkinson Hyperlegible</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid two">
-              <div>
-                <label>Shadow strength</label>
-                <input id="adv_shadow" type="range" min="0" max="1" step="0.05" value="0.35">
-              </div>
-              <div>
-                <label>Gradient intensity</label>
-                <input id="adv_grad" type="range" min="0" max="1" step="0.05" value="0.10">
-              </div>
-            </div>
-
-            <div class="grid two">
-              <div class="flex">
-                <input id="adv_noise" type="checkbox">
-                <label for="adv_noise" style="margin:0">Subtle noise overlay</label>
-              </div>
-              <div class="flex">
-                <input id="adv_hero_flip" type="checkbox">
-                <label for="adv_hero_flip" style="margin:0">Flip hero layout</label>
-              </div>
-            </div>
-
-            <div class="grid two">
-              <div>
-                <label>Border style</label>
-                <select id="adv_border">
-                  <option value="soft" selected>Soft</option>
-                  <option value="hard">Hard / solid</option>
-                  <option value="dashed">Dashed</option>
-                </select>
-              </div>
-              <div>
-                <label>Button shape</label>
-                <select id="adv_button">
-                  <option value="rounded" selected>Rounded</option>
-                  <option value="pill">Pill</option>
-                  <option value="square">Square</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label>Max container width</label>
-              <input id="adv_width" type="range" min="900" max="1400" step="10" value="1140">
-            </div>
-          </div>
-        </details>
-      </div>
-
-      <!-- ACTIONS -->
       <div class="card section" id="sec-actions">
-        <h2>Actions</h2>
+        <h2>Export</h2>
         <div class="toolbar right">
-          <button class="btn primary" id="refreshBtn">Update Preview</button>
-          <button class="btn success" id="exportZip">Download ZIP</button>
+          <button class="btn primary" id="refreshBtn">Refresh Preview</button>
+          <button class="btn success" id="exportZip">Download Website (.ZIP)</button>
         </div>
-        <div class="footer">ZIP includes <strong>index.html</strong> and an <strong>assets/</strong> folder with your images.</div>
+        <div class="tiny muted" style="margin-top:8px">Generates a fully responsive, single-file HTML (with assets) ready for Netlify/Vercel.</div>
       </div>
     </aside>
 
     <main>
-      <div class="card section preview-pane">
-        <div class="kicker">Preview</div>
-        <div id="preview" class="preview-frame"></div>
+      <div class="preview-pane">
+        <div class="kicker" style="padding: 0 0 10px 0; background:#050814; z-index:10;">Live Preview</div>
+        <iframe id="previewFrame" style="width:100%; height:100%; border:0; background:#fff; border-radius:8px;"></iframe>
       </div>
     </main>
   </div>
 
-<!-- ================== SCRIPT ================== -->
 <script>
 (function(){
-  const state = { logo:null, banner:null, logoUrl:'', bannerUrl:'', order:['about','token','road','team'] };
+  const state = { logo:null, banner:null, logoUrl:'', bannerUrl:'' };
   const el = id => document.getElementById(id);
+  const inputs = [
+    'p_name','p_ticker','p_chain','p_tag','p_ca',
+    'c_accent','c_accent2','c_bg','style_preset','font_preset','opt_noise','opt_marquee',
+    's_about','tok_supply','tok_tax','tok_liq','tok_mint',
+    'l_tg','l_x','l_ds','l_buy','s_road'
+  ].reduce((acc,k)=>{ acc[k]=el(k); return acc; }, {});
 
-  // sticky quick-nav auto build
-  (function buildToc(){
-    const tocWrap = document.getElementById('wgTocLinks');
-    const secs = Array.from(document.querySelectorAll('aside .section[id]'));
-    tocWrap.innerHTML = secs.map(s=>`<a href="#${s.id}">${s.querySelector('h2')?.textContent || s.id}</a>`).join('');
-    const links = Array.from(tocWrap.querySelectorAll('a'));
-    const linkFor = id => links.find(a => a.getAttribute('href') === '#'+id);
-    const obs = new IntersectionObserver(entries=>{
-      const a = entries.filter(e=>e.isIntersecting).sort((x,y)=>x.boundingClientRect.top - y.boundingClientRect.top)[0];
-      if(!a) return; links.forEach(n=>n.classList.remove('active')); linkFor(a.target.id)?.classList.add('active');
-    },{root:document.querySelector('aside'),threshold:.2});
-    secs.forEach(s=>obs.observe(s));
-  })();
+  // Drag & Drop Logic
+  const setupDrop = (dropId, fileId, key) => {
+    const d = el(dropId), f = el(fileId);
+    d.addEventListener('click', () => f.click());
+    f.addEventListener('change', () => { if(f.files[0]) handleFile(f.files[0], key); });
+    d.addEventListener('dragover', e => { e.preventDefault(); d.classList.add('drag'); });
+    d.addEventListener('dragleave', () => d.classList.remove('drag'));
+    d.addEventListener('drop', e => { e.preventDefault(); d.classList.remove('drag'); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], key); });
+  };
+  const handleFile = (file, key) => {
+    state[key] = file;
+    state[key+'Url'] = URL.createObjectURL(file);
+    updatePreview();
+  };
+  setupDrop('logoDrop', 'logoFile', 'logo');
+  setupDrop('bannerDrop', 'bannerFile', 'banner');
 
-  // controls
-  const ids = [
-    'p_name','p_ticker','p_chain','p_ca','p_tag',
-    'style_preset','c_accent','c_accent2','c_accent3','c_bg','c_radius',
-    'l_site','l_x','l_tg','l_ds','l_wp',
-    's_about_e','s_about','s_token_e','tok_supply','tok_dec','tok_buy','tok_sell','tok_alloc',
-    's_road_e','s_road','s_team_e','s_team','s_disclaimer_e','s_disclaimer',
-    'adv_font_title','adv_font_body','adv_shadow','adv_grad','adv_noise','adv_hero_flip','adv_border','adv_button','adv_width'
-  ];
-  const inputs = ids.reduce((o,k)=> (o[k]=el(k),o), {});
-  const preview = el('preview');
-  const refreshBtn = el('refreshBtn');
-  const exportBtn = el('exportZip');
+  // --- GENERATOR ENGINE ---
 
-  // media
-  const logoFile = el('logoFile'), bannerFile = el('bannerFile');
-  const logoBrowse=el('logoBrowse'), bannerBrowse=el('bannerBrowse');
-  const logoDrop=el('logoDrop'), bannerDrop=el('bannerDrop');
+  function generateCSS(d) {
+    const fonts = {
+      sans: "'Inter', sans-serif",
+      impact: "'Impact', 'Inter', sans-serif",
+      mono: "'Space Mono', monospace",
+      display: "'Clash Display', sans-serif"
+    }[d.font] || "sans-serif";
 
-  logoBrowse.addEventListener('click', ()=>logoFile.click());
-  bannerBrowse.addEventListener('click', ()=>bannerFile.click());
-  ['dragenter','dragover'].forEach(evt=>logoDrop.addEventListener(evt, e=>{e.preventDefault();logoDrop.classList.add('drag');}));
-  ;['dragleave','drop'].forEach(evt=>logoDrop.addEventListener(evt, e=>{e.preventDefault();logoDrop.classList.remove('drag');}));
-  logoDrop.addEventListener('drop', e=>{ const f=e.dataTransfer.files?.[0]; if(f){ setLogo(f); }});
-  ['dragenter','dragover'].forEach(evt=>bannerDrop.addEventListener(evt, e=>{e.preventDefault();bannerDrop.classList.add('drag');}));
-  ;['dragleave','drop'].forEach(evt=>bannerDrop.addEventListener(evt, e=>{e.preventDefault();bannerDrop.classList.remove('drag');}));
-  bannerDrop.addEventListener('drop', e=>{ const f=e.dataTransfer.files?.[0]; if(f){ setBanner(f); }});
-  logoFile.addEventListener('change', ()=>{ if(logoFile.files[0]) setLogo(logoFile.files[0]); });
-  bannerFile.addEventListener('change', ()=>{ if(bannerFile.files[0]) setBanner(bannerFile.files[0]); });
+    // Common Base
+    let css = `
+      :root {
+        --primary: ${d.accent}; --secondary: ${d.accent2}; --bg: ${d.bg};
+        --text: #ffffff; --text-muted: rgba(255,255,255,0.6);
+        --font-main: ${fonts};
+        --max-w: 1200px;
+        --radius: 16px;
+      }
+      * { box-sizing: border-box; outline: none; }
+      html { scroll-behavior: smooth; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-main); overflow-x: hidden; }
+      a { text-decoration: none; color: inherit; transition: .2s; }
+      img { max-width: 100%; display: block; }
+      
+      /* Utilities */
+      .container { max-width: var(--max-w); margin: 0 auto; padding: 0 20px; }
+      .flex { display: flex; align-items: center; gap: 10px; }
+      .grid { display: grid; gap: 20px; }
+      .section { padding: 80px 0; position: relative; }
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 12px 24px; font-weight: 700; border-radius: var(--radius);
+        background: var(--primary); color: #fff; cursor: pointer;
+        transition: transform .1s, filter .2s;
+        border: none; font-size: 1rem;
+      }
+      .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+      .btn:active { transform: translateY(0); }
+      .btn.outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+      
+      /* Animations */
+      @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+      .reveal { animation: fadeUp 0.8s ease-out forwards; opacity: 0; }
+      .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
 
-  function setLogo(f){ state.logo=f; state.logoUrl=URL.createObjectURL(f); buildPreview(); }
-  function setBanner(f){ state.banner=f; state.bannerUrl=URL.createObjectURL(f); buildPreview(); }
+      /* Marquee */
+      .marquee { background: var(--primary); color: #fff; padding: 12px 0; overflow: hidden; white-space: nowrap; position: relative; transform: rotate(-1deg) scale(1.02); }
+      .track { display: inline-block; animation: scroll 20s linear infinite; font-weight: 900; text-transform: uppercase; font-size: 1.2rem; }
+      @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    `;
 
-  /* ===== THEME ===== */
-  function presetVars(type, vars){
-    const base = {
-      accent: vars.accent, accent2: vars.accent2, accent3: vars.accent3,
-      bg: vars.bg, radius: vars.radius,
-      fontTitle: `800 36px '${inputs.adv_font_title.value}', system-ui`,
-      fontBody: `15px '${inputs.adv_font_body.value}', system-ui`,
-      shadowAmt: +inputs.adv_shadow.value, gradAmt: +inputs.adv_grad.value,
-      noise: inputs.adv_noise.checked, heroFlip: inputs.adv_hero_flip.checked,
-      borderStyle: inputs.adv_border.value, buttonShape: inputs.adv_button.value,
-      maxWidth: +inputs.adv_width.value
-    };
-    if(type==='serious')  return {...base, theme:'serious', decoration:'none'};
-    if(type==='cartoony') return {...base, theme:'cartoony', decoration:'comic', fontTitle:`900 40px 'Impact', Haettenschweiler, 'Arial Black', sans-serif`};
-    if(type==='neon')     return {...base, theme:'neon', decoration:'neon'};
-    if(type==='glass')    return {...base, theme:'glass', decoration:'glass'};
-    if(type==='retro')    return {...base, theme:'retro', decoration:'crt', accent:'#2bff88', accent2:'#57ffa1', fontBody:`14px 'IBM Plex Mono', ui-monospace, SFMono-Regular`};
-    return {...base, theme:'zine', decoration:'zine', fontTitle:`900 36px 'Archivo Black', system-ui`};
+    // Theme Specifics
+    if (d.theme === 'modern') {
+      css += `
+        body { background: radial-gradient(circle at 15% 10%, ${d.accent}22, transparent 40%), radial-gradient(circle at 85% 80%, ${d.accent2}22, transparent 40%), var(--bg); }
+        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius: var(--radius); padding: 24px; }
+        h1 { font-size: clamp(3rem, 8vw, 5rem); font-weight: 800; letter-spacing: -2px; line-height: 1.1; background: linear-gradient(135deg, #fff, rgba(255,255,255,0.5)); -webkit-background-clip: text; color: transparent; }
+        nav { position: sticky; top: 20px; z-index: 100; margin-top: 20px; }
+        .nav-inner { background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; max-width: 600px; margin: 0 auto; }
+        .hero-img { filter: drop-shadow(0 0 40px ${d.accent}66); animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+      `;
+    } else if (d.theme === 'brutal') {
+      css += `
+        :root { --radius: 0px; }
+        body { background: var(--bg); }
+        .card { background: #fff; color: #000; border: 4px solid #000; box-shadow: 8px 8px 0 #000; padding: 20px; }
+        .btn { background: var(--primary); color: #000; border: 3px solid #000; box-shadow: 4px 4px 0 #000; border-radius: 0; text-transform: uppercase; }
+        .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #000; }
+        h1 { font-size: clamp(3rem, 10vw, 6rem); text-transform: uppercase; -webkit-text-stroke: 2px #fff; color: transparent; line-height: 0.9; }
+        .nav-inner { background: #fff; border: 3px solid #000; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; color:#000; font-weight:bold; }
+        .marquee { transform: none; border-top: 3px solid #000; border-bottom: 3px solid #000; }
+      `;
+    } else if (d.theme === 'retro') {
+      css += `
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; }
+        .container { max-width: 900px; border-left: 1px solid #003300; border-right: 1px solid #003300; min-height:100vh; background: #000a00; }
+        h1 { text-shadow: 0 0 10px #0f0; text-transform: lowercase; }
+        .card { border: 1px solid #0f0; background: #001100; padding: 16px; position:relative; }
+        .card::before { content:'['; position:absolute; top:-10px; left:10px; background:#000a00; padding:0 5px; color:#0f0; }
+        .btn { background: #0f0; color: #000; border-radius: 0; text-transform: lowercase; }
+        .btn:hover { background: #fff; }
+        .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 999; }
+      `;
+    } else {
+      // Clean
+      css += `
+        body { background: #fff; color: #111; }
+        .card { background: #f8f9fa; border-radius: 12px; padding: 24px; border: 1px solid #e9ecef; }
+        h1 { color: #111; letter-spacing: -1px; font-weight: 800; }
+        .btn { border-radius: 8px; }
+        .nav-inner { border-bottom: 1px solid #eee; padding: 20px 0; display:flex; justify-content:space-between; }
+        :root { --text: #111; --text-muted: #666; }
+      `;
+    }
+
+    if (d.noise) {
+      css += `body::after { content: ""; position: fixed; inset: 0; background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E'); pointer-events: none; z-index: 9999; }`;
+    }
+
+    return css;
   }
 
-  function hex2rgba(hex,a){
-    try{const h=hex.replace('#','');const b=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);
-      const r=(b>>16)&255,g=(b>>8)&255,bl=b&255; return `rgba(${r},${g},${bl},${a})`;
-    }catch(e){return `rgba(59,130,246,${a})`;}
-  }
-
-  function commonCss(v){
-    const border = v.borderStyle==='hard' ? '1px solid #3a4263' :
-                   v.borderStyle==='dashed' ? '2px dashed #39405f' : '1px solid #22273a';
-    const btnRadius = v.buttonShape==='pill' ? '999px' : v.buttonShape==='square' ? '8px' : '12px';
-    const bgBase = v.bg==='memeportal'
-      ? `radial-gradient(1200px 800px at 10% -10%, ${hex2rgba(v.accent2,.22*v.gradAmt)}, transparent),
-         radial-gradient(900px 700px at 120% 10%, ${hex2rgba(v.accent,.22*v.gradAmt)}, transparent),
-         radial-gradient(1200px 900px at 50% 120%, ${hex2rgba(v.accent3||'#3b82f6', .18+.3*v.gradAmt)}, transparent),
-         #0f1115`
-      : v.bg==='radial'
-      ? `radial-gradient(900px 700px at 120% 10%, ${hex2rgba(v.accent,.45*v.gradAmt)}, transparent),
-         radial-gradient(900px 700px at -20% 120%, ${hex2rgba(v.accent3||'#3b82f6', .35*v.gradAmt)}, transparent),
-         #0e1016`
-      : `#0e1016`;
-    const shadow = `0 ${8+16*v.shadowAmt}px ${20+40*v.shadowAmt}px rgba(0,0,0, ${.25+.35*v.shadowAmt})`;
-    const noise = v.noise ? `
-      body::before{content:'';position:fixed;inset:0;pointer-events:none;background:
-       url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity=".025"/></svg>') repeat}
-    ` : '';
-    return `
-:root{--accent:${v.accent};--accent2:${v.accent2};--accent3:${v.accent3};--radius:${v.radius}px;--border:#22273a;--card:#10131c;--muted:#8892a6;--text:#e6e9ef}
-*{box-sizing:border-box}
-body{margin:0;color:var(--text);background:${bgBase};font:${v.fontBody}}
-${noise}
-.container{max-width:${v.maxWidth}px;margin:0 auto;padding:20px}
-.card{background:var(--card);border:${border};border-radius:var(--radius);box-shadow:${shadow}}
-.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid #2b3352;background:#0f1424;color:#fff;padding:10px 14px;border-radius:${btnRadius};text-decoration:none;font-weight:800}
-.btn:hover{border-color:#39436c}
-.section{padding:16px}
-.h2{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#9aa6c6;margin:0 0 10px}
-.list{display:grid;gap:10px}
-.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.kpi .item{padding:12px;border-radius:12px;border:1px solid var(--border);background:#0b0f17}
-.kpi .item .t{font-size:12px;color:#9aa6c6}
-.kpi .item .v{font-size:18px;font-weight:900;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
-.tokenomics{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-.tokenomics .card{padding:14px}
-.timeline{position:relative;padding-left:22px}
-.timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:linear-gradient(var(--accent),var(--accent2))}
-.timeline .step{position:relative;margin:10px 0;padding:10px 12px;background:#0b0f17;border:1px solid var(--border);border-radius:12px}
-.timeline .step::before{content:'';position:absolute;left:-6px;top:12px;width:10px;height:10px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-.footer{display:flex;justify-content:space-between;align-items:center;padding:14px 0;color:#9aa6c6}
-.header-logo{width:40px;height:40px;border-radius:10px;object-fit:contain;background:#0b0f17;border:1px solid var(--border);padding:4px}
-.logo-fallback{width:40px;height:40px;border-radius:12px;background:conic-gradient(from 210deg,var(--accent),var(--accent2))}
-a{color:#c8d2ff}
-@media (max-width:900px){
-  .split{grid-template-columns:1fr}
-  .container{padding:14px}
-  .kpi{grid-template-columns:repeat(2,1fr)}
-}
-@media (max-width:600px){ .kpi{grid-template-columns:1fr} }
-img.banner{width:100%;height:clamp(220px,34vh,360px);object-fit:cover;display:block;border-radius:16px;border:1px solid var(--border)}
-`; }
-
-  function themeCss(v){
-    if(v.theme==='cartoony'){ return `
-body{background:#131525}
-.card{border:4px solid #1a1846}
-.comic-hero{position:relative;overflow:hidden;border-radius:18px;background:
-  radial-gradient(80% 100% at 20% -10%, ${v.accent}22 0, transparent 60%),
-  radial-gradient(80% 100% at 120% 10%, ${v.accent2}22 0, transparent 60%), #0f1022}
-.comic-topper{height:12px;background:repeating-linear-gradient(45deg,#0000 0 4px,#341b7a 4px 8px,#0000 8px 12px)}
-.comic-title{-webkit-text-stroke:3px #341b7a;color:#fff;letter-spacing:.5px}
-.speech{background:#fff;color:#111;border-radius:16px 16px 16px 2px;padding:10px 14px;border:3px solid #111;box-shadow:6px 6px 0 #0007}
-.halftone{background-image:radial-gradient(#ffffff33 1px, transparent 1px);background-size:6px 6px;mix-blend-mode:overlay;position:absolute;inset:0;pointer-events:none}
-.split{display:grid;grid-template-columns:1.4fr .8fr;gap:16px}
-@media (max-width:900px){.split{grid-template-columns:1fr}}
-.zigzag{height:12px;background:
- linear-gradient(135deg,transparent 8px,#1a1846 0) left,
- linear-gradient(-135deg,transparent 8px,#1a1846 0) right;
- background-size:16px 100%; background-repeat:no-repeat}
-img.banner{height:280px;border:5px solid #1a1846;border-radius:14px}
-.tokenomics .card{border:3px solid #111;background:#fff;color:#111;box-shadow:6px 6px 0 #0007}
-.timeline .step{border:3px solid #1a1846;background:#0e1130;color:#dbe0ff}
-`; }
-    if(v.theme==='neon'){ return `
-body{background:#05060c}
-.grid-bg{position:absolute;inset:0;background:
-  linear-gradient(transparent 0 60%, ${v.accent}11 60% 61%,transparent 61%),
-  linear-gradient(90deg,transparent 0 60%, ${v.accent2}11 60% 61%,transparent 61%);background-size:40px 40px;filter:blur(.3px)}
-.neon-hero{position:relative;border-radius:20px;background:#0a0b18;border:1px solid #20254a;box-shadow:0 0 40px ${v.accent}33 inset, 0 0 60px ${v.accent2}22}
-.neon-title{font-weight:900;letter-spacing:.5px;text-shadow:0 0 10px ${v.accent}, 0 0 24px ${v.accent2}}
-.neon-chip{border:1px solid #2a3263;border-radius:999px;padding:6px 10px;background:#0c1227}
-.btn{box-shadow:0 0 12px ${v.accent}55 inset, 0 0 18px ${v.accent2}44}
-img.banner{border-radius:18px;border:1px solid #2a3263}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media (max-width:900px){.split{grid-template-columns:1fr}}
-.tokenomics .card{background:#0b0f1f;border:1px solid #2a3263;box-shadow:0 0 24px ${v.accent2}22 inset}
-.timeline .step{background:#0b0f1f;border:1px solid #2a3263}
-`; }
-    if(v.theme==='glass'){ return `
-body{background:radial-gradient(1200px 800px at 10% -10%, ${v.accent2}11, transparent),radial-gradient(1200px 800px at 120% 10%, ${v.accent}11, transparent), #0a0c12}
-.card{background:rgba(16,19,28,.55);backdrop-filter:saturate(1.2) blur(12px);border:1px solid #2a314d}
-.glass-hero{position:relative;border-radius:20px;background:linear-gradient(180deg,#0b1020aa,#0c1022aa)}
-img.banner{border-radius:20px;filter:saturate(1.1) contrast(1.05)}
-.split{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
-@media (max-width:900px){.split{grid-template-columns:1fr}}
-.tokenomics .card{background:rgba(12,16,28,.6);backdrop-filter:blur(6px);border:1px solid #2a314d}
-.timeline .step{background:rgba(12,16,28,.6);backdrop-filter:blur(4px);border:1px solid #2a314d}
-`; }
-    if(v.theme==='retro'){ return `
-body{color:#caffd7;background:#03130a}
-.container{filter:contrast(1.1)}
-.card{background:#06180c;border:1px solid #123a23}
-.crt-scan::after{content:'';position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg, rgba(0,0,0,.14), rgba(0,0,0,.14) 1px, transparent 1px, transparent 3px)}
-.mono{font-family:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
-.btn{border-color:#1f6a3c;background:#052313}
-img.banner{border:1px solid #1f6a3c;border-radius:10px}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media (max-width:900px){.split{grid-template-columns:1fr}}
-.tokenomics .card{background:#03160a;border:1px solid #1f6a3c}
-.timeline .step{background:#03160a;border:1px solid #1f6a3c}
-`; }
-    if(v.theme==='zine'){ return `
-body{background:#0e0f14}
-.card{background:#0c0f17;border:2px solid #0a0c14;box-shadow:8px 8px 0 #00000055}
-.torn{position:relative}
-.torn:before{content:'';position:absolute;inset:-14px -14px auto -14px;height:28px;
-  background:linear-gradient(-45deg, #fff 12px, transparent 12px) 0 0/28px 28px,
-             linear-gradient(45deg,  #fff 12px, transparent 12px) 0 0/28px 28px;
-  mix-blend-mode:overlay;opacity:.06}
-.tape{position:absolute;width:110px;height:28px;background:#e9e9d9aa;top:-10px;left:16px;transform:rotate(-6deg)}
-img.banner{border:4px solid #000;border-radius:6px;filter:grayscale(.1) contrast(1.05)}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media (max-width:900px){.split{grid-template-columns:1fr}}
-.stamp{display:inline-block;border:3px dashed #fff3;padding:6px 10px;transform:rotate(-3deg)}
-.tokenomics .card{border:3px dashed #fff3;background:#0a0d16}
-.timeline .step{border:3px dashed #fff3;background:#0a0d16}
-`; }
-    return `
-.hero{position:relative;overflow:hidden;border-radius:calc(var(--radius) + 6px)}
-.hero .inner{display:grid;grid-template-columns:420px 1fr;gap:24px;align-items:center;padding:28px}
-@media (max-width:900px){.hero .inner{grid-template-columns:1fr;padding:20px}}
-.hero .badge{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
-.hero h1{font:${v.fontTitle};margin:6px 0 4px}
-.hero p{color:var(--muted);margin:0 0 12px}
-.hero .cta{display:flex;gap:10px;flex-wrap:wrap}
-.hero .gfx{position:absolute;inset:auto -80px -80px auto;opacity:.6;filter:blur(40px);pointer-events:none}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media (max-width:900px){.split{grid-template-columns:1fr}}
-`; }
-
-  function siteCss(v){ return commonCss(v) + themeCss(v); }
-
-  /* HERO builders (same as previous messages) */
-  function heroSerious(d,v){return `
-<section class="hero card section" style="margin-top:14px">
-  <div class="inner">
-    <div>
-      <div class="badge">${esc(d.ticker)} / ${esc(d.chain)}</div>
-      <h1>${esc(d.name)}</h1>
-      <p>${esc(d.tagline)}</p>
-      ${d.ca? `<div class="kpi" style="grid-template-columns:1fr"><div class="item"><div class="t">CA</div><div class="v" style="word-break:break-all">${esc(d.ca)}</div></div></div>`:''}
-      <div class="cta" style="margin-top:10px">
-        ${d.links.site? `<a class="btn" href="${esc(d.links.site)}">Website</a>`:''}
-        ${d.links.x? `<a class="btn" href="${esc(d.links.x)}">Twitter/X</a>`:''}
-        ${d.links.wp? `<a class="btn" href="${esc(d.links.wp)}">Whitepaper</a>`:''}
-      </div>
-    </div>
-    <div style="justify-self:end;align-self:center">
-      ${d.logoSrc? `<img src="${esc(d.logoSrc)}" alt="Logo" style="width:180px;height:180px;object-fit:contain;border-radius:18px;border:1px solid var(--border);background:#0b0f17;padding:12px">`:
-        `<div style="width:180px;height:180px;border-radius:18px;border:1px dashed var(--border);display:grid;place-items:center;color:#9aa6c6">Logo</div>`}
-    </div>
-  </div>
-</section>`;}
-  function heroCartoony(d,v){return `
-<section class="comic-hero card torn" style="margin-top:14px">
-  <div class="comic-topper"></div>
-  <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 360px':'360px 1fr'};gap:22px;align-items:center;padding:22px 22px 12px">
-    <div style="${v.heroFlip?'order:2':''}">
-      <div class="speech"><b>${esc(d.ticker)}</b> on <b>${esc(d.chain)}</b> — let's go!</div>
-      <h1 class="comic-title" style="margin:12px 0 6px">${esc(d.name)}</h1>
-      <p style="color:#cdd2ff">${esc(d.tagline)}</p>
-      ${d.ca? `<div class="stamp" style="margin:10px 0; color:#fff">${esc(d.ca).slice(0,10)}…</div>`:''}
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-        ${d.links.site? `<a class="btn" href="${esc(d.links.site)}">Website</a>`:''}
-        ${d.links.x? `<a class="btn" href="${esc(d.links.x)}">Twitter/X</a>`:''}
-        ${d.links.wp? `<a class="btn" href="${esc(d.links.wp)}">Whitepaper</a>`:''}
-      </div>
-    </div>
-    <div style="justify-self:end">
-      ${d.logoSrc? `<img src="${esc(d.logoSrc)}" class="sticker" alt="Logo" style="width:220px;height:220px;object-fit:contain;background:#fff;border-radius:14px;padding:12px">`:
-      `<div class="sticker" style="width:220px;height:220px;border-radius:14px;display:grid;place-items:center;background:#fff;color:#111">Logo</div>`}
-    </div>
-  </div>
-  <div class="halftone"></div>
-  <div class="zigzag"></div>
-</section>`;}
-  function heroNeon(d,v){return `
-<section class="neon-hero card" style="margin-top:14px;position:relative;overflow:hidden">
-  <div class="grid-bg"></div>
-  <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 380px':'380px 1fr'};gap:24px;align-items:center;padding:26px;position:relative">
-    <div style="${v.heroFlip?'order:2':''}">
-      <div class="neon-chip">${esc(d.ticker)} / ${esc(d.chain)}</div>
-      <h1 class="neon-title" style="margin:8px 0 6px">${esc(d.name)}</h1>
-      <p style="color:#a8b2ff">${esc(d.tagline)}</p>
-      ${d.ca? `<div class="kpi" style="grid-template-columns:1fr"><div class="item"><div class="t">CA</div><div class="v" style="word-break:break-all">${esc(d.ca)}</div></div></div>`:''}
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-        ${d.links.site? `<a class="btn" href="${esc(d.links.site)}">Website</a>`:''}
-        ${d.links.x? `<a class="btn" href="${esc(d.links.x)}">Twitter/X</a>`:''}
-        ${d.links.wp? `<a class="btn" href="${esc(d.links.wp)}">Whitepaper</a>`:''}
-      </div>
-    </div>
-    <div style="justify-self:end">
-      ${d.logoSrc? `<img src="${esc(d.logoSrc)}" alt="Logo" style="width:220px;height:220px;object-fit:contain;border-radius:18px;border:1px solid #2a3263;background:#0b0f17;padding:14px;box-shadow:0 0 30px ${v.accent2}66">`:
-      `<div style="width:220px;height:220px;border-radius:18px;border:1px dashed #2a3263;display:grid;place-items:center;color:#9aa6c6">Logo</div>`}
-    </div>
-  </div>
-</section>`;}
-  function heroGlass(d,v){return `
-<section class="glass-hero card" style="margin-top:14px">
-  <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 360px':'360px 1fr'};gap:22px;align-items:center;padding:24px">
-    <div style="${v.heroFlip?'order:2':''}">
-      <div class="h2" style="margin:0">${esc(d.ticker)} on ${esc(d.chain)}</div>
-      <h1 style="font:${v.fontTitle};margin:6px 0 6px">${esc(d.name)}</h1>
-      <p style="color:#c7d1ff">${esc(d.tagline)}</p>
-      ${d.ca? `<div class="kpi" style="grid-template-columns:1fr"><div class="item"><div class="t">CA</div><div class="v" style="word-break:break-all">${esc(d.ca)}</div></div></div>`:''}
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-        ${d.links.site? `<a class="btn" href="${esc(d.links.site)}">Website</a>`:''}
-        ${d.links.x? `<a class="btn" href="${esc(d.links.x)}">Twitter/X</a>`:''}
-        ${d.links.wp? `<a class="btn" href="${esc(d.links.wp)}">Whitepaper</a>`:''}
-      </div>
-    </div>
-    <div style="justify-self:end">
-      ${d.logoSrc? `<img src="${esc(d.logoSrc)}" alt="Logo" style="width:200px;height:200px;object-fit:contain;border-radius:22px;border:1px solid #2a314d;background:#0b0f17aa;padding:16px;backdrop-filter:blur(6px)">`:
-      `<div style="width:200px;height:200px;border-radius:22px;border:1px dashed #2a314d;display:grid;place-items:center;color:#9aa6c6">Logo</div>`}
-    </div>
-  </div>
-</section>`;}
-  function heroRetro(d,v){return `
-<section class="card mono crt-scan" style="margin-top:14px">
-  <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 360px':'360px 1fr'};gap:20px;align-items:center;padding:18px">
-    <div style="${v.heroFlip?'order:2':''}">
-      <div class="h2 mono" style="margin:0">:: ${esc(d.ticker)} @ ${esc(d.chain)}</div>
-      <h1 class="mono" style="font-weight:900;margin:6px 0 4px">${esc(d.name)}</h1>
-      <p class="mono" style="color:#86ffbd">${esc(d.tagline)}</p>
-      ${d.ca? `<pre class="mono" style="white-space:pre-wrap;word-break:break-all;background:#03160a;padding:8px;border:1px solid #144e2b;border-radius:8px">CA ${esc(d.ca)}</pre>`:''}
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        ${d.links.site? `<a class="btn" href="${esc(d.links.site)}">open(site)</a>`:''}
-        ${d.links.x? `<a class="btn" href="${esc(d.links.x)}">open(x)</a>`:''}
-        ${d.links.wp? `<a class="btn" href="${esc(d.links.wp)}">open(whitepaper)</a>`:''}
-      </div>
-    </div>
-    <div style="justify-self:end">
-      ${d.logoSrc? `<img src="${esc(d.logoSrc)}" alt="Logo" style="width:200px;height:200px;object-fit:contain;border-radius:10px;border:1px solid #1f6a3c;background:#03160a;padding:10px">`:
-      `<div style="width:200px;height:200px;border-radius:10px;border:1px dashed #1f6a3c;display:grid;place-items:center;color:#86ffbd" class="mono">Logo</div>`}
-    </div>
-  </div>
-</section>`;}
-  function heroZine(d,v){return `
-<section class="card torn" style="margin-top:14px;position:relative">
-  <div class="tape"></div>
-  <div style="display:grid;grid-template-columns:${v.heroFlip?'1fr 320px':'320px 1fr'};gap:18px;align-items:center;padding:18px">
-    <div style="${v.heroFlip?'order:2':''}">
-      <div class="stamp" style="color:#fff">${esc(d.ticker)} / ${esc(d.chain)}</div>
-      <h1 class="title-outline" style="margin:10px 0 6px">${esc(d.name)}</h1>
-      <p style="color:#c7d1ff">${esc(d.tagline)}</p>
-      ${d.ca? `<div class="stamp" style="margin:8px 0;color:#fff">${esc(d.ca).slice(0,14)}…</div>`:''}
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-        ${d.links.site? `<a class="btn" href="${esc(d.links.site)}">Website</a>`:''}
-        ${d.links.x? `<a class="btn" href="${esc(d.links.x)}">Twitter/X</a>`:''}
-        ${d.links.wp? `<a class="btn" href="${esc(d.links.wp)}">Whitepaper</a>`:''}
-      </div>
-    </div>
-    <div style="justify-self:end">
-      ${d.logoSrc? `<img src="${esc(d.logoSrc)}" class="sticker" alt="Logo" style="width:200px;height:200px;object-fit:contain;background:#fff;border-radius:8px;padding:12px">`:
-      `<div class="sticker" style="width:200px;height:200px;border-radius:8px;display:grid;place-items:center;background:#fff;color:#111">Logo</div>`}
-    </div>
-  </div>
-</section>`;}
-
-  function sectionsHtml(d,v){
-    const about = d.aboutEnabled? `
-      <div class="${v.theme==='zine'?'card torn':'card'} section">
-        <div class="h2">${v.theme==='retro'?'ABOUT::':'About'}</div>
-        <div>${nl2br(esc(d.about))}</div>
-      </div>`:'';
-    const token = d.tokenEnabled? `
-      <div class="${v.theme==='zine'?'card torn':'card'} section">
-        <div class="h2">${v.theme==='retro'?'TOKENOMICS::':'Tokenomics'}</div>
-        <div class="tokenomics">
-          <div class="card"><div class="t">Supply</div><div class="v">${esc(d.supply)}</div></div>
-          <div class="card"><div class="t">Decimals</div><div class="v">${esc(d.dec)}</div></div>
-          <div class="card"><div class="t">Buy Tax</div><div class="v">${esc(d.buy)}%</div></div>
-          <div class="card"><div class="t">Sell Tax</div><div class="v">${esc(d.sell)}%</div></div>
-          ${parseAllocations(d.tokAlloc).map(a=>`<div class="card"><div class="t">${esc(a.k)}</div><div class="v">${esc(a.v)}%</div></div>`).join('')}
+  function generateHTML(d) {
+    const css = generateCSS(d);
+    
+    // Logic Helpers
+    const marqueeTxt = Array(10).fill(`${d.ticker} $${d.ticker}`).join(" &nbsp; • &nbsp; ");
+    const logoImg = d.logoSrc ? `<img src="${d.logoSrc}" alt="Logo" style="height:40px; width:auto;">` : `<div style="font-weight:900;">${d.ticker}</div>`;
+    const heroLogo = d.logoSrc ? `<img src="${d.logoSrc}" alt="Hero" class="hero-img reveal delay-1" style="width:100%; max-width:400px; margin:0 auto;">` : '';
+    
+    // Bento Grid for Tokenomics
+    const statsHtml = `
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="card reveal delay-1">
+          <div style="font-size:0.9rem; color:var(--text-muted);">Supply</div>
+          <div style="font-size:1.5rem; font-weight:bold; color:var(--primary);">${d.supply}</div>
         </div>
-      </div>`:'';
-    const road = d.roadEnabled? `
-    <section class="${v.theme==='zine'?'card torn':'card'} section" style="margin-top:14px">
-      <div class="h2">${v.theme==='retro'?'ROADMAP::':'Roadmap'}</div>
-      <div class="timeline">${(d.road||'').split('\n').filter(Boolean).map(l=>`<div class="step">${esc(l)}</div>`).join('')}</div>
-    </section>`:'';
-    const team = d.teamEnabled? `
-    <section class="${v.theme==='zine'?'card torn':'card'} section" style="margin-top:14px">
-      <div class="h2">${v.theme==='retro'?'TEAM::':'Team'}</div>
-      <ul class="list">${(d.team||'').split('\n').filter(Boolean).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
-    </section>`:'';
-    return {about, token, road, team};
-  }
-
-  function siteHtml(data){
-    const v = data.vars;
-    const banner = data.bannerSrc? `<img src="${esc(data.bannerSrc)}" class="banner" alt="Banner">` : '';
-    const head = `
-<!DOCTYPE html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(data.name)} — ${esc(data.ticker)}</title>
-<style>${siteCss(v)}</style>
-</head><body class="${v.decoration==='crt'?'crt':''}">`;
-
-    const headerLogo = data.logoSrc
-      ? `<img src="${esc(data.logoSrc)}" alt="Logo" class="header-logo">`
-      : `<div class="logo-fallback" aria-hidden="true"></div>`;
-
-    const header = `
-  <div class="container">
-    <header class="section" style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-      <div style="display:flex;align-items:center;gap:12px">
-        ${headerLogo}
-        <div>
-          <div class="h2" style="margin:0">${esc(data.ticker)} on ${esc(data.chain)}</div>
-          <div style="font-weight:900;font-size:18px">${esc(data.name)}</div>
+        <div class="card reveal delay-2">
+          <div style="font-size:0.9rem; color:var(--text-muted);">Taxes</div>
+          <div style="font-size:1.5rem; font-weight:bold; color:var(--secondary);">${d.tax}</div>
+        </div>
+        <div class="card reveal delay-3">
+          <div style="font-size:0.9rem; color:var(--text-muted);">Liquidity</div>
+          <div style="font-size:1.5rem; font-weight:bold;">${d.liq}</div>
+        </div>
+        <div class="card reveal delay-1">
+          <div style="font-size:0.9rem; color:var(--text-muted);">Mint Auth</div>
+          <div style="font-size:1.5rem; font-weight:bold;">${d.mint}</div>
         </div>
       </div>
-      <div class="kpi" style="grid-template-columns:repeat(2,auto);gap:8px">
-        ${data.links.ds?`<a class="btn" href="${esc(data.links.ds)}">DexScreener</a>`:''}
-        ${data.links.tg?`<a class="btn" href="${esc(data.links.tg)}">Telegram</a>`:''}
+    `;
+
+    // Roadmap List
+    const roadHtml = d.roadmap.split('\n').map((item, i) => 
+      `<div class="card reveal delay-${(i%3)+1}" style="display:flex; align-items:center; gap:15px;">
+         <div style="background:var(--primary); color:#fff; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">${i+1}</div>
+         <div>${item}</div>
+       </div>`
+    ).join('');
+
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${d.name} (${d.ticker})</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;600;700&family=Inter:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>${css}</style>
+</head>
+<body>
+  ${d.theme==='retro' ? '<div class="scanlines"></div>' : ''}
+  
+  <nav class="container">
+    <div class="nav-inner">
+      <div class="logo">${logoImg}</div>
+      <div class="flex">
+        ${d.tg ? `<a href="${d.tg}" target="_blank">TG</a>` : ''}
+        ${d.x ? `<a href="${d.x}" target="_blank">X</a>` : ''}
+        ${d.buy ? `<a href="${d.buy}" target="_blank" class="btn" style="padding:8px 16px; font-size:0.9rem;">Buy Now</a>` : ''}
       </div>
-    </header>
-    ${banner}
-`;
+    </div>
+  </nav>
 
-    const hero = v.theme==='cartoony' ? heroCartoony(data,v)
-               : v.theme==='neon'     ? heroNeon(data,v)
-               : v.theme==='glass'    ? heroGlass(data,v)
-               : v.theme==='retro'    ? heroRetro(data,v)
-               : v.theme==='zine'     ? heroZine(data,v)
-               : heroSerious(data,v);
+  <header class="container section" style="min-height:80vh; display:flex; align-items:center; justify-content:center; text-align:center;">
+    <div style="width:100%;">
+      ${heroLogo}
+      <h1 class="reveal">${d.name}</h1>
+      <p class="reveal delay-1" style="font-size:1.25rem; max-width:600px; margin:20px auto; color:var(--text-muted);">${d.tag}</p>
+      
+      <div class="reveal delay-2" style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap; margin-top:30px;">
+        ${d.buy ? `<a href="${d.buy}" class="btn">Buy ${d.ticker}</a>` : ''}
+        ${d.ds ? `<a href="${d.ds}" class="btn outline">Chart</a>` : ''}
+      </div>
 
-    const {about, token, road, team} = sectionsHtml(data,v);
-    const sectionMap = {about, token, road, team};
-    const ordered = state.order.map(k=>sectionMap[k]).filter(Boolean).join('');
+      ${d.ca ? `
+      <div class="reveal delay-3" style="margin-top:40px;">
+        <div class="card" style="display:inline-flex; align-items:center; gap:10px; padding:10px 20px; cursor:pointer;" onclick="copyCA()">
+          <span style="font-family:monospace; font-size:0.9rem;">${d.ca}</span>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+        </div>
+        <div id="copyMsg" style="font-size:0.8rem; color:var(--primary); height:20px; margin-top:5px; opacity:0; transition:0.3s;">Copied to clipboard!</div>
+      </div>` : ''}
+    </div>
+  </header>
 
-    const foot = data.disclaimerEnabled? `
-    <footer class="footer">
-      <div>© ${new Date().getFullYear()} ${esc(data.name)} — ${esc(data.ticker)}</div>
-      <div>${esc(data.disclaimer)}</div>
-    </footer>` : '';
+  ${d.isMarquee ? `<div class="marquee"><div class="track">${marqueeTxt} ${marqueeTxt}</div></div>` : ''}
 
-    return head + header + hero + '\n' + ordered + foot + '\n  </div>\n</body></html>';
+  <section class="container section">
+    <div class="grid" style="grid-template-columns: 1fr 1fr; align-items:center; gap:40px;">
+      <div class="reveal">
+        <h2 style="font-size:2.5rem; margin-bottom:20px;">About</h2>
+        <p style="font-size:1.1rem; line-height:1.6; color:var(--text-muted);">${d.about.replace(/\n/g, '<br>')}</p>
+      </div>
+      <div class="card reveal delay-1" style="height:300px; display:flex; align-items:center; justify-content:center; font-size:5rem;">
+         🦖
+      </div>
+    </div>
+  </section>
+
+  <section class="container section">
+    <h2 class="reveal" style="font-size:2.5rem; text-align:center; margin-bottom:40px;">Tokenomics</h2>
+    ${statsHtml}
+  </section>
+
+  <section class="container section" style="max-width:800px;">
+    <h2 class="reveal" style="font-size:2.5rem; text-align:center; margin-bottom:40px;">Roadmap</h2>
+    <div class="grid">
+      ${roadHtml}
+    </div>
+  </section>
+
+  <footer class="section" style="text-align:center; margin-top:40px; border-top:1px solid rgba(255,255,255,0.1);">
+    <h2 style="font-size:4rem; opacity:0.1; margin:0;">${d.ticker}</h2>
+    <div style="margin-top:-20px; font-size:0.9rem; color:var(--text-muted);">
+      © ${new Date().getFullYear()} ${d.name}. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    function copyCA() {
+      navigator.clipboard.writeText("${d.ca}");
+      const msg = document.getElementById('copyMsg');
+      msg.style.opacity = '1';
+      setTimeout(() => msg.style.opacity = '0', 2000);
+    }
+    
+    // Simple Scroll Reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+          entry.target.style.opacity = '1';
+        }
+      });
+    });
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+  <\/script>
+</body>
+</html>
+    `;
   }
 
-  /* helpers */
-  const esc = s => String(s||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-  const nl2br = s => s.replace(/\n/g,'<br>');
-  function parseAllocations(str){
-    return (str||'').split(',').map(s=>s.trim()).filter(Boolean).map(s=>{
-      const m=s.split(':'); return {k:(m[0]||'').trim(), v:(m[1]||'').trim()};
-    }).filter(x=>x.k && x.v);
-  }
+  // --- STATE COLLECTION ---
 
-  function collect(){
-    const vars = presetVars(inputs.style_preset.value, {
+  function collectData() {
+    return {
+      name: inputs.p_name.value,
+      ticker: inputs.p_ticker.value,
+      chain: inputs.p_chain.value,
+      tag: inputs.p_tag.value,
+      ca: inputs.p_ca.value,
+      
       accent: inputs.c_accent.value,
       accent2: inputs.c_accent2.value,
-      accent3: inputs.c_accent3.value,
       bg: inputs.c_bg.value,
-      radius: +inputs.c_radius.value
-    });
-
-    return {
-      name: inputs.p_name.value.trim(),
-      ticker: inputs.p_ticker.value.trim(),
-      chain: inputs.p_chain.value,
-      ca: inputs.p_ca.value.trim(),
-      tagline: inputs.p_tag.value.trim(),
-      vars,
-      links: {
-        site: inputs.l_site.value.trim(),
-        x: inputs.l_x.value.trim(),
-        tg: inputs.l_tg.value.trim(),
-        ds: inputs.l_ds.value.trim(),
-        wp: inputs.l_wp.value.trim()
-      },
-      aboutEnabled: inputs.s_about_e.checked,
+      theme: inputs.style_preset.value,
+      font: inputs.font_preset.value,
+      noise: inputs.opt_noise.checked,
+      isMarquee: inputs.opt_marquee.checked,
+      
       about: inputs.s_about.value,
-      tokenEnabled: inputs.s_token_e.checked,
-      supply: inputs.tok_supply.value, dec: inputs.tok_dec.value,
-      buy: inputs.tok_buy.value, sell: inputs.tok_sell.value,
-      tokAlloc: inputs.tok_alloc.value,
-      roadEnabled: inputs.s_road_e.checked, road: inputs.s_road.value,
-      teamEnabled: inputs.s_team_e.checked, team: inputs.s_team.value,
-      disclaimerEnabled: inputs.s_disclaimer_e.checked, disclaimer: inputs.s_disclaimer.value,
-      logoSrc: state.logoUrl, bannerSrc: state.bannerUrl
+      supply: inputs.tok_supply.value,
+      tax: inputs.tok_tax.value,
+      liq: inputs.tok_liq.value,
+      mint: inputs.tok_mint.value,
+      roadmap: inputs.s_road.value,
+      
+      tg: inputs.l_tg.value,
+      x: inputs.l_x.value,
+      ds: inputs.l_ds.value,
+      buy: inputs.l_buy.value,
+      
+      logoSrc: state.logoUrl,
+      bannerSrc: state.bannerUrl
     };
   }
 
-  function buildPreview(){ preview.innerHTML = siteHtml(collect()); }
-
-  // ORDER UI
-  const orderList = document.getElementById('orderList');
-  const SECTION_LABELS = {about:'About', token:'Tokenomics', road:'Roadmap', team:'Team'};
-  function renderOrderUI(){
-    orderList.innerHTML = '';
-    state.order.forEach((key, idx)=>{
-      const row = document.createElement('div');
-      row.className = 'card section';
-      row.style.padding = '10px';
-      row.innerHTML = `
-        <div class="flex" style="justify-content:space-between">
-          <div class="flex" style="gap:8px">
-            <span class="badge">${idx+1}</span>
-            <strong>${SECTION_LABELS[key]}</strong>
-          </div>
-          <div class="flex">
-            <button class="btn" data-act="up" data-key="${key}">↑</button>
-            <button class="btn" data-act="down" data-key="${key}">↓</button>
-          </div>
-        </div>`;
-      orderList.appendChild(row);
-    });
+  function updatePreview() {
+    const data = collectData();
+    const html = generateHTML(data);
+    const frame = el('previewFrame');
+    const doc = frame.contentDocument || frame.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
   }
-  orderList.addEventListener('click', (e)=>{
-    const btn = e.target.closest('button[data-act]');
-    if(!btn) return;
-    const key = btn.dataset.key, act = btn.dataset.act;
-    const i = state.order.indexOf(key);
-    if(i<0) return;
-    if(act==='up' && i>0){ [state.order[i-1], state.order[i]] = [state.order[i], state.order[i-1]]; }
-    if(act==='down' && i<state.order.length-1){ [state.order[i+1], state.order[i]] = [state.order[i], state.order[i+1]]; }
-    renderOrderUI(); buildPreview();
-  });
-  renderOrderUI();
 
-  // live update
-  Object.values(inputs).forEach(i=>{
-    i.addEventListener('input', buildPreview);
-    i.addEventListener('change', buildPreview);
+  // Events
+  Object.values(inputs).forEach(inp => {
+    inp.addEventListener('input', updatePreview);
+    inp.addEventListener('change', updatePreview);
   });
-  buildPreview();
-
-  // export
-  exportBtn.addEventListener('click', async ()=>{
-    const data = collect();
+  
+  el('refreshBtn').addEventListener('click', updatePreview);
+  
+  el('exportZip').addEventListener('click', async () => {
+    const data = collectData();
     const zip = new JSZip();
     const assets = zip.folder('assets');
-    let logoName='', bannerName='';
-    if(state.logo){ logoName = 'logo' + ext(state.logo.name); assets.file(logoName, state.logo); }
-    if(state.banner){ bannerName = 'banner' + ext(state.banner.name); assets.file(bannerName, state.banner); }
-
-    const html = siteHtml({...data, logoSrc: logoName ? 'assets/'+logoName : '', bannerSrc: bannerName ? 'assets/'+bannerName : ''});
-    zip.file('index.html', html);
-
-    const content = await zip.generateAsync({type:'blob'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(content);
-    a.download = (data.ticker||'site')+'_site.zip';
+    
+    let logoPath = '', bannerPath = '';
+    
+    if (state.logo) {
+      const ext = state.logo.name.split('.').pop();
+      logoPath = `assets/logo.${ext}`;
+      assets.file(`logo.${ext}`, state.logo);
+      data.logoSrc = logoPath;
+    }
+    
+    if (state.banner) {
+      const ext = state.banner.name.split('.').pop();
+      bannerPath = `assets/banner.${ext}`;
+      assets.file(`banner.${ext}`, state.banner);
+      data.bannerSrc = bannerPath;
+    }
+    
+    const finalHtml = generateHTML(data);
+    zip.file("index.html", finalHtml);
+    
+    const blob = await zip.generateAsync({type:"blob"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${data.ticker}_website.zip`;
     a.click();
   });
-  const ext = n => (n.toLowerCase().match(/\.[a-z0-9]+$/)||['.png'])[0];
 
-  refreshBtn.addEventListener('click', buildPreview);
+  // Init
+  updatePreview();
+
 })();
 </script>
 </body>
