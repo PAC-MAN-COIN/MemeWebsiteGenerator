@@ -3,16 +3,24 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Memeportal — NextGen Site Generator</title>
+<title>Memeportal — Website Generator</title>
 <link rel="stylesheet" href="style.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   /* Generator Tool Specific Styles */
   :root { --p-bg: #050505; --p-card: #0e0e0e; --p-border: #222; --p-accent: #3b82f6; }
   .preview-pane { position: sticky; top: 20px; height: calc(100vh - 40px); overflow: hidden; display: flex; flex-direction: column; }
-  #preview { flex: 1; border: 0; width: 100%; height: 100%; background: #fff; border-radius: 8px; overflow-y: auto; }
-  /* Simulating the iframe sandbox environment */
-  .preview-frame { isolation: isolate; }
+  #previewFrame { width: 100%; height: 100%; border: 0; background: #000; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+  
+  .color-group { display: flex; gap: 10px; margin-bottom: 15px; }
+  .color-field { flex: 1; display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: #888; }
+  input[type="color"] { width: 100%; height: 35px; padding: 0; border: none; border-radius: 6px; cursor: pointer; }
+  
+  /* Compact Gallery Dropzones */
+  .gal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .gal-drop { padding: 15px 5px; border: 1px dashed #333; text-align: center; border-radius: 8px; cursor: pointer; transition: .2s; background: #0a0a0a; }
+  .gal-drop:hover { border-color: #666; background: #111; }
+  .gal-drop.filled { border-color: var(--p-accent); background: rgba(59, 130, 246, 0.1); }
 </style>
 </head>
 <body>
@@ -40,51 +48,42 @@
       <nav class="toc" id="wgToc"><div class="title">Quick menu</div><div class="row" id="wgTocLinks"></div></nav>
 
       <div class="card section" id="sec-basics">
-        <h2>Brand Identity</h2>
+        <h2>Identity</h2>
         <div class="grid">
-          <div><label>Project Name</label><input id="p_name" type="text" value="MoonBeast"></div>
+          <div><label>Project Name</label><input id="p_name" type="text" value="Memeportal"></div>
           <div class="grid two">
-            <div><label>Ticker</label><input id="p_ticker" type="text" value="$BEAST"></div>
+            <div><label>Ticker</label><input id="p_ticker" type="text" value="$PORTAL"></div>
             <div><label>Chain</label><select id="p_chain"><option>Solana</option><option>Ethereum</option><option>Base</option><option>Sui</option></select></div>
           </div>
-          <div><label>Tagline</label><input id="p_tag" type="text" value="The only beast that feeds on jeets."></div>
-          <div><label>Contract Address (CA)</label><input id="p_ca" type="text" placeholder="Paste CA here"></div>
+          <div><label>Tagline</label><input id="p_tag" type="text" value="The Gateway to Meme Culture"></div>
+          <div><label>Contract Address</label><input id="p_ca" type="text" placeholder="Paste CA here"></div>
         </div>
       </div>
 
       <div class="card section" id="sec-design">
-        <h2>Visual Style</h2>
+        <h2>Vibe & Theme</h2>
         <div class="grid">
-          <div class="grid three">
-            <div><label>Primary</label><input id="c_accent" type="color" value="#8b5cf6"></div>
-            <div><label>Secondary</label><input id="c_accent2" type="color" value="#06b6d4"></div>
-            <div><label>Background</label><input id="c_bg" type="color" value="#050505"></div>
+          <div>
+            <label>Theme Preset</label>
+            <select id="theme_preset">
+              <option value="polar" selected>Polar (Blue/Purple Glass)</option>
+              <option value="magma">Magma (Red/Orange Heat)</option>
+              <option value="venom">Venom (Green/Toxic)</option>
+              <option value="cyber">Cyber (Pink/Neon)</option>
+            </select>
           </div>
-          <div class="grid two">
-            <div>
-              <label>Theme Preset</label>
-              <select id="style_preset">
-                <option value="modern" selected>Modern Dark (Glass)</option>
-                <option value="brutal">Neo-Brutalist (Bold)</option>
-                <option value="retro">Retro Terminal (Matrix)</option>
-                <option value="clean">Clean / Corporate</option>
-              </select>
-            </div>
-            <div>
-              <label>Font Pair</label>
-              <select id="font_preset">
-                <option value="sans">Inter + Manrope (Clean)</option>
-                <option value="impact">Impact + Inter (Meme)</option>
-                <option value="mono">Space Mono (Tech)</option>
-                <option value="display">Clash Display (Trendy)</option>
-              </select>
-            </div>
+
+          <div class="color-group">
+            <div class="color-field"><label>Glow 1</label><input id="c_accent" type="color" value="#7c3aed"></div>
+            <div class="color-field"><label>Glow 2</label><input id="c_accent2" type="color" value="#06b6d4"></div>
+            <div class="color-field"><label>Bg</label><input id="c_bg" type="color" value="#020205"></div>
+          </div>
+          
+          <div class="flex">
+             <input id="opt_noise" type="checkbox" checked><label for="opt_noise">Cinematic Grain</label>
           </div>
           <div class="flex">
-            <input id="opt_noise" type="checkbox" checked><label for="opt_noise">Add Grain/Noise Texture</label>
-          </div>
-          <div class="flex">
-            <input id="opt_marquee" type="checkbox" checked><label for="opt_marquee">Show Infinity Marquee</label>
+             <input id="opt_orb" type="checkbox" checked><label for="opt_orb">Floating Orbs</label>
           </div>
         </div>
       </div>
@@ -94,19 +93,19 @@
         <div class="grid">
           <div class="drop" id="logoDrop">
             <input id="logoFile" type="file" accept="image/*">
-            <div><strong>Logo</strong> (PNG/SVG transparent)<button class="btn ghost" id="logoBrowse">Browse</button></div>
+            <div><strong>Logo</strong> (PNG/SVG)<button class="btn ghost" id="logoBrowse">Browse</button></div>
           </div>
           <div class="drop" id="bannerDrop">
             <input id="bannerFile" type="file" accept="image/*">
-            <div><strong>Hero Banner</strong> (Optional wide img)<button class="btn ghost" id="bannerBrowse">Browse</button></div>
+            <div><strong>Hero Banner</strong> (Wide)<button class="btn ghost" id="bannerBrowse">Browse</button></div>
           </div>
         </div>
       </div>
 
       <div class="card section" id="sec-content">
-        <h2>Content Sections</h2>
+        <h2>Content</h2>
         <div class="grid">
-          <textarea id="s_about" rows="3" placeholder="About text...">MoonBeast is not just a coin, it's a lifestyle. Born on the chain, raised by the community.</textarea>
+          <textarea id="s_about" rows="3">Memeportal is the ultimate destination for next-gen meme assets. Create, share, and vibe.</textarea>
           
           <label>Tokenomics</label>
           <div class="grid two">
@@ -116,208 +115,293 @@
             <div><label>Mint</label><input id="tok_mint" type="text" value="Revoked"></div>
           </div>
 
-          <label>Social Links</label>
-          <div class="grid two">
-            <input id="l_tg" type="text" placeholder="Telegram URL">
-            <input id="l_x" type="text" placeholder="X / Twitter URL">
-            <input id="l_ds" type="text" placeholder="DexScreener URL">
-            <input id="l_buy" type="text" placeholder="Buy Link (Pump/Raydium)">
+          <div class="flex">
+             <input id="opt_roadmap" type="checkbox" checked><label for="opt_roadmap">Enable Roadmap</label>
+          </div>
+          <textarea id="s_road" rows="3">Phase 1: Stealth Launch
+Phase 2: Vibe & HODL
+Phase 3: Moon Mission</textarea>
+
+          <div class="flex">
+             <input id="opt_gallery" type="checkbox" checked><label for="opt_gallery">Enable Meme Gallery</label>
+          </div>
+          <div class="tiny muted" style="margin-top:-10px; margin-bottom:5px;">Upload 1 to 4 images. Empty slots are ignored.</div>
+          
+          <div class="gal-grid">
+            <div class="gal-drop" id="gal1Drop">
+              <input id="gal1File" type="file" accept="image/*" hidden>
+              <div class="tiny">Image 1</div>
+            </div>
+            <div class="gal-drop" id="gal2Drop">
+              <input id="gal2File" type="file" accept="image/*" hidden>
+              <div class="tiny">Image 2</div>
+            </div>
+            <div class="gal-drop" id="gal3Drop">
+              <input id="gal3File" type="file" accept="image/*" hidden>
+              <div class="tiny">Image 3</div>
+            </div>
+            <div class="gal-drop" id="gal4Drop">
+              <input id="gal4File" type="file" accept="image/*" hidden>
+              <div class="tiny">Image 4</div>
+            </div>
           </div>
 
-          <label>Roadmap (One item per line)</label>
-          <textarea id="s_road" rows="3">Phase 1: Launch & Vibe
-Phase 2: 1000 Holders
-Phase 3: Utility Drop</textarea>
+          <label>Links</label>
+          <div class="grid two">
+            <input id="l_tg" type="text" placeholder="Telegram URL" value="https://t.me/">
+            <input id="l_x" type="text" placeholder="X / Twitter URL" value="https://x.com/">
+            <input id="l_ds" type="text" placeholder="DexScreener URL" value="https://dexscreener.com/">
+            <input id="l_buy" type="text" placeholder="Buy Link" value="https://raydium.io/">
+          </div>
         </div>
       </div>
 
       <div class="card section" id="sec-actions">
         <h2>Export</h2>
         <div class="toolbar right">
-          <button class="btn primary" id="refreshBtn">Refresh Preview</button>
+          <button class="btn primary" id="refreshBtn">Update Preview</button>
           <button class="btn success" id="exportZip">Download Website (.ZIP)</button>
         </div>
-        <div class="tiny muted" style="margin-top:8px">Generates a fully responsive, single-file HTML (with assets) ready for Netlify/Vercel.</div>
       </div>
     </aside>
 
     <main>
       <div class="preview-pane">
-        <div class="kicker" style="padding: 0 0 10px 0; background:#050814; z-index:10;">Live Preview</div>
-        <iframe id="previewFrame" style="width:100%; height:100%; border:0; background:#fff; border-radius:8px;"></iframe>
+        <iframe id="previewFrame"></iframe>
       </div>
     </main>
   </div>
 
 <script>
 (function(){
-  const state = { logo:null, banner:null, logoUrl:'', bannerUrl:'' };
+  const state = { 
+    logo:null, banner:null, 
+    gal1:null, gal2:null, gal3:null, gal4:null,
+    logoUrl:'', bannerUrl:'', 
+    gal1Url:'', gal2Url:'', gal3Url:'', gal4Url:'' 
+  };
+  
   const el = id => document.getElementById(id);
   const inputs = [
     'p_name','p_ticker','p_chain','p_tag','p_ca',
-    'c_accent','c_accent2','c_bg','style_preset','font_preset','opt_noise','opt_marquee',
+    'theme_preset','c_accent','c_accent2','c_bg','opt_noise','opt_orb',
     's_about','tok_supply','tok_tax','tok_liq','tok_mint',
-    'l_tg','l_x','l_ds','l_buy','s_road'
+    'opt_roadmap','s_road',
+    'opt_gallery',
+    'l_tg','l_x','l_ds','l_buy'
   ].reduce((acc,k)=>{ acc[k]=el(k); return acc; }, {});
 
-  // Drag & Drop Logic
+  // Drag & Drop Helper
   const setupDrop = (dropId, fileId, key) => {
     const d = el(dropId), f = el(fileId);
     d.addEventListener('click', () => f.click());
-    f.addEventListener('change', () => { if(f.files[0]) handleFile(f.files[0], key); });
-    d.addEventListener('dragover', e => { e.preventDefault(); d.classList.add('drag'); });
-    d.addEventListener('dragleave', () => d.classList.remove('drag'));
-    d.addEventListener('drop', e => { e.preventDefault(); d.classList.remove('drag'); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], key); });
+    f.addEventListener('change', () => { 
+      if(f.files[0]) {
+        handleFile(f.files[0], key);
+        d.classList.add('filled');
+        const txt = d.querySelector('.tiny');
+        if(txt) txt.textContent = f.files[0].name.slice(0, 10) + '...';
+      }
+    });
+    d.addEventListener('dragover', e => { e.preventDefault(); d.style.borderColor='#fff'; });
+    d.addEventListener('dragleave', () => d.style.borderColor='');
+    d.addEventListener('drop', e => { 
+      e.preventDefault(); 
+      d.style.borderColor=''; 
+      if(e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0], key);
+        d.classList.add('filled');
+      }
+    });
   };
+  
   const handleFile = (file, key) => {
     state[key] = file;
     state[key+'Url'] = URL.createObjectURL(file);
     updatePreview();
   };
+  
   setupDrop('logoDrop', 'logoFile', 'logo');
   setupDrop('bannerDrop', 'bannerFile', 'banner');
+  setupDrop('gal1Drop', 'gal1File', 'gal1');
+  setupDrop('gal2Drop', 'gal2File', 'gal2');
+  setupDrop('gal3Drop', 'gal3File', 'gal3');
+  setupDrop('gal4Drop', 'gal4File', 'gal4');
 
-  // --- GENERATOR ENGINE ---
+  // Theme Logic
+  const THEMES = {
+    polar: { a:'#7c3aed', a2:'#06b6d4', bg:'#020205', font:'Inter' },
+    magma: { a:'#ef4444', a2:'#f59e0b', bg:'#0f0202', font:'Impact' },
+    venom: { a:'#10b981', a2:'#84cc16', bg:'#020a02', font:'Space Mono' },
+    cyber: { a:'#db2777', a2:'#d946ef', bg:'#0f020a', font:'Inter' }
+  };
+
+  el('theme_preset').addEventListener('change', (e) => {
+    const t = THEMES[e.target.value];
+    if(t) {
+      el('c_accent').value = t.a;
+      el('c_accent2').value = t.a2;
+      el('c_bg').value = t.bg;
+      updatePreview();
+    }
+  });
 
   function generateCSS(d) {
-    const fonts = {
-      sans: "'Inter', sans-serif",
-      impact: "'Impact', 'Inter', sans-serif",
-      mono: "'Space Mono', monospace",
-      display: "'Clash Display', sans-serif"
-    }[d.font] || "sans-serif";
-
-    // Common Base
-    let css = `
+    let fontStack = "'Inter', sans-serif";
+    if(d.theme === 'magma') fontStack = "'Impact', 'Inter', sans-serif";
+    if(d.theme === 'venom') fontStack = "'Space Mono', monospace";
+    
+    return `
       :root {
-        --primary: ${d.accent}; --secondary: ${d.accent2}; --bg: ${d.bg};
-        --text: #ffffff; --text-muted: rgba(255,255,255,0.6);
-        --font-main: ${fonts};
-        --max-w: 1200px;
-        --radius: 16px;
+        --primary: ${d.accent};
+        --secondary: ${d.accent2};
+        --bg: ${d.bg};
+        --text: #ffffff;
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-shine: rgba(255, 255, 255, 0.05);
+        --font-head: ${fontStack};
+        --font-body: 'Inter', system-ui, sans-serif;
       }
-      * { box-sizing: border-box; outline: none; }
+      
+      * { box-sizing: border-box; outline: none; -webkit-font-smoothing: antialiased; }
       html { scroll-behavior: smooth; }
-      body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-main); overflow-x: hidden; }
-      a { text-decoration: none; color: inherit; transition: .2s; }
-      img { max-width: 100%; display: block; }
       
-      /* Utilities */
-      .container { max-width: var(--max-w); margin: 0 auto; padding: 0 20px; }
-      .flex { display: flex; align-items: center; gap: 10px; }
-      .grid { display: grid; gap: 20px; }
-      .section { padding: 80px 0; position: relative; }
-      .btn {
-        display: inline-flex; align-items: center; justify-content: center;
-        padding: 12px 24px; font-weight: 700; border-radius: var(--radius);
-        background: var(--primary); color: #fff; cursor: pointer;
-        transition: transform .1s, filter .2s;
-        border: none; font-size: 1rem;
+      body { 
+        margin: 0; 
+        background-color: var(--bg); 
+        color: var(--text); 
+        font-family: var(--font-body); 
+        overflow-x: hidden;
+        min-height: 100vh;
       }
-      .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
-      .btn:active { transform: translateY(0); }
-      .btn.outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+
+      .orb-container { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
+      .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; animation: float 20s infinite alternate; }
+      .orb-1 { width: 50vw; height: 50vw; background: var(--primary); top: -10%; left: -10%; }
+      .orb-2 { width: 40vw; height: 40vw; background: var(--secondary); bottom: -10%; right: -10%; animation-delay: -5s; }
+      @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(30px, 50px); } }
+
+      ${d.noise ? `.noise-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); }` : ''}
+
+      h1, h2, h3 { margin: 0; font-family: var(--font-head); font-weight: 800; letter-spacing: -0.02em; }
+      h1 { font-weight: 900; letter-spacing: -0.04em; }
+      p { line-height: 1.6; color: rgba(255,255,255,0.7); margin: 0 0 20px 0; }
       
-      /* Animations */
-      @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-      .reveal { animation: fadeUp 0.8s ease-out forwards; opacity: 0; }
-      .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
+      .gradient-text {
+        background: linear-gradient(135deg, #fff 30%, var(--primary) 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      }
 
-      /* Marquee */
-      .marquee { background: var(--primary); color: #fff; padding: 12px 0; overflow: hidden; white-space: nowrap; position: relative; transform: rotate(-1deg) scale(1.02); }
-      .track { display: inline-block; animation: scroll 20s linear infinite; font-weight: 900; text-transform: uppercase; font-size: 1.2rem; }
-      @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+      .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
+      .section { padding: 100px 0; }
+      
+      nav { position: fixed; top: 24px; left: 0; right: 0; z-index: 1000; display: flex; justify-content: center; padding: 0 20px; }
+      .nav-dock {
+        background: rgba(10, 10, 10, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 10px; border-radius: 999px;
+        display: flex; align-items: center; justify-content: space-between;
+        width: 100%; max-width: 900px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+      }
+      .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #fff; text-decoration: none; padding-left: 12px; }
+      .nav-logo img { height: 32px; width: auto; border-radius: 6px; }
+      .nav-logo span { font-family: var(--font-head); }
+      
+      .nav-links { display: flex; align-items: center; gap: 4px; }
+      .nav-item { color: rgba(255,255,255,0.7); text-decoration: none; padding: 8px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; transition: .2s; }
+      .nav-item:hover { color: #fff; background: rgba(255,255,255,0.1); }
+      
+      .btn-nav { background: #fff; color: #000; padding: 8px 18px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; text-decoration: none; transition: .2s; margin-left: 4px; }
+      .btn-nav:hover { transform: scale(1.05); }
+
+      .hero { min-height: 90vh; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 100px; }
+      .hero-tag { display: inline-block; padding: 6px 16px; border-radius: 999px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); font-size: 0.85rem; color: var(--secondary); margin-bottom: 24px; font-weight: 600; text-transform: uppercase; }
+      .hero h1 { font-size: clamp(3rem, 8vw, 6rem); line-height: 1; margin-bottom: 24px; }
+      .hero-img-wrap { margin: 40px auto 0; position: relative; max-width: 600px; border-radius: 24px; overflow: hidden; border: 1px solid var(--glass-border); box-shadow: 0 0 80px -20px var(--primary); }
+      
+      .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 32px; transition: .3s; position: relative; overflow: hidden; }
+      .glass-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6); }
+
+      .ca-box { display: inline-flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); padding: 12px 20px; border-radius: 12px; font-family: 'Space Mono', monospace; cursor: pointer; transition: .2s; margin-top: 20px; position: relative; }
+      .ca-box:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
+
+      .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 40px; }
+      .stat-label { font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
+      .stat-val { font-size: 1.8rem; font-weight: 700; color: #fff; font-family: var(--font-head); }
+
+      .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+      .gallery-item { border-radius: 20px; overflow: hidden; border: 1px solid var(--glass-border); position: relative; aspect-ratio: 16/9; }
+      .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: .4s; }
+      .gallery-item:hover img { transform: scale(1.05); }
+
+      .roadmap-step { display: flex; gap: 20px; margin-bottom: 20px; align-items: flex-start; }
+      .step-num { background: var(--primary); color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; box-shadow: 0 0 15px var(--primary); }
+
+      footer { border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); padding: 60px 0; text-align: center; }
+      .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 30px; }
+      .footer-links a { color: var(--text); opacity: 0.6; text-decoration: none; font-weight: 600; transition: .2s; }
+      .footer-links a:hover { opacity: 1; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+
+      @media (max-width: 768px) {
+        .nav-logo span { display: none; }
+        .nav-dock { padding: 8px; }
+        .hero h1 { font-size: 2.5rem; }
+      }
     `;
-
-    // Theme Specifics
-    if (d.theme === 'modern') {
-      css += `
-        body { background: radial-gradient(circle at 15% 10%, ${d.accent}22, transparent 40%), radial-gradient(circle at 85% 80%, ${d.accent2}22, transparent 40%), var(--bg); }
-        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius: var(--radius); padding: 24px; }
-        h1 { font-size: clamp(3rem, 8vw, 5rem); font-weight: 800; letter-spacing: -2px; line-height: 1.1; background: linear-gradient(135deg, #fff, rgba(255,255,255,0.5)); -webkit-background-clip: text; color: transparent; }
-        nav { position: sticky; top: 20px; z-index: 100; margin-top: 20px; }
-        .nav-inner { background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; max-width: 600px; margin: 0 auto; }
-        .hero-img { filter: drop-shadow(0 0 40px ${d.accent}66); animation: float 6s ease-in-out infinite; }
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
-      `;
-    } else if (d.theme === 'brutal') {
-      css += `
-        :root { --radius: 0px; }
-        body { background: var(--bg); }
-        .card { background: #fff; color: #000; border: 4px solid #000; box-shadow: 8px 8px 0 #000; padding: 20px; }
-        .btn { background: var(--primary); color: #000; border: 3px solid #000; box-shadow: 4px 4px 0 #000; border-radius: 0; text-transform: uppercase; }
-        .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #000; }
-        h1 { font-size: clamp(3rem, 10vw, 6rem); text-transform: uppercase; -webkit-text-stroke: 2px #fff; color: transparent; line-height: 0.9; }
-        .nav-inner { background: #fff; border: 3px solid #000; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; color:#000; font-weight:bold; }
-        .marquee { transform: none; border-top: 3px solid #000; border-bottom: 3px solid #000; }
-      `;
-    } else if (d.theme === 'retro') {
-      css += `
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; }
-        .container { max-width: 900px; border-left: 1px solid #003300; border-right: 1px solid #003300; min-height:100vh; background: #000a00; }
-        h1 { text-shadow: 0 0 10px #0f0; text-transform: lowercase; }
-        .card { border: 1px solid #0f0; background: #001100; padding: 16px; position:relative; }
-        .card::before { content:'['; position:absolute; top:-10px; left:10px; background:#000a00; padding:0 5px; color:#0f0; }
-        .btn { background: #0f0; color: #000; border-radius: 0; text-transform: lowercase; }
-        .btn:hover { background: #fff; }
-        .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 999; }
-      `;
-    } else {
-      // Clean
-      css += `
-        body { background: #fff; color: #111; }
-        .card { background: #f8f9fa; border-radius: 12px; padding: 24px; border: 1px solid #e9ecef; }
-        h1 { color: #111; letter-spacing: -1px; font-weight: 800; }
-        .btn { border-radius: 8px; }
-        .nav-inner { border-bottom: 1px solid #eee; padding: 20px 0; display:flex; justify-content:space-between; }
-        :root { --text: #111; --text-muted: #666; }
-      `;
-    }
-
-    if (d.noise) {
-      css += `body::after { content: ""; position: fixed; inset: 0; background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E'); pointer-events: none; z-index: 9999; }`;
-    }
-
-    return css;
   }
 
   function generateHTML(d) {
     const css = generateCSS(d);
     
-    // Logic Helpers
-    const marqueeTxt = Array(10).fill(`${d.ticker} $${d.ticker}`).join(" &nbsp; • &nbsp; ");
-    const logoImg = d.logoSrc ? `<img src="${d.logoSrc}" alt="Logo" style="height:40px; width:auto;">` : `<div style="font-weight:900;">${d.ticker}</div>`;
-    const heroLogo = d.logoSrc ? `<img src="${d.logoSrc}" alt="Hero" class="hero-img reveal delay-1" style="width:100%; max-width:400px; margin:0 auto;">` : '';
+    const logoImg = d.logoSrc ? `<img src="${d.logoSrc}" alt="Logo">` : `<div style="width:32px;height:32px;background:var(--primary);border-radius:6px;"></div>`;
+    const heroImg = d.bannerSrc ? `<img src="${d.bannerSrc}" alt="Hero" style="width:100%; display:block;">` : ``; 
     
-    // Bento Grid for Tokenomics
-    const statsHtml = `
-      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-        <div class="card reveal delay-1">
-          <div style="font-size:0.9rem; color:var(--text-muted);">Supply</div>
-          <div style="font-size:1.5rem; font-weight:bold; color:var(--primary);">${d.supply}</div>
-        </div>
-        <div class="card reveal delay-2">
-          <div style="font-size:0.9rem; color:var(--text-muted);">Taxes</div>
-          <div style="font-size:1.5rem; font-weight:bold; color:var(--secondary);">${d.tax}</div>
-        </div>
-        <div class="card reveal delay-3">
-          <div style="font-size:0.9rem; color:var(--text-muted);">Liquidity</div>
-          <div style="font-size:1.5rem; font-weight:bold;">${d.liq}</div>
-        </div>
-        <div class="card reveal delay-1">
-          <div style="font-size:0.9rem; color:var(--text-muted);">Mint Auth</div>
-          <div style="font-size:1.5rem; font-weight:bold;">${d.mint}</div>
-        </div>
-      </div>
-    `;
+    // Gallery Logic
+    let galleryHtml = '';
+    if (d.gallery) {
+      // Gather all potential images
+      const images = [d.gal1Src, d.gal2Src, d.gal3Src, d.gal4Src].filter(Boolean);
+      
+      // If none uploaded, show placeholders
+      if(images.length === 0) {
+        images.push('https://placehold.co/600x400/111/444?text=Upload+Your+Meme');
+        images.push('https://placehold.co/600x400/111/444?text=Community+Vibes');
+        images.push('https://placehold.co/600x400/111/444?text=Art+Showcase');
+      }
 
-    // Roadmap List
-    const roadHtml = d.roadmap.split('\n').map((item, i) => 
-      `<div class="card reveal delay-${(i%3)+1}" style="display:flex; align-items:center; gap:15px;">
-         <div style="background:var(--primary); color:#fff; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">${i+1}</div>
-         <div>${item}</div>
-       </div>`
-    ).join('');
+      const gridItems = images.map(src => `<div class="gallery-item"><img src="${src}" alt="Gallery Image"></div>`).join('');
+      
+      galleryHtml = `
+      <section class="section">
+        <div class="container">
+          <h2 style="font-size:2.5rem; text-align:center; margin-bottom:40px;">Meme Gallery</h2>
+          <div class="gallery-grid">
+            ${gridItems}
+          </div>
+        </div>
+      </section>`;
+    }
+
+    // Roadmap Logic
+    let roadHtml = '';
+    if (d.showRoad && d.roadmap) {
+       const items = d.roadmap.split('\n').map((item, i) => `
+        <div class="glass-card roadmap-step">
+          <div class="step-num">${i+1}</div>
+          <div>
+            <h3 style="margin-bottom:5px; font-size:1.1rem;">${item.split(':')[0] || 'Phase '+(i+1)}</h3>
+            <p style="margin:0; font-size:0.9rem;">${item.split(':')[1] || ''}</p>
+          </div>
+        </div>
+       `).join('');
+       roadHtml = `
+       <section class="section">
+         <div class="container" style="max-width:800px;">
+           <h2 style="font-size:2.5rem; text-align:center; margin-bottom:40px;">Roadmap</h2>
+           ${items}
+         </div>
+       </section>`;
+    }
 
     return `
 <!DOCTYPE html>
@@ -328,153 +412,133 @@ Phase 3: Utility Drop</textarea>
   <title>${d.name} (${d.ticker})</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;600;700&family=Inter:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Impact&family=Inter:wght@400;600;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
   <style>${css}</style>
 </head>
 <body>
-  ${d.theme==='retro' ? '<div class="scanlines"></div>' : ''}
-  
-  <nav class="container">
-    <div class="nav-inner">
-      <div class="logo">${logoImg}</div>
-      <div class="flex">
-        ${d.tg ? `<a href="${d.tg}" target="_blank">TG</a>` : ''}
-        ${d.x ? `<a href="${d.x}" target="_blank">X</a>` : ''}
-        ${d.buy ? `<a href="${d.buy}" target="_blank" class="btn" style="padding:8px 16px; font-size:0.9rem;">Buy Now</a>` : ''}
+  ${d.noise ? '<div class="noise-overlay"></div>' : ''}
+  ${d.orb ? '<div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>' : ''}
+
+  <nav>
+    <div class="nav-dock">
+      <a href="#" class="nav-logo">${logoImg}<span>${d.name}</span></a>
+      <div style="display:flex; align-items:center;">
+        <div class="nav-links">
+          ${d.tg ? `<a href="${d.tg}" target="_blank" class="nav-item">TG</a>` : ''}
+          ${d.x ? `<a href="${d.x}" target="_blank" class="nav-item">X</a>` : ''}
+        </div>
+        ${d.buy ? `<a href="${d.buy}" target="_blank" class="btn-nav">Buy</a>` : ''}
       </div>
     </div>
   </nav>
 
-  <header class="container section" style="min-height:80vh; display:flex; align-items:center; justify-content:center; text-align:center;">
-    <div style="width:100%;">
-      ${heroLogo}
-      <h1 class="reveal">${d.name}</h1>
-      <p class="reveal delay-1" style="font-size:1.25rem; max-width:600px; margin:20px auto; color:var(--text-muted);">${d.tag}</p>
-      
-      <div class="reveal delay-2" style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap; margin-top:30px;">
-        ${d.buy ? `<a href="${d.buy}" class="btn">Buy ${d.ticker}</a>` : ''}
-        ${d.ds ? `<a href="${d.ds}" class="btn outline">Chart</a>` : ''}
-      </div>
+  <section class="hero">
+    <div class="container">
+      <div class="hero-tag">Welcome to the portal</div>
+      <h1 class="gradient-text">${d.tag}</h1>
+      <p style="font-size:1.2rem; max-width:600px; margin:20px auto;">${d.about}</p>
 
       ${d.ca ? `
-      <div class="reveal delay-3" style="margin-top:40px;">
-        <div class="card" style="display:inline-flex; align-items:center; gap:10px; padding:10px 20px; cursor:pointer;" onclick="copyCA()">
-          <span style="font-family:monospace; font-size:0.9rem;">${d.ca}</span>
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+        <div class="ca-box" onclick="copyCA()">
+          <span style="opacity:0.6;">CA:</span><span>${d.ca}</span>
+          <div id="copyTooltip" style="position:absolute;top:-35px;left:50%;transform:translateX(-50%);background:var(--primary);font-size:12px;padding:4px 8px;border-radius:4px;opacity:0;transition:0.2s;pointer-events:none">Copied!</div>
+        </div>` : ''}
+
+      ${heroImg ? `<div class="hero-img-wrap">${heroImg}</div>` : ''}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 style="font-size:2.5rem; text-align:center;">Tokenomics</h2>
+      <div class="bento-grid">
+        <div class="glass-card">
+          <div class="stat-label">Total Supply</div>
+          <div class="stat-val gradient-text">${d.supply}</div>
         </div>
-        <div id="copyMsg" style="font-size:0.8rem; color:var(--primary); height:20px; margin-top:5px; opacity:0; transition:0.3s;">Copied to clipboard!</div>
-      </div>` : ''}
-    </div>
-  </header>
-
-  ${d.isMarquee ? `<div class="marquee"><div class="track">${marqueeTxt} ${marqueeTxt}</div></div>` : ''}
-
-  <section class="container section">
-    <div class="grid" style="grid-template-columns: 1fr 1fr; align-items:center; gap:40px;">
-      <div class="reveal">
-        <h2 style="font-size:2.5rem; margin-bottom:20px;">About</h2>
-        <p style="font-size:1.1rem; line-height:1.6; color:var(--text-muted);">${d.about.replace(/\n/g, '<br>')}</p>
-      </div>
-      <div class="card reveal delay-1" style="height:300px; display:flex; align-items:center; justify-content:center; font-size:5rem;">
-         🦖
+        <div class="glass-card">
+          <div class="stat-label">Tax</div>
+          <div class="stat-val" style="color:var(--secondary)">${d.tax}</div>
+        </div>
+        <div class="glass-card">
+          <div class="stat-label">Liquidity</div>
+          <div class="stat-val">${d.liq}</div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="container section">
-    <h2 class="reveal" style="font-size:2.5rem; text-align:center; margin-bottom:40px;">Tokenomics</h2>
-    ${statsHtml}
-  </section>
+  ${roadHtml}
 
-  <section class="container section" style="max-width:800px;">
-    <h2 class="reveal" style="font-size:2.5rem; text-align:center; margin-bottom:40px;">Roadmap</h2>
-    <div class="grid">
-      ${roadHtml}
-    </div>
-  </section>
+  ${galleryHtml}
 
-  <footer class="section" style="text-align:center; margin-top:40px; border-top:1px solid rgba(255,255,255,0.1);">
-    <h2 style="font-size:4rem; opacity:0.1; margin:0;">${d.ticker}</h2>
-    <div style="margin-top:-20px; font-size:0.9rem; color:var(--text-muted);">
-      © ${new Date().getFullYear()} ${d.name}. All rights reserved.
+  <footer>
+    <div class="container">
+      <h2 class="gradient-text" style="font-size:3rem; margin-bottom:20px;">${d.ticker}</h2>
+      <div class="footer-links">
+        ${d.tg ? `<a href="${d.tg}" target="_blank">Telegram</a>` : ''}
+        ${d.x ? `<a href="${d.x}" target="_blank">Twitter</a>` : ''}
+        ${d.ds ? `<a href="${d.ds}" target="_blank">DexScreener</a>` : ''}
+      </div>
+      <p style="font-size:0.8rem; opacity:0.4;">© ${new Date().getFullYear()} ${d.name}. All rights reserved.</p>
     </div>
   </footer>
 
   <script>
-    function copyCA() {
+    function copyCA(){
       navigator.clipboard.writeText("${d.ca}");
-      const msg = document.getElementById('copyMsg');
-      msg.style.opacity = '1';
-      setTimeout(() => msg.style.opacity = '0', 2000);
+      const t=document.getElementById('copyTooltip');
+      t.style.opacity='1'; t.style.top='-45px';
+      setTimeout(()=>{t.style.opacity='0';t.style.top='-35px'},2000);
     }
-    
-    // Simple Scroll Reveal
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.style.animationPlayState = 'running';
-          entry.target.style.opacity = '1';
-        }
-      });
-    });
-    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
   <\/script>
 </body>
-</html>
-    `;
+</html>`;
   }
-
-  // --- STATE COLLECTION ---
 
   function collectData() {
     return {
       name: inputs.p_name.value,
       ticker: inputs.p_ticker.value,
-      chain: inputs.p_chain.value,
       tag: inputs.p_tag.value,
       ca: inputs.p_ca.value,
-      
       accent: inputs.c_accent.value,
       accent2: inputs.c_accent2.value,
       bg: inputs.c_bg.value,
-      theme: inputs.style_preset.value,
-      font: inputs.font_preset.value,
+      theme: el('theme_preset').value,
       noise: inputs.opt_noise.checked,
-      isMarquee: inputs.opt_marquee.checked,
+      orb: inputs.opt_orb.checked,
       
+      showRoad: inputs.opt_roadmap.checked,
+      roadmap: inputs.s_road.value,
+      
+      gallery: inputs.opt_gallery.checked,
       about: inputs.s_about.value,
       supply: inputs.tok_supply.value,
       tax: inputs.tok_tax.value,
       liq: inputs.tok_liq.value,
       mint: inputs.tok_mint.value,
-      roadmap: inputs.s_road.value,
-      
       tg: inputs.l_tg.value,
       x: inputs.l_x.value,
       ds: inputs.l_ds.value,
       buy: inputs.l_buy.value,
-      
       logoSrc: state.logoUrl,
-      bannerSrc: state.bannerUrl
+      bannerSrc: state.bannerUrl,
+      gal1Src: state.gal1Url,
+      gal2Src: state.gal2Url,
+      gal3Src: state.gal3Url,
+      gal4Src: state.gal4Url
     };
   }
 
   function updatePreview() {
     const data = collectData();
     const html = generateHTML(data);
-    const frame = el('previewFrame');
-    const doc = frame.contentDocument || frame.contentWindow.document;
-    doc.open();
-    doc.write(html);
-    doc.close();
+    const doc = el('previewFrame').contentDocument;
+    doc.open(); doc.write(html); doc.close();
   }
 
-  // Events
-  Object.values(inputs).forEach(inp => {
-    inp.addEventListener('input', updatePreview);
-    inp.addEventListener('change', updatePreview);
-  });
-  
+  Object.values(inputs).forEach(i => i.addEventListener(i.type==='text'?'input':'change', updatePreview));
   el('refreshBtn').addEventListener('click', updatePreview);
   
   el('exportZip').addEventListener('click', async () => {
@@ -482,35 +546,22 @@ Phase 3: Utility Drop</textarea>
     const zip = new JSZip();
     const assets = zip.folder('assets');
     
-    let logoPath = '', bannerPath = '';
-    
-    if (state.logo) {
-      const ext = state.logo.name.split('.').pop();
-      logoPath = `assets/logo.${ext}`;
-      assets.file(`logo.${ext}`, state.logo);
-      data.logoSrc = logoPath;
-    }
-    
-    if (state.banner) {
-      const ext = state.banner.name.split('.').pop();
-      bannerPath = `assets/banner.${ext}`;
-      assets.file(`banner.${ext}`, state.banner);
-      data.bannerSrc = bannerPath;
-    }
-    
-    const finalHtml = generateHTML(data);
-    zip.file("index.html", finalHtml);
-    
-    const blob = await zip.generateAsync({type:"blob"});
+    // Save images to ZIP
+    if(state.logo) { assets.file('logo'+ext(state.logo), state.logo); data.logoSrc='assets/logo'+ext(state.logo); }
+    if(state.banner) { assets.file('banner'+ext(state.banner), state.banner); data.bannerSrc='assets/banner'+ext(state.banner); }
+    if(state.gal1) { assets.file('gal1'+ext(state.gal1), state.gal1); data.gal1Src='assets/gal1'+ext(state.gal1); }
+    if(state.gal2) { assets.file('gal2'+ext(state.gal2), state.gal2); data.gal2Src='assets/gal2'+ext(state.gal2); }
+    if(state.gal3) { assets.file('gal3'+ext(state.gal3), state.gal3); data.gal3Src='assets/gal3'+ext(state.gal3); }
+    if(state.gal4) { assets.file('gal4'+ext(state.gal4), state.gal4); data.gal4Src='assets/gal4'+ext(state.gal4); }
+
+    zip.file("index.html", generateHTML(data));
+    const b = await zip.generateAsync({type:"blob"});
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${data.ticker}_website.zip`;
-    a.click();
+    a.href = URL.createObjectURL(b); a.download = `${data.name}_site.zip`; a.click();
   });
-
-  // Init
+  
+  const ext = f => f.name.substring(f.name.lastIndexOf('.'));
   updatePreview();
-
 })();
 </script>
 </body>
