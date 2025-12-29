@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memeportal — Tokenomics & Roadmap Visualizer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+  <script>
+    (async ()=>{try{
+      const host=document.getElementById('site-header');
+      host.innerHTML=await (await fetch('nav.html')).text();
+      const btn=host.querySelector('.menu-toggle'), menu=host.querySelector('#mobileMenu');
+      if(!btn||!menu) return;
+      const close=()=>{menu.setAttribute('hidden','');btn.setAttribute('aria-expanded','false');document.removeEventListener('click',away);};
+      const open =()=>{menu.removeAttribute('hidden');btn.setAttribute('aria-expanded','true');setTimeout(()=>document.addEventListener('click',away),0);};
+      const away=e=>{if(!menu.contains(e.target)&&!btn.contains(e.target)) close();};
+      btn.addEventListener('click',e=>{e.stopPropagation();menu.hasAttribute('hidden')?open():close();});
+      window.matchMedia('(min-width:900px)').addEventListener?.('change',e=>{if(e.matches) close();});
+      close();
+    }catch(e){console.warn('nav load failed',e);} })();
+  </script>
+
+  <div class="app app--wide">
+    <aside>
+      <div class="card section">
+        <h2>Project</h2>
+        <div class="grid two">
+          <div><label>Name</label><input id="p_name" type="text" value="BeastLab"></div>
+          <div><label>Ticker</label><input id="p_ticker" type="text" value="BG"></div>
+        </div>
+        <div class="grid three">
+          <div><label>Primary</label><input id="c1" type="color" value="#7c3aed"></div>
+          <div><label>Secondary</label><input id="c2" type="color" value="#22d3ee"></div>
+          <div><label>Accent</label><input id="c3" type="color" value="#3b82f6"></div>
+        </div>
+      </div>
+
+      <div class="card section">
+        <h2>Tokenomics</h2>
+        <div class="tiny muted">Format: <code>Label:Percent</code> (total = 100)</div>
+        <textarea id="alloc" rows="6">Liquidity:70
+Community:20
+Treasury:10</textarea>
+        <div class="grid two" style="margin-top:8px">
+          <div><label>Decimals</label><input id="dec" type="number" value="9"></div>
+          <div><label>Total Supply</label><input id="sup" type="text" value="1,000,000,000"></div>
+        </div>
+      </div>
+
+      <div class="card section">
+        <h2>Roadmap</h2>
+        <div class="tiny muted">One item per line. Use <code>Q1/24 - Title — details</code> (dash or em dash).</div>
+        <textarea id="road" rows="6">Q1/24 — Launch, socials, CMC/CG listing
+Q2/24 — Partnerships, meme contest, CEX listing
+Q3/24 — Utilities, DAO experiments</textarea>
+      </div>
+
+      <div class="card section">
+        <h2>Options</h2>
+        <div class="grid two">
+          <div>
+            <label>Chart palette</label>
+            <select id="palette">
+              <option value="auto" selected>Auto from theme</option>
+              <option value="warm">Warm</option>
+              <option value="cool">Cool</option>
+              <option value="candy">Candy</option>
+            </select>
+          </div>
+          <div>
+            <label>Label style</label>
+            <select id="labels">
+              <option value="out" selected>Outside</option>
+              <option value="in">Inside</option>
+              <option value="legend">Legend only</option>
+            </select>
+          </div>
+        </div>
+        <div class="toolbar" style="margin-top:10px">
+          <button class="btn primary" id="refreshBtn">Update</button>
+          <button class="btn success" id="downloadPng">Download PNG</button>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="card section preview-pane">
+        <div class="kicker">Preview</div>
+        <div class="preview-frame" style="padding:16px">
+          <div id="sheet" class="container" style="max-width:1000px;padding:0">
+            <header style="display:flex;align-items:center;justify-content:space-between;padding:10px 0">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="logo"></div>
+                <div>
+                  <div class="h2">Tokenomics & Roadmap</div>
+                  <h1 id="hTitle" style="margin:2px 0 0;font-weight:900;font-size:22px"></h1>
+                </div>
+              </div>
+              <div class="badge" id="hTicker"></div>
+            </header>
+
+            <section class="section card" style="margin:12px 0">
+              <div class="h2">Tokenomics</div>
+              <div style="display:grid;grid-template-columns:380px 1fr;gap:16px">
+                <canvas id="pie" width="380" height="380" style="background:#0b0f17;border:1px solid var(--border);border-radius:14px"></canvas>
+                <div id="legend" class="list" style="align-content:start"></div>
+              </div>
+              <div class="grid three" style="margin-top:12px">
+                <div class="card section"><div class="tiny muted">Decimals</div><div id="outDec" style="font-weight:800;font-size:18px"></div></div>
+                <div class="card section"><div class="tiny muted">Total Supply</div><div id="outSup" style="font-weight:800;font-size:18px"></div></div>
+                <div class="card section"><div class="tiny muted">Slices</div><div id="outSlices" style="font-weight:800;font-size:18px"></div></div>
+              </div>
+            </section>
+
+            <section class="section card" style="margin:12px 0">
+              <div class="h2">Roadmap</div>
+              <div id="roadmap" class="timeline"></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const inputs=['p_name','p_ticker','c1','c2','c3','alloc','dec','sup','road','palette','labels']
+    .reduce((a,k)=>(a[k]=$(k),a),{});
+  const pie=$('pie'), ctx=pie.getContext('2d'), legend=$('legend'), roadmap=$('roadmap');
+
+  function palette(kind){
+    const a=inputs.c1.value,b=inputs.c2.value,c=inputs.c3.value;
+    const sets={
+      auto:[a,b,c,'#10b981','#f59e0b','#ef4444','#eab308','#06b6d4','#22c55e'],
+      warm:['#ef4444','#f97316','#f59e0b','#eab308','#fb7185','#fda4af'],
+      cool:['#22d3ee','#38bdf8','#60a5fa','#818cf8','#a78bfa','#34d399'],
+      candy:['#ff6ad5','#c774e8','#ad8cff','#9ad5ff','#7afcff','#b8f1c6']
+    };
+    return sets[kind]||sets.auto;
+  }
+
+  function parseAlloc(text){
+    return text.split(/\n+/).map(s=>s.trim()).filter(Boolean).map(s=>{
+      const m=s.split(':'); return {label:(m[0]||'').trim(), pct:parseFloat(m[1])||0};
+    }).filter(x=>x.label && x.pct>0);
+  }
+
+  function drawPie(data, colors, labelMode){
+    ctx.clearRect(0,0,pie.width,pie.height);
+    const total=data.reduce((s,d)=>s+d.pct,0)||1;
+    const cx=pie.width/2, cy=pie.height/2, r=Math.min(cx,cy)-12;
+    let ang=-Math.PI/2;
+    legend.innerHTML=''; $('outSlices').textContent=data.length;
+    data.forEach((d,i)=>{
+      const frac=d.pct/total, a2=ang+frac*2*Math.PI;
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,ang,a2); ctx.closePath();
+      ctx.fillStyle=colors[i % colors.length]; ctx.fill();
+      // label
+      if(labelMode!=='legend'){
+        const mid=ang+(a2-ang)/2, rx=cx+(r+(labelMode==='in'?-30:16))*Math.cos(mid), ry=cy+(r+(labelMode==='in'?-30:16))*Math.sin(mid);
+        ctx.fillStyle='#e6e9ef'; ctx.font='12px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(`${d.label} (${d.pct}%)`, rx, ry);
+      }
+      // legend row
+      const row=document.createElement('div'); row.className='flex'; row.style.justifyContent='space-between';
+      row.innerHTML=`<div class="flex" style="gap:8px">
+        <span style="width:14px;height:14px;border-radius:4px;background:${colors[i%colors.length]};display:inline-block;border:1px solid #0003"></span>
+        <strong>${d.label}</strong></div>
+        <span>${d.pct}%</span>`;
+      legend.appendChild(row);
+      ang=a2;
+    });
+  }
+
+  function buildRoadmap(lines){
+    roadmap.innerHTML='';
+    lines.split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(l=>{
+      const step=document.createElement('div'); step.className='step';
+      const m=l.split(/—|–|-/); // period — title — rest
+      const when=(m[0]||'').trim(), title=(m[1]||'').trim(), rest=(m.slice(2).join('—')||'').trim();
+      step.innerHTML=`<div style="font-weight:800">${when?when+' · ':''}${title||l}</div>${rest?`<div class="muted tiny" style="margin-top:4px">${rest}</div>`:''}`;
+      roadmap.appendChild(step);
+    });
+  }
+
+  function update(){
+    $('hTitle').textContent=inputs.p_name.value||'Project';
+    $('hTicker').textContent=(inputs.p_ticker.value||'TICKER').toUpperCase();
+    $('outDec').textContent=inputs.dec.value;
+    $('outSup').textContent=inputs.sup.value;
+
+    const data=parseAlloc(inputs.alloc.value);
+    drawPie(data, palette(inputs.palette.value), inputs.labels.value);
+    buildRoadmap(inputs.road.value);
+  }
+  Object.values(inputs).forEach(el=>{el.addEventListener('input',update); el.addEventListener('change',update);});
+  $('refreshBtn').addEventListener('click',update);
+  update();
+
+  // simple PNG export (pie + legend + roadmap snapshot)
+  $('downloadPng').addEventListener('click', ()=>{
+    const sheet=document.getElementById('sheet');
+    const rect=sheet.getBoundingClientRect();
+    const s=window.scrollY;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${rect.width}" height="${sheet.scrollHeight}">
+      <foreignObject width="100%" height="100%">${new XMLSerializer().serializeToString(sheet)}</foreignObject></svg>`;
+    const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const img=new Image(); img.onload=function(){
+      const c=document.createElement('canvas'); c.width=this.width; c.height=this.height;
+      const cx=c.getContext('2d'); cx.fillStyle=getComputedStyle(document.body).backgroundColor; cx.fillRect(0,0,c.width,c.height);
+      cx.drawImage(this,0,0); URL.revokeObjectURL(url);
+      c.toBlob(b=>{const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='tokenomics.png'; a.click();},'image/png');
+    }; img.src=url; window.scrollTo(0,s);
+  });
+})();
+</script>
+</body>
+</html>

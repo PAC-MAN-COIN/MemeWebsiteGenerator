@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memeportal — Litepaper Generator</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* print styles for PDF */
+@media print{
+  body{background:#fff}
+  .header,aside,.toolbar{display:none!important}
+  main{padding:0}
+  .paper{box-shadow:none;border:0;background:#fff;color:#000}
+}
+.paper{background:#0b0f17;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:32px}
+.paper h1{font-size:28px;margin:0 0 6px}
+.paper h2{font-size:16px;letter-spacing:.12em;text-transform:uppercase;color:#9aa6c6;margin:18px 0 8px}
+.paper p{margin:8px 0}
+.paper .muted{color:#a8b0c6}
+</style>
+</head>
+<body>
+  <div id="site-header"></div>
+  <script>
+    (async ()=>{try{
+      const host=document.getElementById('site-header');
+      host.innerHTML=await (await fetch('nav.html')).text();
+      const btn=host.querySelector('.menu-toggle'), menu=host.querySelector('#mobileMenu');
+      if(!btn||!menu) return;
+      const close=()=>{menu.setAttribute('hidden','');btn.setAttribute('aria-expanded','false');document.removeEventListener('click',away);};
+      const open =()=>{menu.removeAttribute('hidden');btn.setAttribute('aria-expanded','true');setTimeout(()=>document.addEventListener('click',away),0);};
+      const away=e=>{if(!menu.contains(e.target)&&!btn.contains(e.target)) close();};
+      btn.addEventListener('click',e=>{e.stopPropagation();menu.hasAttribute('hidden')?open():close();});
+      window.matchMedia('(min-width:900px)').addEventListener?.('change',e=>{if(e.matches) close();});
+      close();
+    }catch(e){console.warn('nav load failed',e);} })();
+  </script>
+
+  <div class="app app--wide">
+    <aside>
+      <div class="card section">
+        <h2>Basics</h2>
+        <div class="grid">
+          <div><label>Project name</label><input id="p_name" type="text" value="BeastLab"></div>
+          <div class="two">
+            <div><label>Ticker</label><input id="p_ticker" type="text" value="BG"></div>
+            <div><label>Chain</label><select id="p_chain"><option>Solana</option><option>Ethereum</option><option>BNB</option><option>Base</option></select></div>
+          </div>
+          <div><label>Tagline</label><input id="p_tag" type="text" value="Meme tech from the jungle."></div>
+        </div>
+      </div>
+
+      <div class="card section">
+        <h2>Content</h2>
+        <label>Overview</label><textarea id="c_over" rows="4">BeastLab is a community-driven memecoin with clean branding, fair launch, and a vibe that ships.</textarea>
+        <label style="margin-top:6px">Tokenomics (markdown-ish)</label><textarea id="c_tok" rows="5">• Supply: 1,000,000,000
+• Decimals: 9
+• Taxes: 0/0
+• Allocations: Liquidity 70%, Community 20%, Treasury 10%</textarea>
+        <label style="margin-top:6px">Roadmap</label><textarea id="c_road" rows="5">Q1 — Launch, socials, CMC/CG listing
+Q2 — Partnerships, meme contest, CEX listing
+Q3 — Utilities, DAO experiments</textarea>
+        <label style="margin-top:6px">Utility / Vision</label><textarea id="c_vision" rows="5">• Meme tools, contests, brand drops
+• Open-source templates and bots
+• Keep it fun. Build with community.</textarea>
+        <label style="margin-top:6px">Disclaimer</label><textarea id="c_disc" rows="3">This document is for informational purposes only and is not financial advice.</textarea>
+      </div>
+
+      <div class="card section">
+        <h2>Actions</h2>
+        <div class="toolbar">
+          <button class="btn primary" id="refresh">Update</button>
+          <button class="btn success" id="print">Download PDF (print)</button>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="card section preview-pane">
+        <div class="kicker">Preview</div>
+        <div class="preview-frame" style="padding:16px">
+          <div id="paper" class="paper container" style="max-width:860px"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const F=['p_name','p_ticker','p_chain','p_tag','c_over','c_tok','c_road','c_vision','c_disc']
+    .reduce((m,k)=>(m[k]=$(k),m),{});
+
+  function mdList(s){ return (s||'').split('\n').map(t=>t.replace(/^•\s*/,'').trim()).filter(Boolean); }
+
+  function build(){
+    const n=F.p_name.value||'Project', t=(F.p_ticker.value||'TICKER').toUpperCase();
+    const html = `
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="logo"></div>
+        <div>
+          <h1>${n} — ${t}</h1>
+          <div class="muted">${F.p_tag.value||''}</div>
+        </div>
+      </div>
+
+      <h2>Overview</h2>
+      <p>${escapeHtml(F.c_over.value)}</p>
+
+      <h2>Tokenomics</h2>
+      <ul>${mdList(F.c_tok.value).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>
+
+      <h2>Roadmap</h2>
+      <ul>${(F.c_road.value||'').split('\n').filter(Boolean).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>
+
+      <h2>Utility & Vision</h2>
+      <ul>${mdList(F.c_vision.value).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>
+
+      <h2>Disclaimer</h2>
+      <p class="muted">${escapeHtml(F.c_disc.value)}</p>
+    `;
+    $('paper').innerHTML = html;
+  }
+  function escapeHtml(s){return String(s||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+  Object.values(F).forEach(el=>{el.addEventListener('input',build); el.addEventListener('change',build);});
+  $('refresh').addEventListener('click',build);
+  $('print').addEventListener('click',()=>window.print());
+  build();
+})();
+</script>
+</body>
+</html>

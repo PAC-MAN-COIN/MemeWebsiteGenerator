@@ -3,9 +3,39 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Memeportal — Emoji Tools</title>
-<link rel="stylesheet" href="style.css" />
+<title>Memeportal — 3D Emoji Tools</title>
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<link rel="stylesheet" href="style.css" />
+
+<style>
+    /* Specific styles for the 3D preview to look good within your theme */
+    #previewContainer {
+        width: 100%;
+        max-width: 520px;
+        border-radius: 12px;
+        overflow: hidden;
+        /* The dark gradient needed for the coin to pop */
+        background: radial-gradient(circle at 20% 0%, #222a56, #050814 60%);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        margin-bottom: 1rem;
+        aspect-ratio: 1 / 1; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #previewContainer canvas {
+        display: block;
+        width: 100% !important; 
+        height: auto !important;
+    }
+    .range-group { margin-bottom: 8px; }
+    .range-group label { display:flex; justify-content:space-between; font-size:0.85rem; opacity:0.8; margin-bottom:2px; }
+    .range-group input { width:100%; }
+    .radio-group { display: flex; gap: 10px; font-size: 0.9rem; margin-bottom: 8px; }
+    .radio-group label { display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer;}
+</style>
 </head>
 <body>
   <div id="site-header"></div>
@@ -14,12 +44,9 @@
     try{
       const host = document.getElementById('site-header');
       host.innerHTML = await (await fetch('nav.html')).text();
-
-      // wire up after insertion
       const btn  = host.querySelector('.menu-toggle');
       const menu = host.querySelector('#mobileMenu');
       if(!btn || !menu) return;
-
       const close = ()=>{
         menu.setAttribute('hidden','');
         btn.setAttribute('aria-expanded','false');
@@ -28,29 +55,22 @@
       const open = ()=>{
         menu.removeAttribute('hidden');
         btn.setAttribute('aria-expanded','true');
-        // defer so the same click doesn't immediately close it
         setTimeout(()=>document.addEventListener('click', clickAway),0);
       };
       const clickAway = (e)=>{
         if(!menu.contains(e.target) && !btn.contains(e.target)) close();
       };
-
       btn.addEventListener('click', (e)=>{
         e.stopPropagation();
         if(menu.hasAttribute('hidden')) open(); else close();
       });
-
-      // Auto-close when resizing up to desktop
       const mq = window.matchMedia('(min-width: 900px)');
       mq.addEventListener?.('change', e=>{ if(e.matches) close(); });
-
-      // make sure it's closed initially
       close();
     }catch(e){ console.warn('nav load failed', e); }
   }
   loadNav();
 </script>
-
 
   <div class="app" style="grid-template-columns:380px minmax(0,1fr)">
     <aside>
@@ -70,70 +90,105 @@
       </div>
 
       <div class="card section">
-        <h2>Animated (Spinner) — TGS‑ready frames</h2>
+        <h2>3D Coin Video (WebM)</h2>
         <div class="grid">
-          <div>
-            <label>Logo (PNG/SVG)</label>
-            <input id="logoFile" type="file" accept="image/*,image/svg+xml">
+          
+          <div class="two">
+             <div>
+                <label>Front Image</label>
+                <input id="imageInput" type="file" accept="image/*" />
+             </div>
+             <div>
+                <label>Back (Optional)</label>
+                <input id="backImageInput" type="file" accept="image/*" />
+             </div>
           </div>
+
           <div class="two">
             <div>
-              <label for="coinA">Coin color A</label>
-              <input id="coinA" type="color" value="#f59e0b"/>
+              <label for="coinTint">Coin Tint</label>
+              <input type="color" id="coinTint" value="#00d1ff">
             </div>
             <div>
-              <label for="coinB">Coin color B</label>
-              <input id="coinB" type="color" value="#fde68a"/>
+              <label for="rimColor">Rim Color</label>
+              <input type="color" id="rimColor" value="#ff0bd8">
             </div>
           </div>
+
+          <div style="margin-bottom:8px;">
+            <label>Style</label>
+            <div class="radio-group">
+                <label><input type="radio" name="styleMode" value="glossy" checked> Metallic</label>
+                <label><input type="radio" name="styleMode" value="cartoon"> Flat/Toon</label>
+            </div>
+          </div>
+
+          <div class="range-group">
+            <label><span>Speed</span> <span id="speedVal">1.0s</span></label>
+            <input type="range" id="speed" min="0.4" max="3" step="0.1" value="1.0">
+          </div>
+          
+          <div class="range-group">
+            <label><span>Thickness</span></label>
+            <input type="range" id="thickness" min="0.05" max="0.3" step="0.01" value="0.15">
+          </div>
+
+          <div class="range-group">
+            <label><span>Front Rotation Fix</span> <input type="number" id="imageRotationNumber" value="0" style="width:50px; height:20px; padding:0;"/></label>
+            <input type="range" id="imageRotation" min="0" max="360" step="1" value="0">
+          </div>
+          <div class="range-group">
+            <label><span>Back Rotation Fix</span> <input type="number" id="backRotationNumber" value="0" style="width:50px; height:20px; padding:0;"/></label>
+            <input type="range" id="backRotation" min="0" max="360" step="1" value="0">
+          </div>
+
+          <div class="hr"></div>
           <div class="two">
-            <div>
-              <label for="edge">Edge width</label>
-              <input id="edge" type="range" min="2" max="20" value="8">
-            </div>
-            <div>
-              <label for="speed">Spin speed</label>
-              <input id="speed" type="range" min="0.2" max="3" step="0.1" value="1.2">
-            </div>
+             <div>
+                <label>Export Mode</label>
+                <div class="radio-group" style="flex-direction: column; gap:4px;">
+                    <label><input type="radio" name="exportMode" value="sticker" checked> Sticker (512px)</label>
+                    <label><input type="radio" name="exportMode" value="emoji"> Emoji (100px)</label>
+                </div>
+             </div>
+             <div>
+                <label>FPS</label>
+                <input type="number" id="fps" min="5" max="60" step="1" value="30">
+             </div>
           </div>
-          <div class="two">
-            <div>
-              <label for="size">Size</label>
-              <select id="size">
-                <option>100</option>
-                <option selected>256</option>
-                <option>512</option>
-              </select>
-            </div>
-            <div class="flex">
-              <input id="shine" type="checkbox" checked>
-              <label for="shine" style="margin:0">Specular shine</label>
-            </div>
+
+          <div class="range-group">
+             <label><span>Bitrate (Quality)</span> <span id="bitrateVal">400 kbps</span></label>
+             <input type="range" id="bitrateRange" min="40" max="1200" step="10" value="400">
+             <div class="tiny muted" id="sizeEst">Est. size: - KB</div>
           </div>
-          <div class="toolbar right">
-            <button class="btn" id="export24">Export 24f ZIP</button>
-            <button class="btn" id="export60">Export 60f ZIP</button>
+
+          <div class="toolbar right" style="margin-top:10px;">
+            <button class="btn ghost" id="toggleSpinBtn">Pause</button>
+            <button class="btn" id="exportBtn">Export WebM</button>
           </div>
+          <div class="tiny muted" style="text-align:right;">Captures 1 full spin.</div>
+
         </div>
       </div>
 
       <div class="card section">
-        <h2>Telegram Animated Requirements</h2>
+        <h2>Telegram Video Requirements</h2>
         <ul class="tiny muted" style="margin:0 0 8px 18px;line-height:1.45">
-          <li>Canvas: <strong>512×512</strong>. Objects must stay inside.</li>
-          <li>Length ≤ <strong>3s</strong>, looped, <strong>60 FPS</strong>.</li>
-          <li>Final <strong>.TGS</strong> ≤ <strong>64 KB</strong> (Lottie‑based).</li>
-          <li>Export with <strong>Bodymovin‑TG</strong> from After Effects.</li>
-          <li>Unsupported AE features: masks, layer effects, images, solids, texts, 3D, merge paths, star shapes, gradient strokes, repeaters, time stretching/remapping, auto‑orient, auto‑bezier, expressions.</li>
+          <li><strong>Video Stickers:</strong> 512×512, VP9 WebM, &le; 256 KB, 30 FPS.</li>
+          <li><strong>Video Emoji:</strong> 100×100, VP9 WebM, &le; 64 KB, 30 FPS.</li>
+          <li>Duration must be &le; 3 seconds.</li>
+          <li>This tool automatically loops 1 spin and encodes to VP9 WebM.</li>
         </ul>
-        <div class="tiny">Workflow tip: Export frames here → assemble in After Effects → export with Bodymovin‑TG to <strong>.TGS</strong>. For video stickers/emoji, render <strong>.WEBM</strong> (VP9) up to 30 FPS, ≤256 KB.</div>
       </div>
     </aside>
 
     <main>
       <div class="card section" style="display:grid;gap:12px">
-        <div class="kicker">Preview</div>
-        <canvas id="coinCanvas" width="256" height="256" class="checkerboard" style="width:100%;max-width:520px;border-radius:12px;justify-self:start"></canvas>
+        <div class="kicker">3D Live Preview</div>
+        
+        <div id="previewContainer"></div>
+        
         <div class="hr"></div>
         <h2>Static Emoji Output</h2>
         <div id="emojiGrid" class="preview-grid"></div>
@@ -142,15 +197,18 @@
   </div>
 
 <script>
-(function(){
-  // --- Static Emoji (100×100) ---
+window.addEventListener('load', function(){
+
+  // ==========================================
+  // 1. STATIC EMOJI TOOL (Legacy Code)
+  // ==========================================
   const eDrop=document.getElementById('eDrop'), eFiles=document.getElementById('eFiles'), eBrowse=document.getElementById('eBrowse');
   const eGrid=document.getElementById('emojiGrid');
   const eZipBtn=document.getElementById('eZip'); const eClearBtn=document.getElementById('eClear');
-  const eState=[]; // {name, canvas}
+  const eState=[]; 
 
   ['dragenter','dragover'].forEach(evt=>eDrop.addEventListener(evt,e=>{e.preventDefault();eDrop.classList.add('drag')}));
-  ;['dragleave','drop'].forEach(evt=>eDrop.addEventListener(evt,e=>{e.preventDefault();eDrop.classList.remove('drag')}));
+  ['dragleave','drop'].forEach(evt=>eDrop.addEventListener(evt,e=>{e.preventDefault();eDrop.classList.remove('drag')}));
   eDrop.addEventListener('drop', e=>handleEmojiFiles(e.dataTransfer.files));
   eBrowse.addEventListener('click',()=>eFiles.click()); eFiles.addEventListener('change',()=>handleEmojiFiles(eFiles.files));
 
@@ -158,23 +216,416 @@
     const list=[...files].filter(f=>/^image\//.test(f.type)); if(!list.length) return;
     list.forEach(file=>{ const img=new Image(); img.onload=()=>{ const c=resizeTo100(img); addEmojiThumb(c, file.name.replace(/\.[^.]+$/, '')); }; img.src=URL.createObjectURL(file); });
   }
-  function resizeTo100(img){ const c=document.createElement('canvas'); c.width=100; c.height=100; const ctx=c.getContext('2d'); ctx.clearRect(0,0,100,100); // fit & center
+  function resizeTo100(img){ const c=document.createElement('canvas'); c.width=100; c.height=100; const ctx=c.getContext('2d'); ctx.clearRect(0,0,100,100); 
     const s=Math.min(100/img.width, 100/img.height); const w=img.width*s, h=img.height*s; ctx.drawImage(img,(100-w)/2,(100-h)/2,w,h); return c; }
   function addEmojiThumb(canvas, base){ const wrap=document.createElement('div'); wrap.className='thumb checkerboard'; const a=document.createElement('a'); a.className='btn'; a.textContent='PNG'; a.download=base+'.png'; a.href=canvas.toDataURL('image/png'); const actions=document.createElement('div'); actions.className='actions'; actions.appendChild(a); wrap.appendChild(canvas); wrap.appendChild(actions); eGrid.appendChild(wrap); eState.push({name:a.download, canvas}); }
   eClearBtn.addEventListener('click',()=>{eGrid.innerHTML=''; eState.length=0;});
   eZipBtn.addEventListener('click', async ()=>{ if(!eState.length) return alert('Add some images first.'); const zip=new JSZip(); for(const {canvas,name} of eState){ const blob=await new Promise(res=>canvas.toBlob(res,'image/png')); zip.file(name, blob); } const content=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(content); a.download='emoji_static_100.zip'; a.click(); });
 
-  // --- Animated Spinner (frames) ---
-  const canvas=document.getElementById('coinCanvas'); const ctx=canvas.getContext('2d');
-  const logoFile=document.getElementById('logoFile'); const coinA=document.getElementById('coinA'); const coinB=document.getElementById('coinB'); const edge=document.getElementById('edge'); const speed=document.getElementById('speed'); const sizeSel=document.getElementById('size'); const shine=document.getElementById('shine');
-  const export24=document.getElementById('export24'); const export60=document.getElementById('export60');
-  let logo=null, t=0, last=0; function resize(){ const s=parseInt(sizeSel.value,10); canvas.width=s; canvas.height=s;} sizeSel.addEventListener('change', resize); resize();
-  logoFile.addEventListener('change',()=>{ const f=logoFile.files[0]; if(!f) return; const img=new Image(); img.onload=()=>{logo=img}; img.src=URL.createObjectURL(f); });
-  function draw(){ const w=canvas.width, h=canvas.height; ctx.clearRect(0,0,w,h); const r=Math.min(w,h)*0.34; const cx=w/2, cy=h/2; const scx=Math.cos(t); const absX=Math.abs(scx); const edgeW=+edge.value; ctx.save(); ctx.translate(cx,cy); ctx.scale(scx,1); const grd=ctx.createRadialGradient(0,-r*0.4,r*0.2,0,0,r*1.2); grd.addColorStop(0,coinB.value); grd.addColorStop(1,coinA.value); ctx.fillStyle=grd; ctx.beginPath(); ctx.ellipse(0,0,r,r,0,0,Math.PI*2); ctx.fill(); ctx.lineWidth=edgeW; ctx.strokeStyle='#00000022'; ctx.stroke(); if(shine.checked){ const sg=ctx.createLinearGradient(-r,-r,r,r); sg.addColorStop(0,'rgba(255,255,255,0.25)'); sg.addColorStop(0.5,'rgba(255,255,255,0)'); sg.addColorStop(1,'rgba(0,0,0,0.15)'); ctx.globalCompositeOperation='lighter'; ctx.fillStyle=sg; ctx.beginPath(); ctx.ellipse(0,0,r,r,0,0,Math.PI*2); ctx.fill(); ctx.globalCompositeOperation='source-over'; } if(logo){ ctx.save(); const s=r*1.1; ctx.globalAlpha=absX; if(scx<0) ctx.scale(-1,1); const rr=Math.min(s, s*(logo.height/logo.width)); const wL=rr, hL=rr*(logo.height/logo.width); ctx.drawImage(logo,-wL/2,-hL/2,wL,hL); ctx.restore(); } ctx.restore(); }
-  function loop(now){ const dt=(now-last)||16; last=now; t+=dt/1000 * +speed.value; draw(); requestAnimationFrame(loop);} requestAnimationFrame(loop);
-  async function exportFrames(n){ const oldT=t; const zip=new JSZip(); for(let i=0;i<n;i++){ t=i*(Math.PI*2/n); draw(); const blob=await new Promise(res=>canvas.toBlob(res,'image/png')); zip.file(`frame_${String(i).padStart(2,'0')}.png`, blob);} t=oldT; const content=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(content); a.download=`spinner_${n}f.zip`; a.click(); }
-  export24.addEventListener('click',()=>exportFrames(24)); export60.addEventListener('click',()=>exportFrames(60));
-})();
+
+  // ==========================================
+  // 2. 3D COIN GENERATOR (New Logic)
+  // ==========================================
+
+    const imageInput       = document.getElementById('imageInput');
+    const backImageInput   = document.getElementById('backImageInput');
+    const coinTintIn       = document.getElementById('coinTint');
+    const rimColorIn       = document.getElementById('rimColor');
+    const speedIn          = document.getElementById('speed');
+    const thicknessIn      = document.getElementById('thickness');
+    
+    // Front Rotation Controls
+    const imageRotSlider   = document.getElementById('imageRotation');
+    const imageRotNumber   = document.getElementById('imageRotationNumber');
+    
+    // Back Rotation Controls
+    const backRotSlider    = document.getElementById('backRotation');
+    const backRotNumber    = document.getElementById('backRotationNumber');
+
+    const toggleSpin       = document.getElementById('toggleSpinBtn');
+    const exportBtn        = document.getElementById('exportBtn');
+    
+    const fpsIn            = document.getElementById('fps');
+    const bitrateRange     = document.getElementById('bitrateRange');
+    const bitrateVal       = document.getElementById('bitrateVal');
+    const sizeEst          = document.getElementById('sizeEst');
+    const previewContainer = document.getElementById('previewContainer');
+    const modeRadios       = document.querySelectorAll('input[name="exportMode"]');
+    const styleRadios      = document.querySelectorAll('input[name="styleMode"]');
+    const speedValDisplay  = document.getElementById('speedVal');
+
+    // THREE basics
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 10);
+    camera.position.set(0, 0, 2.4);
+
+    const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        premultipliedAlpha: true
+    });
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setClearColor(0x000000, 0);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    previewContainer.appendChild(renderer.domElement);
+
+    let currentMode = 'sticker';
+    let exportSize = 512;
+
+    function updateRendererSize() {
+        // We only change the internal render size, CSS handles display size
+        exportSize = currentMode === 'emoji' ? 100 : 512;
+        renderer.setSize(exportSize, exportSize, false);
+    }
+    updateRendererSize();
+
+    function updateBitrateLabel(){
+        let kbps = parseInt(bitrateRange.value) || 400;
+        bitrateVal.textContent = kbps + " kbps";
+
+        const duration = Math.max(parseFloat(speedIn.value) || 1.0, 0.3);
+        const estBytes = (kbps * 1000 * duration) / 8;
+        const estKB    = estBytes / 1024;
+
+        sizeEst.textContent = `Est. size: ~${estKB.toFixed(1)} KB (duration ${duration.toFixed(2)}s)`;
+    }
+
+    bitrateRange.addEventListener('input', updateBitrateLabel);
+
+    modeRadios.forEach(r => {
+        r.addEventListener('change', () => {
+            currentMode = Array.from(modeRadios).find(m => m.checked).value;
+            updateRendererSize();
+            updateBitrateLabel();
+            rebuildCoin();
+        });
+    });
+
+    // Lights
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    keyLight.position.set(3, 4, 5);
+    scene.add(keyLight);
+
+    const rimLight = new THREE.DirectionalLight(0x66aaff, 0.9);
+    rimLight.position.set(-4, 2, -3);
+    scene.add(rimLight);
+
+    const bottomLight = new THREE.DirectionalLight(0x00d0ff, 0.7);
+    bottomLight.position.set(0, -3, 3);
+    scene.add(bottomLight);
+
+    scene.add(new THREE.AmbientLight(0x555566, 0.9));
+
+    let coinGroup = null;
+    let baseFaceTexture = null;
+    let baseBackTexture = null;
+
+    let running = true;
+    let speed = parseFloat(speedIn.value);
+    let thickness = parseFloat(thicknessIn.value);
+    
+    let imageRotationDeg = parseFloat(imageRotSlider.value);
+    let backRotationDeg  = parseFloat(backRotSlider.value);
+
+    let lastTime = performance.now();
+
+    let exporting = false;
+    let exportDuration = speed;
+    let exportStartTime = 0;
+    let exportBaseRotation = 0;
+
+    let currentStyle = 'glossy';
+
+    styleRadios.forEach(function(r){
+        r.addEventListener('change', function(){
+            currentStyle = Array.from(styleRadios).find(m => m.checked).value;
+            rebuildCoin();
+        });
+    });
+
+    function makeFaceTextureFromImage(img){
+        const size = 1024;
+        const c = document.createElement('canvas');
+        c.width = c.height = size;
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0,0,size,size);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size/2,size/2,size*0.46,0,Math.PI*2);
+        ctx.closePath();
+        ctx.clip();
+
+        const s = Math.min(img.width, img.height);
+        const sx = (img.width - s)/2;
+        const sy = (img.height - s)/2;
+        ctx.drawImage(img, sx, sy, s, s, size*0.04, size*0.04, size*0.92, size*0.92);
+        ctx.restore();
+
+        const grd = ctx.createRadialGradient(size/2,size/2,size*0.15,size/2,size/2,size*0.5);
+        grd.addColorStop(0,"rgba(0,0,0,0)");
+        grd.addColorStop(1,"rgba(0,0,0,0.35)");
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(size/2,size/2,size*0.46,0,Math.PI*2);
+        ctx.fill();
+
+        // slight global soften to reduce contrast
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        ctx.fillRect(0,0,size,size);
+
+        const tex = new THREE.CanvasTexture(c);
+        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        tex.encoding = THREE.sRGBEncoding;
+        tex.needsUpdate = true;
+        return tex;
+    }
+
+    function createFaceTextures(){
+        let front = null;
+        if (baseFaceTexture) {
+            front = baseFaceTexture.clone();
+            front.center.set(0.5, 0.5);
+            front.rotation = THREE.MathUtils.degToRad(imageRotationDeg);
+            front.needsUpdate = true;
+        }
+
+        let back = null;
+        const source = baseBackTexture || baseFaceTexture;
+        
+        if (source) {
+            back = source.clone();
+            back.center.set(0.5, 0.5);
+            back.rotation = THREE.MathUtils.degToRad(backRotationDeg);
+            back.needsUpdate = true;
+        }
+
+        return { front, back };
+    }
+
+    function safeDisposeMesh(obj){
+        if (!obj.isMesh) return;
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        mats.forEach(function(m){
+            if (!m) return;
+            if (m.map && typeof m.map.dispose === 'function') m.map.dispose();
+            m.dispose && m.dispose();
+        });
+        obj.geometry && obj.geometry.dispose && obj.geometry.dispose();
+    }
+
+    function rebuildCoin(){
+        if(coinGroup){
+            scene.remove(coinGroup);
+            coinGroup.traverse(safeDisposeMesh);
+            coinGroup = null;
+        }
+
+        const radius = 0.55;
+        const height = thickness;
+        const segments = 160;
+
+        const textures = createFaceTextures();
+        const frontTex = textures.front;
+        const backTex  = textures.back;
+
+        let rimColor  = new THREE.Color(rimColorIn.value);
+        let faceColor = new THREE.Color(coinTintIn.value);
+
+        const glossyRim = { metalness: 1.0, roughness: 0.15, flatShading: false };
+        const glossyFace = { metalness: 0.65, roughness: 0.3, flatShading: false };
+        const cartoonCommon = { metalness: 0.05, roughness: 0.6, flatShading: true };
+
+        let rimParams  = currentStyle === 'glossy' ? { ...glossyRim }  : { ...cartoonCommon };
+        let faceParams = currentStyle === 'glossy' ? { ...glossyFace } : { ...cartoonCommon };
+
+        if (currentMode === 'emoji') {
+            const white = new THREE.Color(0xffffff);
+            rimColor.lerp(white, 0.2);
+            faceColor.lerp(white, 0.2);
+            rimParams.metalness  = Math.min(rimParams.metalness, 0.4);
+            rimParams.roughness  = Math.max(rimParams.roughness, 0.5);
+            faceParams.metalness = Math.min(faceParams.metalness, 0.35);
+            faceParams.roughness = Math.max(faceParams.roughness, 0.55);
+        }
+
+        const rimMat = new THREE.MeshStandardMaterial({ color: rimColor, ...rimParams });
+        const faceMat = new THREE.MeshStandardMaterial({ color: faceColor, map: frontTex || null, ...faceParams });
+        const backMat = new THREE.MeshStandardMaterial({ color: faceColor.clone(), map: backTex || null, ...faceParams });
+
+        const cylinderGeom = new THREE.CylinderGeometry(radius, radius, height, segments, 1, false);
+        cylinderGeom.rotateX(Math.PI / 2); // stand upright
+
+        const coinMesh = new THREE.Mesh(cylinderGeom, [rimMat, faceMat, backMat]);
+
+        coinGroup = new THREE.Group();
+        coinGroup.add(coinMesh);
+        coinGroup.rotation.set(0, 0, 0);
+        scene.add(coinGroup);
+    }
+
+    function updateSettings(){
+        speed            = parseFloat(speedIn.value);
+        thickness        = parseFloat(thicknessIn.value);
+        imageRotationDeg = parseFloat(imageRotSlider.value);
+        backRotationDeg  = parseFloat(backRotSlider.value);
+        
+        exportDuration   = speed;
+        speedValDisplay.innerText = speed.toFixed(1) + "s";
+
+        rebuildCoin();
+        updateBitrateLabel();
+    }
+
+    [coinTintIn, rimColorIn, speedIn, thicknessIn].forEach(function(el){
+        el.addEventListener('input', updateSettings);
+    });
+
+    // Rotation Sync Handlers
+    function syncRotationInputs(from, slider, number){
+        if (from === 'slider') { number.value = slider.value; } 
+        else if (from === 'number') {
+            let v = parseFloat(number.value) || 0;
+            v = ((v % 360) + 360) % 360;
+            number.value = v;
+            slider.value = v;
+        }
+    }
+    imageRotSlider.addEventListener('input', () => { syncRotationInputs('slider', imageRotSlider, imageRotNumber); updateSettings(); });
+    imageRotNumber.addEventListener('input', () => { syncRotationInputs('number', imageRotSlider, imageRotNumber); updateSettings(); });
+    backRotSlider.addEventListener('input', () => { syncRotationInputs('slider', backRotSlider, backRotNumber); updateSettings(); });
+    backRotNumber.addEventListener('input', () => { syncRotationInputs('number', backRotSlider, backRotNumber); updateSettings(); });
+
+
+    imageInput.addEventListener('change', function(e){
+        const file = e.target.files[0];
+        if(!file) return;
+        const img = new Image();
+        img.onload = function(){
+            baseFaceTexture = makeFaceTextureFromImage(img);
+            rebuildCoin();
+        };
+        img.src = URL.createObjectURL(file);
+    });
+
+    backImageInput.addEventListener('change', function(e){
+        const file = e.target.files[0];
+        if(!file) return;
+        const img = new Image();
+        img.onload = function(){
+            baseBackTexture = makeFaceTextureFromImage(img);
+            rebuildCoin();
+        };
+        img.src = URL.createObjectURL(file);
+    });
+
+    toggleSpin.addEventListener('click', function(){
+        running = !running;
+        toggleSpin.textContent = running ? 'Pause' : 'Play';
+    });
+
+    // Initialize
+    rebuildCoin();
+    updateBitrateLabel();
+
+    function animate(now){
+        const dt = (now - lastTime) / 1000;
+        lastTime = now;
+
+        if(coinGroup){
+            if (exporting) {
+                const t = (now - exportStartTime) / 1000;
+                const phase = Math.min(t / exportDuration, 1);
+                coinGroup.rotation.y = exportBaseRotation + phase * Math.PI * 2;
+            } else if (running) {
+                const turnPerSec = 1 / speed;
+                coinGroup.rotation.y += dt * turnPerSec * Math.PI * 2;
+            }
+        }
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+
+    // EXPORT
+    exportBtn.addEventListener('click', function () {
+        const duration = Math.max(exportDuration || 1.0, 0.3);
+        let fps = parseInt(fpsIn.value) || 30;
+        fps = Math.min(Math.max(fps, 5), 60);
+
+        let kbps = parseInt(bitrateRange.value) || 400;
+        kbps = Math.max(40, Math.min(kbps, 1200));
+        
+        const bitrate = kbps * 1000;
+        const prevRunning = running;
+        const prevPixelRatio = renderer.getPixelRatio();
+        const targetSize = (currentMode === 'emoji') ? 100 : 512;
+
+        if (coinGroup) {
+            exportBaseRotation = 0;
+            coinGroup.rotation.y = 0;
+        }
+
+        renderer.setPixelRatio(1);
+        renderer.setSize(targetSize, targetSize, false);
+
+        const stream = renderer.domElement.captureStream(fps);
+        let chunks = [];
+        let recorder;
+
+        try {
+            recorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm;codecs=vp9',
+                videoBitsPerSecond: bitrate
+            });
+        } catch (e) {
+            alert('VP9 WebM export not supported by this browser. Please use Chrome, Edge or Brave on Desktop.');
+            renderer.setPixelRatio(prevPixelRatio);
+            updateRendererSize();
+            return;
+        }
+
+        running = true;
+        toggleSpin.textContent = 'Recording...';
+        toggleSpin.disabled = true;
+        exportBtn.disabled = true;
+        
+        exporting = true;
+        exportStartTime = performance.now();
+
+        recorder.ondataavailable = function (e) {
+            if (e.data && e.data.size > 0) chunks.push(e.data);
+        };
+
+        recorder.onstop = function () {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (currentMode === 'emoji' ? 'coin-emoji-100.webm' : 'coin-sticker-512.webm');
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+
+            exporting = false;
+            running = prevRunning;
+            toggleSpin.textContent = running ? 'Pause' : 'Play';
+            toggleSpin.disabled = false;
+            exportBtn.disabled = false;
+
+            renderer.setPixelRatio(prevPixelRatio);
+            updateRendererSize();
+            stream.getTracks().forEach(t => t.stop());
+        };
+
+        recorder.start();
+        setTimeout(function () {
+            recorder.stop();
+        }, duration * 1000);
+    });
+
+});
 </script>
 </body>
 </html>
