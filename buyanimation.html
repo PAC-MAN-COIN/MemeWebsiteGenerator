@@ -39,23 +39,11 @@
     .drop-preview { width: 30px; height: 30px; border-radius: 50%; background: #333; background-size: cover; background-position: center; margin: 0 auto 5px; }
     
     .flip-option {
-        display: inline-block;
-        margin-top: 8px;
-        padding: 4px 10px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid #444;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        color: #ccc;
-        cursor: pointer;
-        transition: 0.2s;
-        user-select: none;
+        display: inline-block; margin-top: 8px; padding: 4px 10px;
+        background: rgba(255, 255, 255, 0.1); border: 1px solid #444; border-radius: 4px;
+        font-size: 0.75rem; color: #ccc; cursor: pointer; transition: 0.2s; user-select: none;
     }
-    .flip-option:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: #777;
-        color: #fff;
-    }
+    .flip-option:hover { background: rgba(255, 255, 255, 0.2); border-color: #777; color: #fff; }
     .flip-option input { margin-right: 6px; vertical-align: middle; cursor: pointer; }
 </style>
 </head>
@@ -134,25 +122,25 @@
             <div><label>BG Edge</label><input type="color" id="bgCol2" value="#3b82f6"></div>  
           </div>
           <div class="range-group" style="margin-top:10px;">
-             <label><span>Background Blur (Focus)</span></label>
-             <input type="range" id="bgBlur" min="0" max="100" step="10" value="0">
+              <label><span>Background Blur (Focus)</span></label>
+              <input type="range" id="bgBlur" min="0" max="100" step="10" value="0">
           </div>
 
           <div class="group-label">Background Coins</div>
           <div class="grid two">
-             <div>
-               <label>Shape</label>
-               <select id="coinShape">
-                 <option value="6">Hexagon</option>
-                 <option value="32" selected>Round</option>
-                 <option value="4">Square</option>
-                 <option value="8">Octagon</option>
-               </select>
-             </div>
-             <div>
-               <label>Count</label>
-               <input type="number" id="coinCount" value="40" min="10" max="150">
-             </div>
+              <div>
+                <label>Shape</label>
+                <select id="coinShape">
+                  <option value="6">Hexagon</option>
+                  <option value="32" selected>Round</option>
+                  <option value="4">Square</option>
+                  <option value="8">Octagon</option>
+                </select>
+              </div>
+              <div>
+                <label>Count</label>
+                <input type="number" id="coinCount" value="40" min="10" max="150">
+              </div>
           </div>
           <div class="range-group">
             <label><span>Fall Speed</span></label>
@@ -161,18 +149,18 @@
 
           <div class="group-label">Render Settings</div>
           <div class="grid two">
-             <div>
-                <label>Aspect</label>
-                <select id="aspectRatio">
-                    <option value="16/9" selected>16:9</option>
-                    <option value="1/1">1:1</option>
-                    <option value="9/16">9:16</option>
-                </select>
-             </div>
-             <div>
-                <label>Loop Length (s)</label>
-                <input type="number" id="loopDuration" value="4" min="3" max="10">
-             </div>
+              <div>
+                 <label>Aspect</label>
+                 <select id="aspectRatio">
+                     <option value="16/9" selected>16:9</option>
+                     <option value="1/1">1:1</option>
+                     <option value="9/16">9:16</option>
+                 </select>
+              </div>
+              <div>
+                 <label>Loop Length (s)</label>
+                 <input type="number" id="loopDuration" value="4" min="3" max="10">
+              </div>
           </div>
 
           <div class="toolbar right" style="margin-top:15px;">
@@ -195,7 +183,7 @@
         <div id="previewContainer" class="ratio-16-9"></div>
         
         <div class="tiny muted" style="max-width:600px;">
-            <strong>Controls:</strong> Upload Front/Back images. Use the Flip Vertical button if the back image appears upside down.
+            <strong>Controls:</strong> Upload Front/Back images. Animation now uses "Smooth Blend" physics for zero jerkiness.
         </div>
       </div>
     </main>
@@ -373,8 +361,9 @@ window.addEventListener('load', function(){
     let isPaused = false;
     let loopStartTime = Date.now();
     
-    function easeOutBackSmooth(x) { const c1 = 1.5; const c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); }
-    function easeInQuart(x) { return x * x * x * x; }
+    // Easing Functions
+    function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+    function easeInCubic(x) { return x * x * x; }
     
     function animate() {
         requestAnimationFrame(animate);
@@ -385,6 +374,7 @@ window.addEventListener('load', function(){
         const loopDuration = parseFloat(loopDurIn.value) * 1000;
         const now = Date.now();
 
+        // 1. Background Coins
         bgCoins.forEach(c => {
             c.mesh.position.y -= c.speed * bgSpeedVal;
             c.mesh.rotation.x += c.rotX; c.mesh.rotation.z += c.rotZ;
@@ -394,24 +384,37 @@ window.addEventListener('load', function(){
             }
         });
 
+        // 2. HERO COIN (Smoothed Animation Logic)
         if(heroCoinMesh) {
             const t = (now - loopStartTime) % loopDuration;
+            const pct = t / loopDuration;
+            
             heroCoinMesh.rotation.y += (0.015 * heroSpeedVal); 
             
-            const pct = t / loopDuration;
-            let targetY = -25;
-            
-            if (pct < 0.20) targetY = -25;
-            else if (pct < 0.35) {
-                const prog = (pct - 0.20) / 0.15;
-                targetY = -25 + (25 * easeOutBackSmooth(prog));
-            } else if (pct < 0.75) {
-                targetY = Math.sin(now * 0.0025) * 0.25; 
+            let baseY = -25;
+            const startLaunch = 0.20;
+            const endLaunch   = 0.35; 
+            const startDrop   = 0.75; 
+
+            if (pct < startLaunch) {
+                baseY = -25;
+            } else if (pct < endLaunch) {
+                // Smooth Rise
+                const subT = (pct - startLaunch) / (endLaunch - startLaunch);
+                baseY = -25 + (25 * easeOutCubic(subT));
+            } else if (pct < startDrop) {
+                // Holding at 0
+                baseY = 0;
             } else {
-                const prog = (pct - 0.75) / 0.25; 
-                targetY = 0 - (30 * easeInQuart(prog));
+                // Falling
+                const subT = (pct - startDrop) / (1.0 - startDrop);
+                baseY = 0 - (30 * easeInCubic(subT));
             }
-            heroCoinMesh.position.y = targetY;
+
+            // Bobbing with Blend (Prevents Jumping)
+            const bob = Math.sin(now * 0.0025) * 0.25;
+            const blend = Math.max(0, Math.min(1, (baseY + 25) / 25));
+            heroCoinMesh.position.y = baseY + (bob * blend);
         }
 
         if(textMesh) textMesh.position.y = Math.sin(now * 0.002) * 0.2;
@@ -483,15 +486,17 @@ window.addEventListener('load', function(){
     aspectIn.addEventListener('change', handleResize);
     setTimeout(handleResize, 100);
 
-    // --- EXPORT MP4 Logic ---
+    // --- EXPORT MP4 Logic (Fixed Start) ---
     exportBtn.onclick = () => {
         const loopMs = parseInt(loopDurIn.value) * 1000;
         loopStartTime = Date.now(); // Reset Anim
         
+        // FORCE RESET Position for Recording
+        if(heroCoinMesh) heroCoinMesh.position.y = -25;
+        renderer.render(scene, camera); // Render the reset state
+
         const stream = renderer.domElement.captureStream(30);
         
-        // Priority: MP4 (H.264) -> MP4 (Generic) -> WebM (Fallback)
-        // Note: Firefox often doesn't support MP4 recording, will fallback to WebM
         const formats = [
             { mime: 'video/mp4; codecs="avc1.424028, mp4a.40.2"', ext: 'mp4' },
             { mime: 'video/mp4', ext: 'mp4' },
