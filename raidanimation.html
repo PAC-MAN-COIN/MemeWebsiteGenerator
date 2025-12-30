@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Memeportal — Raid Animator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+<link rel="stylesheet" href="style.css" />
+
+<style>
+    /* PREVIEW CONTAINER */
+    #previewContainer {
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    .ratio-16-9 { aspect-ratio: 16 / 9; }
+    .ratio-1-1 { aspect-ratio: 1 / 1; }
+    .ratio-9-16 { aspect-ratio: 9 / 16; }
+
+    #previewContainer canvas { display: block; width: 100% !important; height: 100% !important; }
+    
+    /* UI CONTROLS */
+    .group-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin: 15px 0 5px; font-weight: 700; border-top: 1px solid #222; padding-top: 10px; }
+    .range-group { margin-bottom: 8px; }
+    .range-group label { display:flex; justify-content:space-between; font-size:0.85rem; opacity:0.8; margin-bottom:4px; }
+    
+    .input-row { display: flex; gap: 10px; align-items: center; }
+    .input-row input[type=range] { flex: 1; }
+    .input-row input[type=number] { width: 60px; padding: 4px; border-radius: 4px; border: 1px solid #444; background: #222; color: white; text-align: center; }
+
+    .drop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .drop { border: 1px dashed var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+    .drop:hover { background: rgba(255,255,255,0.05); border-color: var(--accent); }
+    .drop-preview { width: 30px; height: 30px; border-radius: 50%; background: #333; background-size: cover; background-position: center; margin: 0 auto 5px; }
+    
+    .flip-option { display: inline-block; margin-top: 8px; font-size: 11px; color: #888; cursor: pointer; }
+    .flip-option input { margin-right: 6px; vertical-align: middle; }
+
+    /* Fun Extras Toggles */
+    .toggle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .toggle-btn {
+        background: #1a1a1a; border: 1px solid #333; color: #888;
+        padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer; text-align: center;
+        transition: .2s;
+    }
+    .toggle-btn.active {
+        background: rgba(34, 197, 94, 0.15); border-color: #22c55e; color: #22c55e; font-weight: bold;
+    }
+
+    #sparkSettings {
+        border-left: 2px solid var(--accent);
+        padding-left: 10px;
+        margin-top: 10px;
+        display: none; 
+    }
+</style>
+</head>
+<body>
+  <div id="site-header"></div>
+<script>
+  async function loadNav(){
+    try{
+      const h = document.getElementById('site-header');
+      h.innerHTML = await (await fetch('nav.html')).text();
+      const b = h.querySelector('.menu-toggle'), m = h.querySelector('#mobileMenu');
+      if(b && m){
+         b.onclick=()=>{ m.hidden=!m.hidden; b.setAttribute('aria-expanded',!m.hidden); };
+      }
+    }catch(e){}
+  }
+  loadNav();
+</script>
+
+  <div class="app" style="grid-template-columns:380px minmax(0,1fr)">
+    <aside>
+      <div class="card section">
+        <h2>Raid Animation Studio</h2>
+        <div class="grid">
+          
+          <div class="group-label" style="margin-top:0; border-top:none;">Coin & Images</div>
+          <div class="drop-grid">
+              <div class="drop" id="dropFront">
+                 <input id="inputFront" type="file" accept="image/*" hidden />
+                 <div id="prevFront" class="drop-preview"></div>
+                 <div class="tiny">Front</div>
+              </div>
+              <div class="drop" id="dropBack">
+                 <input id="inputBack" type="file" accept="image/*" hidden />
+                 <div id="prevBack" class="drop-preview"></div>
+                 <div class="tiny">Back</div>
+                 <label class="flip-option" onclick="event.stopPropagation()">
+                    <input type="checkbox" id="flipBackCheck"> Flip Vert
+                 </label>
+              </div>
+          </div>
+
+          <div class="range-group">
+            <label><span>Coin Shape</span></label>
+            <select id="coinShape">
+                <option value="32" selected>Round (Default)</option>
+                <option value="6">Hexagon</option>
+                <option value="4">Square</option>
+                <option value="8">Octagon</option>
+            </select>
+          </div>
+
+          <div class="range-group">
+            <label><span>Hero Size</span></label>
+            <input type="range" id="heroSize" min="0.2" max="2.0" step="0.1" value="1.0">
+          </div>
+
+          <div class="range-group">
+            <label><span>Logo Rotation</span></label>
+            <div class="input-row">
+                <input type="range" id="logoRotate" min="0" max="360" step="1" value="0">
+                <input type="number" id="logoRotateNum" min="0" max="360" value="0">
+            </div>
+          </div>
+
+          <div class="group-label">Text & Physics</div>
+          <div>
+            <input type="text" id="topText" value="SMASH THE" style="font-weight:900; text-transform:uppercase; margin-bottom:5px; width:100%;">
+            <input type="text" id="botText" value="RAID" style="font-weight:900; text-transform:uppercase; width:100%;">
+          </div>
+          <div class="range-group" style="margin-top:8px;">
+            <label><span>Spin Speed</span></label>
+            <input type="range" id="heroSpeed" min="0.5" max="5.0" step="0.1" value="2.5">
+          </div>
+          <div class="range-group">
+            <label><span>Raid Shake</span></label>
+            <input type="range" id="camShake" min="0" max="100" step="10" value="20">
+          </div>
+
+          <div class="group-label">Colors</div>
+          <div class="grid two">
+            <div><label>Center</label><input type="color" id="bgCol1" value="#7c3aed"></div> 
+            <div><label>Edge</label><input type="color" id="bgCol2" value="#22d3ee"></div>  
+          </div>
+          <div class="grid two">
+             <div><label>Text</label><input type="color" id="textColor" value="#ffffff"></div>
+             <div><label>Metal</label><input type="color" id="metalColor" value="#ffd700"></div>
+          </div>
+
+          <div class="group-label">🔥 Extras</div>
+          <div class="toggle-grid">
+             <div class="toggle-btn" id="btnChart">📈 Chart Line</div>
+             <div class="toggle-btn" id="btnSparks">✨ Sparks</div>
+          </div>
+
+          <div id="sparkSettings">
+              <div class="range-group">
+                  <label><span>Spark Color (Fire Glow)</span></label>
+                  <input type="color" id="sparkColor" value="#ffaa00" style="width:100%; height:30px;">
+              </div>
+              <div class="range-group">
+                  <label><span>Direction (+ Up / - Down)</span></label>
+                  <input type="range" id="sparkDir" min="-3" max="3" step="0.5" value="1">
+              </div>
+              <div class="range-group">
+                  <label><span>Glow Size (Motion Blur)</span></label>
+                  <input type="range" id="sparkSize" min="0.1" max="2.5" step="0.1" value="0.8">
+              </div>
+              <div class="range-group">
+                  <label><span>Opacity (Intensity)</span></label>
+                  <input type="range" id="sparkOp" min="0.1" max="1.0" step="0.1" value="0.8">
+              </div>
+          </div>
+
+          <div class="group-label">Export</div>
+          <div class="grid two">
+             <div>
+                <label>Aspect</label>
+                <select id="aspectRatio">
+                    <option value="16/9" selected>16:9</option>
+                    <option value="1/1">1:1</option>
+                    <option value="9/16">9:16</option>
+                </select>
+             </div>
+             <div>
+                <label>Loop (s)</label>
+                <input type="number" id="loopDuration" value="3" min="1" max="10">
+             </div>
+          </div>
+
+          <div class="toolbar right" style="margin-top:15px;">
+            <button class="btn ghost" id="toggleAnimBtn">Pause</button>
+            <button class="btn primary" id="exportBtn">Export MP4</button>
+          </div>
+
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="card section" style="display:grid; gap:12px; height:100%; align-content:start;">
+        <div class="flex" style="justify-content:space-between">
+            <div class="kicker">Live Render</div>
+            <div class="badge">WebGL 2.0</div>
+        </div>
+        
+        <div id="previewContainer" class="ratio-16-9"></div>
+        
+        <div class="tiny muted">
+            <strong>Update:</strong> Resize your coin using the "Hero Size" slider. Sparks feature motion blur and customizable glow.
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+window.addEventListener('load', function(){
+
+    // --- DOM REFERENCES ---
+    const get = (id) => document.getElementById(id);
+    const dropFront = get('dropFront'), inputFront = get('inputFront'), prevFront = get('prevFront');
+    const dropBack  = get('dropBack'), inputBack  = get('inputBack'), prevBack  = get('prevBack');
+    const flipBackCheck = get('flipBackCheck');
+    const coinShapeIn = get('coinShape'); 
+    const heroSizeIn = get('heroSize'); // NEW
+    const logoRotateIn = get('logoRotate'), logoRotateNum = get('logoRotateNum');
+    
+    const heroSpeedIn = get('heroSpeed'), camShakeIn = get('camShake');
+    const topTextIn   = get('topText'), botTextIn   = get('botText');
+    const textColorIn = get('textColor'), metalColIn  = get('metalColor');
+    const bgCol1In    = get('bgCol1'), bgCol2In    = get('bgCol2');
+
+    // SPARK CONTROLS
+    const sparkColorIn = get('sparkColor');
+    const sparkDirIn   = get('sparkDir');
+    const sparkSizeIn  = get('sparkSize');
+    const sparkOpIn    = get('sparkOp');
+    const sparkSettingsDiv = get('sparkSettings');
+
+    const aspectIn    = get('aspectRatio'), loopDurIn   = get('loopDuration');
+    const toggleBtn   = get('toggleAnimBtn'), exportBtn   = get('exportBtn');
+    const container   = get('previewContainer');
+
+    const btnChart = get('btnChart'), btnSparks = get('btnSparks');
+    let showChart = false, showSparks = false;
+
+    function toggleExtra(btn, updateFunc) {
+        btn.onclick = () => {
+            if(btn === btnChart) showChart = !showChart;
+            if(btn === btnSparks) {
+                showSparks = !showSparks;
+                sparkSettingsDiv.style.display = showSparks ? 'block' : 'none';
+            }
+            btn.classList.toggle('active');
+            updateFunc();
+        };
+    }
+
+    // --- THREE.JS SETUP ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 16/9, 0.1, 100);
+    camera.position.set(0, 0, 18);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    // --- LIGHTS ---
+    const ambLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambLight);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    mainLight.position.set(5, 10, 10);
+    mainLight.castShadow = true; 
+    scene.add(mainLight);
+    const rimLight = new THREE.SpotLight(0xffffff, 2.0);
+    rimLight.position.set(-10, 0, 5); scene.add(rimLight);
+
+    // --- ENVIRONMENT ---
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+    
+    function updateEnvironment() {
+        const c1 = bgCol1In.value; 
+        const c2 = bgCol2In.value; 
+
+        // Bg Canvas (RADIAL)
+        const cvsBg = document.createElement('canvas'); cvsBg.width = 512; cvsBg.height = 512;
+        const ctxBg = cvsBg.getContext('2d');
+        const gradBg = ctxBg.createRadialGradient(256, 256, 0, 256, 256, 360);
+        gradBg.addColorStop(0, c1); gradBg.addColorStop(1, c2); 
+        ctxBg.fillStyle = gradBg; ctxBg.fillRect(0,0,512,512);
+        scene.background = new THREE.CanvasTexture(cvsBg);
+
+        // PBR Reflection
+        const cvsEnv = document.createElement('canvas'); cvsEnv.width = 512; cvsEnv.height = 256;
+        const ctxEnv = cvsEnv.getContext('2d');
+        const gradEnv = ctxEnv.createLinearGradient(0,0,0,256);
+        gradEnv.addColorStop(0, c1); gradEnv.addColorStop(1, '#000000');
+        ctxEnv.fillStyle = gradEnv; ctxEnv.fillRect(0,0,512,256);
+        ctxEnv.fillStyle = '#fff'; ctxEnv.fillRect(50, 50, 100, 100); 
+        const texEnv = new THREE.CanvasTexture(cvsEnv);
+        scene.environment = pmremGenerator.fromEquirectangular(texEnv).texture;
+        texEnv.dispose();
+        
+        rimLight.color.set(c1);
+    }
+
+    // --- MATERIALS ---
+    const metalMat = new THREE.MeshPhysicalMaterial({ color: 0xffd700, metalness: 1.0, roughness: 0.2, clearcoat: 1.0 });
+    const frontMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
+    const backMat  = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
+
+    // --- OBJECTS ---
+    let textMesh, heroCoinMesh;
+    let sparksSystem, chartLine;
+
+    // 1. Text
+    function updateText() {
+        if(textMesh) scene.remove(textMesh);
+        const cvs = document.createElement('canvas'); cvs.width = 1024; cvs.height = 512;
+        const ctx = cvs.getContext('2d');
+        ctx.textAlign = "center"; ctx.fillStyle = textColorIn.value;
+        ctx.shadowColor = "rgba(0,0,0,0.6)"; ctx.shadowBlur = 15; ctx.shadowOffsetX = 8; ctx.shadowOffsetY = 8;
+        
+        ctx.font = "900 130px 'Inter', sans-serif"; ctx.textBaseline = "bottom";
+        ctx.fillText((topTextIn.value || "SMASH THE").toUpperCase(), 512, 240);
+        
+        ctx.font = "900 180px 'Inter', sans-serif"; ctx.textBaseline = "top";
+        ctx.fillText((botTextIn.value || "RAID").toUpperCase(), 512, 260);
+
+        const tex = new THREE.CanvasTexture(cvs); tex.minFilter = THREE.LinearFilter;
+        const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+        textMesh = new THREE.Mesh(new THREE.PlaneGeometry(16, 8), mat); 
+        textMesh.position.z = -3; 
+        scene.add(textMesh);
+    }
+
+    // 2. Coin
+    function spawnCoin() {
+        if(heroCoinMesh) scene.remove(heroCoinMesh);
+        metalMat.color.set(metalColIn.value);
+        
+        const segments = parseInt(coinShapeIn.value);
+        const radius = 3.5 * parseFloat(heroSizeIn.value); // Apply Scale
+        const geo = new THREE.CylinderGeometry(radius, radius, 0.4 * parseFloat(heroSizeIn.value), segments);
+        geo.rotateX(Math.PI / 2);
+        
+        if(segments === 6) geo.rotateZ(Math.PI / 6);
+        if(segments === 4) geo.rotateZ(Math.PI / 4);
+
+        heroCoinMesh = new THREE.Mesh(geo, [metalMat, frontMat, backMat]);
+        heroCoinMesh.castShadow = true;
+        scene.add(heroCoinMesh);
+    }
+
+    // 3. Extras
+    function updateExtras() {
+        // Chart
+        if(chartLine) scene.remove(chartLine);
+        if(showChart) {
+            const points = [];
+            for(let i=0; i<=20; i++) {
+                const x = (i/20) * 20 - 10;
+                const y = (i/20) * 8 - 4 + (Math.random()*1.5);
+                points.push(new THREE.Vector3(x, y, -5));
+            }
+            const curve = new THREE.CatmullRomCurve3(points);
+            const tubeGeo = new THREE.TubeGeometry(curve, 20, 0.15, 8, false);
+            const tubeMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+            chartLine = new THREE.Mesh(tubeGeo, tubeMat);
+            scene.add(chartLine);
+        }
+
+        // Sparks (Motion Blurred)
+        if(sparksSystem) scene.remove(sparksSystem);
+        if(showSparks) {
+            const geo = new THREE.BufferGeometry();
+            const pos = [], speeds = [];
+            for(let i=0; i<60; i++){
+                pos.push((Math.random()-0.5)*30, (Math.random()-0.5)*20, -4);
+                speeds.push(0.05 + Math.random()*0.1);
+            }
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+            geo.setAttribute('speed', new THREE.Float32BufferAttribute(speeds, 1));
+            
+            // Create "Motion Blur" texture (Vertically Stretched Glow)
+            const cvs = document.createElement('canvas'); cvs.width = 64; cvs.height = 64;
+            const ctx = cvs.getContext('2d');
+            
+            // Gradient: Hot Core -> Glow -> Fade
+            const grad = ctx.createRadialGradient(32, 32, 2, 32, 32, 30);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 1)');   // White Hot
+            grad.addColorStop(0.3, 'rgba(255, 255, 255, 0.5)'); // Glow
+            grad.addColorStop(1, 'rgba(255, 255, 255, 0)');     // Fade
+            
+            ctx.fillStyle = grad;
+            
+            // Draw elongated oval to mimic motion blur
+            ctx.save();
+            ctx.translate(32, 32);
+            ctx.scale(0.4, 1.0); // Narrow width, full height = Stretch
+            ctx.beginPath();
+            ctx.arc(0, 0, 30, 0, Math.PI*2);
+            ctx.fill();
+            ctx.restore();
+
+            const tex = new THREE.CanvasTexture(cvs);
+
+            const mat = new THREE.PointsMaterial({ 
+                color: sparkColorIn.value, 
+                size: parseFloat(sparkSizeIn.value), 
+                map: tex,
+                transparent: true, 
+                opacity: parseFloat(sparkOpIn.value),
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            sparksSystem = new THREE.Points(geo, mat);
+            scene.add(sparksSystem);
+        }
+    }
+
+    function updateSparkVisuals() {
+        if(sparksSystem) {
+            sparksSystem.material.color.set(sparkColorIn.value);
+            sparksSystem.material.size = parseFloat(sparkSizeIn.value);
+            sparksSystem.material.opacity = parseFloat(sparkOpIn.value);
+        }
+    }
+
+    // --- ANIMATION ---
+    let isPaused = false;
+    let loopStartTime = Date.now();
+    
+    function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+    function easeInCubic(x) { return x * x * x; }
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        if(isPaused) return;
+
+        const loopDur = parseFloat(loopDurIn.value) * 1000;
+        const now = Date.now();
+        const t = (now - loopStartTime) % loopDur;
+        const pct = t / loopDur;
+        
+        if(heroCoinMesh) {
+            const speed = parseFloat(heroSpeedIn.value);
+            heroCoinMesh.rotation.y = pct * Math.PI * 2 * (speed > 2 ? 2 : 1);
+            heroCoinMesh.rotation.z = Math.sin(now * 0.002) * 0.1;
+
+            let baseY = -25;
+            const startLaunch = 0.30; 
+            const endLaunch   = 0.50; 
+            const startDrop   = 0.85; 
+
+            if (pct < startLaunch) {
+                baseY = -25;
+            } else if (pct < endLaunch) {
+                const subT = (pct - startLaunch) / (endLaunch - startLaunch);
+                baseY = -25 + (25 * easeOutCubic(subT));
+            } else if (pct < startDrop) {
+                baseY = 0;
+            } else {
+                const subT = (pct - startDrop) / (1.0 - startDrop);
+                baseY = 0 - (25 * easeInCubic(subT));
+            }
+
+            const bob = Math.sin(now * 0.003) * 0.5;
+            const blend = Math.max(0, Math.min(1, (baseY + 25) / 25));
+            heroCoinMesh.position.y = baseY + (bob * blend);
+        }
+
+        if(textMesh) {
+            const slamStart = 0.10;
+            const slamEnd   = 0.20;
+            const dropTime  = 0.85;
+            let s = 2.0; let op = 0.0;
+
+            if (pct < slamStart) {
+                s = 2.0; op = 0;
+            } else if (pct < slamEnd) {
+                const subT = (pct - slamStart) / (slamEnd - slamStart);
+                s = 2.0 - subT; op = subT;
+            } else if (pct < dropTime) {
+                s = 1.0 + Math.sin(now*0.005)*0.02; op = 1.0;
+            } else {
+                const subT = (pct - dropTime) / (1.0 - dropTime);
+                s = 1.0 - subT; op = 1.0 - (subT * 2);
+            }
+            textMesh.scale.set(s, s, 1);
+            textMesh.material.opacity = Math.max(0, op);
+        }
+
+        if(chartLine) {
+            chartLine.scale.y = 1 + Math.sin(now*0.005)*0.1;
+            chartLine.position.x = -1 + (pct * 2); 
+            if(chartLine.position.x > 1) chartLine.position.x = -1;
+        }
+
+        if(sparksSystem) {
+            const p = sparksSystem.geometry.attributes.position.array;
+            const s = sparksSystem.geometry.attributes.speed.array;
+            const dir = parseFloat(sparkDirIn.value);
+
+            for(let i=0; i<s.length; i++){
+                p[i*3+1] += s[i] * dir;
+                if(dir > 0 && p[i*3+1] > 10) { p[i*3+1] = -10; p[i*3] = (Math.random()-0.5)*30; }
+                if(dir < 0 && p[i*3+1] < -10) { p[i*3+1] = 10; p[i*3] = (Math.random()-0.5)*30; }
+            }
+            sparksSystem.geometry.attributes.position.needsUpdate = true;
+        }
+
+        const shake = parseInt(camShakeIn.value) * 0.0005;
+        if(shake > 0) {
+            camera.position.x = (Math.random()-0.5)*shake;
+            camera.position.y = (Math.random()-0.5)*shake;
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    // --- EVENTS ---
+    toggleExtra(btnChart, updateExtras);
+    toggleExtra(btnSparks, updateExtras);
+
+    function updateTextures() {
+        const rad = logoRotateIn.value * (Math.PI / 180); 
+        const flip = flipBackCheck.checked;
+        if(frontMat.map) { 
+            frontMat.map.center.set(0.5,0.5); 
+            frontMat.map.rotation = rad; 
+        }
+        if(backMat.map) { 
+            backMat.map.center.set(0.5,0.5); 
+            backMat.map.repeat.set(-1, flip?-1:1); 
+            backMat.map.rotation = -rad; 
+        }
+    }
+    
+    function loadImg(file, mat, el) {
+        if(!file) return;
+        const u = URL.createObjectURL(file); el.style.backgroundImage=`url(${u})`;
+        new THREE.TextureLoader().load(u, t=>{ 
+            t.encoding=3001; mat.map=t; mat.needsUpdate=true; mat.color.setHex(0xffffff); 
+            updateTextures(); 
+        });
+    }
+
+    dropFront.onclick=()=>inputFront.click(); inputFront.onchange=e=>loadImg(e.target.files[0], frontMat, prevFront);
+    dropBack.onclick=()=>inputBack.click(); inputBack.onchange=e=>loadImg(e.target.files[0], backMat, prevBack);
+    flipBackCheck.onchange=updateTextures;
+
+    logoRotateIn.oninput = (e) => { logoRotateNum.value = e.target.value; updateTextures(); };
+    logoRotateNum.oninput = (e) => { logoRotateIn.value = e.target.value; updateTextures(); };
+    
+    [topTextIn, botTextIn, textColorIn].forEach(e=>e.addEventListener('input', updateText));
+    [bgCol1In, bgCol2In].forEach(e=>e.addEventListener('input', updateEnvironment));
+    metalColIn.addEventListener('input', ()=>metalMat.color.set(metalColIn.value));
+    
+    coinShapeIn.addEventListener('change', spawnCoin);
+    heroSizeIn.addEventListener('input', spawnCoin); // FIXED: Added event listener
+
+    [sparkColorIn, sparkSizeIn, sparkOpIn].forEach(e => e.addEventListener('input', updateSparkVisuals));
+    
+    toggleBtn.onclick=()=>{ isPaused=!isPaused; toggleBtn.textContent=isPaused?"Play":"Pause"; };
+    
+    // EXPORT FIX (RESET START)
+    exportBtn.onclick = () => {
+        const loopMs = parseInt(loopDurIn.value) * 1000;
+        loopStartTime = Date.now(); 
+        
+        // FORCE RESET VISUALS FOR FRAME 1
+        if(heroCoinMesh) heroCoinMesh.position.y = -25; // Force Start Pos
+        if(textMesh) { textMesh.scale.set(2,2,1); textMesh.material.opacity = 0; } // Force Text Hidden
+        renderer.render(scene, camera); // Render the clean frame
+
+        const stream = renderer.domElement.captureStream(30);
+        const mime = MediaRecorder.isTypeSupported('video/mp4; codecs="avc1.424028, mp4a.40.2"') ? 'video/mp4; codecs="avc1.424028, mp4a.40.2"' : 'video/webm';
+        const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8000000 });
+        const chunks = [];
+        rec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+        rec.onstop = () => {
+            const b = new Blob(chunks, { type: mime });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `raid-anim.mp4`; a.click();
+            exportBtn.textContent = "Export MP4"; exportBtn.disabled = false;
+        };
+        exportBtn.textContent = "Rendering..."; exportBtn.disabled = true;
+        rec.start(); setTimeout(() => rec.stop(), loopMs);
+    };
+    
+    window.onresize = () => {
+        camera.aspect = container.clientWidth/container.clientHeight; camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    };
+
+    updateEnvironment(); updateText(); spawnCoin(); updateExtras(); animate();
+});
+</script>
+</body>
+</html>
